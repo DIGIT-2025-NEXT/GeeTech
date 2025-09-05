@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export default function Login() {
     return (
-        <Container maxWidth="sm">
+        <Container maxWidth="sm" sx={{ py: 6 }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Typography variant="h4">Login</Typography>
             </Box>
@@ -13,7 +13,7 @@ export default function Login() {
                 <Button variant="contained" color="primary">Login</Button>
             </Box>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Typography variant="body1">Don't have an account? <Link href="/register">Register</Link></Typography>
+                 <Link href="/register">Don't have an account?</Link>
             </Box>
         </Container>
     )
