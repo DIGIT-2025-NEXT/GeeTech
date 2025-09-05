@@ -5,6 +5,7 @@ import Header from "./_components/Header";
 import Footer from "./_components/Footer";
 import MUIThemeProvider from "./_components/MUIThemeProvider";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,16 +35,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ja">
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${audiowide.variable} antialiased`}
       >
         <AppRouterCacheProvider>
-          <MUIThemeProvider>
-            <Header />
-            {children}
-            <Footer />
-          </MUIThemeProvider>
+          <AuthProvider>
+            <MUIThemeProvider>
+              <Header />
+              {children}
+              <Footer />
+            </MUIThemeProvider>
+          </AuthProvider>
         </AppRouterCacheProvider>
       </body>
     </html>
