@@ -8,6 +8,7 @@ import {
   Menu,
   MenuItem,
   ListItemIcon,
+  Skeleton,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -18,11 +19,14 @@ import LoginIcon from "@mui/icons-material/Login";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
+import { useSupabaseClient, useSession } from "@supabase/auth-helpers-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Header() {
   // 後で差し替える
   const userName = "山田太郎";
   const router = useRouter();
+  const { user, signOut, loading } = useAuth();
   const userStatus = "student" as "unauthenticated" | "student" | "company";
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -41,9 +45,11 @@ export default function Header() {
     router.push("/profile");
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     handleClose();
-    router.push("/logout");
+
+    await signOut();
+    router.replace("/login");
   };
 
   const links = (
@@ -73,6 +79,14 @@ export default function Header() {
     </>
   );
 
+  const linksSkelton = (
+    <>
+      <Skeleton variant="text" width={240} height={40} />
+      <Skeleton variant="text" width={240} height={40} />
+      <Skeleton variant="text" width={240} height={40} />
+    </>
+  );
+
   const unauthenticatedLinks = (
     <>
       <Link href={"/login"} passHref>
@@ -95,7 +109,7 @@ export default function Header() {
             Kitaq_Startup
           </Link>
         </Typography>
-        {userStatus === "unauthenticated" ? unauthenticatedLinks : links}
+        {loading ? linksSkelton : user ? links : unauthenticatedLinks}
       </Toolbar>
       <Menu
         id="user-menu"
