@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Audiowide } from "next/font/google";
 import "./globals.css";
+import Header from "./_components/Header";
+import Footer from "./_components/Footer";
+import MUIThemeProvider from "./_components/MUIThemeProvider";
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -10,6 +15,13 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const audiowide = Audiowide({
+  weight: ["400"],
+  subsets: ["latin"],
+  variable: "--audiowide",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -23,11 +35,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ja">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${audiowide.variable} antialiased`}
       >
-        {children}
+        <AppRouterCacheProvider>
+          <AuthProvider>
+            <MUIThemeProvider>
+              <Header />
+              {children}
+              <Footer />
+            </MUIThemeProvider>
+          </AuthProvider>
+        </AppRouterCacheProvider>
       </body>
     </html>
   );
