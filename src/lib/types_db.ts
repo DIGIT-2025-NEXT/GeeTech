@@ -4,24 +4,90 @@ export type Json =
   | boolean
   | null
   | { [key: string]: Json | undefined }
-  | Json[]
+  | Json[];
+
+export type UserRole = "student" | "company";
+
+export interface BaseProfile {
+  id: string; // Corresponds to the user's ID in Supabase Auth
+  updated_at: string;
+  username: string;
+  avatar_url: string;
+  website: string;
+  role: UserRole;
+}
+
+export interface student extends BaseProfile {
+  role: "student";
+  first_name: string;
+  last_name: string;
+}
+
+export interface company extends BaseProfile {
+  role: "company";
+  company_name: string;
+}
+
+export type ProfileType = student | company;
 
 export interface Database {
   public: {
     Tables: {
-      [_ in never]: never
-    }
+      profiles: {
+        Row: {
+          id: string;
+          updated_at: string | null;
+          username: string | null;
+          avatar_url: string | null;
+          website: string | null;
+          role: UserRole | null;
+          first_name: string | null;
+          last_name: string | null;
+          company_name: string | null;
+        };
+        Insert: {
+          id: string;
+          updated_at?: string | null;
+          username?: string | null;
+          avatar_url?: string | null;
+          website?: string | null;
+          role?: UserRole | null;
+          first_name?: string | null;
+          last_name?: string | null;
+          company_name?: string | null;
+        };
+        Update: {
+          id?: string;
+          updated_at?: string | null;
+          username?: string | null;
+          avatar_url?: string | null;
+          website?: string | null;
+          role?: UserRole | null;
+          first_name?: string | null;
+          last_name?: string | null;
+          company_name?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "profiles_id_fkey";
+            columns: ["id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+    };
     Views: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Functions: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Enums: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     CompositeTypes: {
-      [_ in never]: never
-    }
-  }
+      [_ in never]: never;
+    };
+  };
 }
