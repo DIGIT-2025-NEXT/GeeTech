@@ -24,7 +24,6 @@ import {
   TableRow
 } from '@mui/material';
 import {
-  Business as BusinessIcon,
   Add as AddIcon,
   Person as PersonIcon,
   Assignment as AssignmentIcon,

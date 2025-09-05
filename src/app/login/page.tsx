@@ -13,7 +13,7 @@ export default function Login() {
                 <Button variant="contained" color="primary">Login</Button>
             </Box>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                 <Link href="/register">Don't have an account?</Link>
+                 <Link href="/register">Don&apos;t have an account?</Link>
             </Box>
         </Container>
     )

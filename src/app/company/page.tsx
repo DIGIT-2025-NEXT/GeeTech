@@ -25,18 +25,6 @@ import {
   Rating,
   Divider,
   Skeleton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  LinearProgress,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails
 } from '@mui/material';
 import {
   Person as PersonIcon,
@@ -45,21 +33,9 @@ import {
   Work as WorkIcon,
   Search as SearchIcon,
   Filter as FilterIcon,
-  Star as StarIcon,
-  LocationOn as LocationIcon,
   TrendingUp as TrendingUpIcon,
   FavoriteBorder as FavoriteBorderIcon,
-  Favorite as FavoriteIcon,
-  Close as CloseIcon,
-  Email as EmailIcon,
-  Code as CodeIcon,
-  EmojiEvents as EmojiEventsIcon,
-  Assignment as AssignmentIcon,
-  ExpandMore as ExpandMoreIcon,
-  GitHub as GitHubIcon,
-  LinkedIn as LinkedInIcon,
-  Language as LanguageIcon,
-  AutoAwesome as PsychologyIcon
+  Favorite as FavoriteIcon
 } from '@mui/icons-material';
 // import Link from 'next/link'; // 不要になったためコメントアウト
 import { getAllStudents, type Student } from '@/lib/mock';
@@ -73,8 +49,6 @@ export default function CompanyPage() {
   const [skillFilter, setSkillFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
-  const [detailModalOpen, setDetailModalOpen] = useState(false);
 
   useEffect(() => {
     // シミュレートされたローディング
@@ -127,15 +101,6 @@ export default function CompanyPage() {
     });
   };
 
-  const handleOpenStudentDetail = (student: Student) => {
-    setSelectedStudent(student);
-    setDetailModalOpen(true);
-  };
-
-  const handleCloseStudentDetail = () => {
-    setSelectedStudent(null);
-    setDetailModalOpen(false);
-  };
 
   const universities = Array.from(new Set(students.map(s => s.university.split(' ')[0])));
   const allSkills = Array.from(new Set(students.flatMap(s => s.skills)));

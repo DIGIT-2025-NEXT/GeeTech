@@ -27,7 +27,7 @@ import {
   Assignment as AssignmentIcon
 } from '@mui/icons-material';
 import Link from 'next/link';
-import { getCompanyById, getProjectsByCompanyId } from '@/lib/mock';
+import { getCompanyById, getProjectsByCompanyId, Company, Project } from '@/lib/mock';
 import { notFound } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -37,15 +37,13 @@ interface Props {
 }
 
 export default function CompanyDetailPage({ params }: Props) {
-  const [company, setCompany] = useState<any>(null);
-  const [projects, setProjects] = useState<any[]>([]);
-  const [companyId, setCompanyId] = useState<string>('');
+  const [company, setCompany] = useState<Company | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
   const searchParams = useSearchParams();
   const fromPage = searchParams.get('from');
 
   useEffect(() => {
     params.then(({ companyId }) => {
-      setCompanyId(companyId);
       const companyData = getCompanyById(companyId);
       const projectsData = getProjectsByCompanyId(companyId);
       

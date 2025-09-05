@@ -1,8 +1,6 @@
-import { Box, Button, Container, TextField, Typography } from '@mui/material';
-import Link from 'next/link';
+import { Box, Container, Typography } from '@mui/material';
 
-export default async function Chat({ params }: { params: Promise<{ chatid: string }> }) {
-    const { chatid } = await params;
+export default async function Chat() {
     return (
         <Container maxWidth="sm">
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
