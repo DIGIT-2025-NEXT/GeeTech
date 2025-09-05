@@ -9,7 +9,6 @@ import {
   Button,
   Box,
   Avatar,
-  Grid,
   Divider,
   Paper,
   List,
@@ -81,9 +80,9 @@ export default function CompanyDetailPage({ params }: Props) {
         </Button>
       </Box>
 
-      <Grid container spacing={4}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4 }}>
         {/* 左カラム: 企業情報 */}
-        <Grid item xs={12} md={4}>
+        <Box sx={{ flex: { xs: '1', md: '0 0 33%' } }}>
           <Card sx={{ position: 'sticky', top: 20 }}>
             <CardContent sx={{ textAlign: 'center', p: 4 }}>
               <Avatar 
@@ -190,10 +189,10 @@ export default function CompanyDetailPage({ params }: Props) {
               </Box>
             </CardContent>
           </Card>
-        </Grid>
+        </Box>
 
         {/* 右カラム: 詳細情報 */}
-        <Grid item xs={12} md={8}>
+        <Box sx={{ flex: '1' }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {/* 企業について */}
             <Card>
@@ -251,7 +250,7 @@ export default function CompanyDetailPage({ params }: Props) {
                         </Typography>
 
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-                          {project.skills.map((skill, index) => (
+                          {project.skills.map((skill: string, index: number) => (
                             <Chip
                               key={index}
                               label={skill}
@@ -286,53 +285,45 @@ export default function CompanyDetailPage({ params }: Props) {
                 <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
                   企業の特徴・福利厚生
                 </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
-                    <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                        🏢 働く環境
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        フレックスタイム制、リモートワーク可能
-                      </Typography>
-                    </Box>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                        📚 成長支援
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        研修制度、書籍購入補助
-                      </Typography>
-                    </Box>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                        🎯 挑戦機会
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        新規事業への参画可能
-                      </Typography>
-                    </Box>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                        ⚖️ ワークライフ
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        有休取得率90%以上
-                      </Typography>
-                    </Box>
-                  </Grid>
-                </Grid>
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+                  <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                      🏢 働く環境
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      フレックスタイム制、リモートワーク可能
+                    </Typography>
+                  </Box>
+                  <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                      📚 成長支援
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      研修制度、書籍購入補助
+                    </Typography>
+                  </Box>
+                  <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                      🎯 挑戦機会
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      新規事業への参画可能
+                    </Typography>
+                  </Box>
+                  <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                      ⚖️ ワークライフ
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      有休取得率90%以上
+                    </Typography>
+                  </Box>
+                </Box>
               </CardContent>
             </Card>
           </Box>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
     </Container>
   );
 }
