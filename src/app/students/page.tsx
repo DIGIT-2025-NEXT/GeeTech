@@ -1,4 +1,4 @@
-// app/students/page.tsx - 企業一覧ページ（MUI版・改良版）
+// app/students/page.tsx - 学生一覧ページ（MUI版・改良版）
 'use client';
 
 import {
@@ -12,7 +12,6 @@ import {
   Button,
   Box,
   IconButton,
-  CardActions,
   TextField,
   InputAdornment,
   FormControl,
@@ -28,36 +27,35 @@ import {
   Skeleton
 } from '@mui/material';
 import {
-  Business as BusinessIcon,
-  Category as CategoryIcon,
-  Visibility as VisibilityIcon,
+  Person as PersonIcon,
+  School as SchoolIcon,
+  Chat as ChatIcon,
   Work as WorkIcon,
-  Star as StarIcon,
   Search as SearchIcon,
   Filter as FilterIcon,
-  LocationOn as LocationIcon,
   TrendingUp as TrendingUpIcon,
   FavoriteBorder as FavoriteBorderIcon,
   Favorite as FavoriteIcon
 } from '@mui/icons-material';
 import Link from 'next/link';
-import { getAllCompanies, type Company } from '@/lib/mock';
+import { getAllStudents, type Student } from '@/lib/mock';
 import { useState, useEffect } from 'react';
 
 export default function StudentsPage() {
-  const [companies, setCompanies] = useState<Company[]>([]);
-  const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [industryFilter, setIndustryFilter] = useState('');
+  const [universityFilter, setUniversityFilter] = useState('');
+  const [skillFilter, setSkillFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     // シミュレートされたローディング
     const timer = setTimeout(() => {
-      const allCompanies = getAllCompanies();
-      setCompanies(allCompanies);
-      setFilteredCompanies(allCompanies);
+      const allStudents = getAllStudents();
+      setStudents(allStudents);
+      setFilteredStudents(allStudents);
       setLoading(false);
     }, 500);
 
@@ -65,38 +63,46 @@ export default function StudentsPage() {
   }, []);
 
   useEffect(() => {
-    let filtered = companies;
+    let filtered = students;
 
     // 検索フィルター
     if (searchQuery) {
-      filtered = filtered.filter(company =>
-        company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        company.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        company.industry.toLowerCase().includes(searchQuery.toLowerCase())
+      filtered = filtered.filter(student =>
+        student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        student.bio.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        student.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()))
       );
     }
 
-    // 業界フィルター
-    if (industryFilter) {
-      filtered = filtered.filter(company => company.industry.includes(industryFilter));
+    // 大学フィルター
+    if (universityFilter) {
+      filtered = filtered.filter(student => student.university.includes(universityFilter));
     }
 
-    setFilteredCompanies(filtered);
-  }, [searchQuery, industryFilter, companies]);
+    // スキルフィルター
+    if (skillFilter) {
+      filtered = filtered.filter(student =>
+        student.skills.some(skill => skill.toLowerCase().includes(skillFilter.toLowerCase()))
+      );
+    }
 
-  const toggleFavorite = (companyId: string) => {
+    setFilteredStudents(filtered);
+  }, [searchQuery, universityFilter, skillFilter, students]);
+
+  const toggleFavorite = (studentId: string) => {
     setFavorites(prev => {
       const newFavorites = new Set(prev);
-      if (newFavorites.has(companyId)) {
-        newFavorites.delete(companyId);
+      if (newFavorites.has(studentId)) {
+        newFavorites.delete(studentId);
       } else {
-        newFavorites.add(companyId);
+        newFavorites.add(studentId);
       }
       return newFavorites;
     });
   };
 
-  const industries = Array.from(new Set(companies.map(c => c.industry)));
+  const universities = Array.from(new Set(students.map(s => s.university.split(' ')[0])));
+  const allSkills = Array.from(new Set(students.flatMap(s => s.skills)));
 
   if (loading) {
     return <LoadingSkeleton />;
@@ -110,49 +116,49 @@ export default function StudentsPage() {
           <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
             ホーム
           </Link>
-          <Typography color="text.primary">企業一覧</Typography>
+          <Typography color="text.primary">学生一覧</Typography>
         </Breadcrumbs>
 
         <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-          注目のスタートアップ企業
+          才能あふれる学生たち
         </Typography>
         <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
-          北九州市から未来を創る企業たち
+          未来を創る、挑戦がここから始まる。
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          革新的なアイデアと技術で社会課題に挑む、北九州市のスタートアップ企業をご紹介します。
+          北九州市の大学で学ぶ、情熱ある学生たちとつながりましょう。
         </Typography>
       </Box>
 
       {/* 統計情報 */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 3 }}>
-            <Typography variant="h3" color="primary.main" sx={{ fontWeight: 'bold' }}>
-              {companies.length}
+      <Grid container spacing={2} sx={{ mb: 4 }}>
+        <Grid item xs={6} sm={3}>
+          <Paper sx={{ p: 2, textAlign: 'center' }}>
+            <Typography variant="h4" color="primary.main" sx={{ fontWeight: 'bold' }}>
+              {students.length}
             </Typography>
-            <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 'medium' }}>
-              登録企業数
-            </Typography>
-          </Paper>
-        </Grid>
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 3 }}>
-            <Typography variant="h3" color="success.main" sx={{ fontWeight: 'bold' }}>
-              {industries.length}
-            </Typography>
-            <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 'medium' }}>
-              業界数
+            <Typography variant="body2" color="text.secondary">
+              登録学生数
             </Typography>
           </Paper>
         </Grid>
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 3 }}>
-            <Typography variant="h3" color="warning.main" sx={{ fontWeight: 'bold' }}>
-              24
+        <Grid item xs={6} sm={3}>
+          <Paper sx={{ p: 2, textAlign: 'center' }}>
+            <Typography variant="h4" color="success.main" sx={{ fontWeight: 'bold' }}>
+              {universities.length}
             </Typography>
-            <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 'medium' }}>
-              募集プロジェクト
+            <Typography variant="body2" color="text.secondary">
+              参加大学数
+            </Typography>
+          </Paper>
+        </Grid>
+        <Grid item xs={6} sm={3}>
+          <Paper sx={{ p: 2, textAlign: 'center' }}>
+            <Typography variant="h4" color="warning.main" sx={{ fontWeight: 'bold' }}>
+              {allSkills.length}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              スキル種類
             </Typography>
           </Paper>
         </Grid>
@@ -166,10 +172,10 @@ export default function StudentsPage() {
         </Typography>
         
         <Grid container spacing={2}>
-          <Grid size={{ xs: 12, md: 8 }}>
+          <Grid item xs={12} md={6}>
             <TextField
               fullWidth
-              placeholder="企業名、業界、事業内容で検索..."
+              placeholder="学生名、スキル、自己紹介で検索..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               InputProps={{
@@ -181,17 +187,32 @@ export default function StudentsPage() {
               }}
             />
           </Grid>
-          <Grid size={{ xs: 12, md: 4 }}>
+          <Grid item xs={12} md={3}>
             <FormControl fullWidth>
-              <InputLabel>業界で絞り込み</InputLabel>
+              <InputLabel>大学で絞り込み</InputLabel>
               <Select
-                value={industryFilter}
-                label="業界で絞り込み"
-                onChange={(e) => setIndustryFilter(e.target.value)}
+                value={universityFilter}
+                label="大学で絞り込み"
+                onChange={(e) => setUniversityFilter(e.target.value)}
               >
                 <MenuItem value="">すべて</MenuItem>
-                {industries.map((industry) => (
-                  <MenuItem key={industry} value={industry}>{industry}</MenuItem>
+                {universities.map((uni) => (
+                  <MenuItem key={uni} value={uni}>{uni}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <FormControl fullWidth>
+              <InputLabel>スキルで絞り込み</InputLabel>
+              <Select
+                value={skillFilter}
+                label="スキルで絞り込み"
+                onChange={(e) => setSkillFilter(e.target.value)}
+              >
+                <MenuItem value="">すべて</MenuItem>
+                {allSkills.slice(0, 10).map((skill) => (
+                  <MenuItem key={skill} value={skill}>{skill}</MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -200,14 +221,15 @@ export default function StudentsPage() {
 
         <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="body2" color="text.secondary">
-            {filteredCompanies.length}件の企業が見つかりました
+            {filteredStudents.length}件の学生が見つかりました
           </Typography>
           <Button
             variant="outlined"
             size="small"
             onClick={() => {
               setSearchQuery('');
-              setIndustryFilter('');
+              setUniversityFilter('');
+              setSkillFilter('');
             }}
           >
             フィルターをリセット
@@ -215,14 +237,15 @@ export default function StudentsPage() {
         </Box>
       </Paper>
 
-      {/* 企業一覧 */}
+      {/* 学生一覧 */}
       <Grid container spacing={3}>
-        {filteredCompanies.map((company, index) => (
-          <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={company.id}>
+        {filteredStudents.map((student, index) => (
+          <Grid item xs={12} sm={6} lg={4} key={student.id}>
             <Fade in={true} timeout={300 + index * 100}>
               <Card 
                 sx={{ 
-                  height: '380px', // 固定の高さを設定
+                  height: '100%',
+
                   display: 'flex',
                   flexDirection: 'column',
                   transition: 'all 0.3s ease-in-out',
@@ -245,48 +268,48 @@ export default function StudentsPage() {
                     '&:hover': { bgcolor: 'grey.100' }
                   }}
                   size="small"
-                  onClick={() => toggleFavorite(company.id)}
+                  onClick={() => toggleFavorite(student.id)}
                 >
-                  {favorites.has(company.id) ? 
+                  {favorites.has(student.id) ? 
                     <FavoriteIcon color="error" /> : 
                     <FavoriteBorderIcon />
                   }
                 </IconButton>
 
                 <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                  {/* 企業ヘッダー */}
+                  {/* プロフィール部分 */}
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                     <Avatar 
                       sx={{ 
-                        width: 60, 
-                        height: 60, 
+                        width: 70, 
+                        height: 70, 
                         mr: 2,
-                        bgcolor: 'secondary.main',
-                        fontSize: '1.5rem'
+                        bgcolor: 'primary.main',
+                        fontSize: '1.8rem',
+                        border: '3px solid',
+                        borderColor: 'primary.light'
                       }}
                     >
-                      {company.name.charAt(0)}
+                      {student.name.charAt(0)}
                     </Avatar>
                     <Box sx={{ flexGrow: 1 }}>
                       <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold', mb: 0.5 }}>
-                        {company.name.length > 15 ? 
-                          company.name.substring(0, 15) + '...' : 
-                          company.name
-                        }
+                        {student.name}
                       </Typography>
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <CategoryIcon sx={{ fontSize: 16, mr: 0.5, color: 'text.secondary' }} />
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                        <SchoolIcon sx={{ fontSize: 16, mr: 0.5, color: 'text.secondary' }} />
                         <Typography variant="body2" color="text.secondary">
-                          {company.industry}
+                          {student.university.length > 20 ? 
+                            student.university.substring(0, 20) + '...' : 
+                            student.university
+                          }
                         </Typography>
                       </Box>
+                      <Rating value={4.5} precision={0.5} size="small" readOnly />
                     </Box>
-                    <IconButton size="small" sx={{ color: 'text.secondary' }}>
-                      <StarIcon />
-                    </IconButton>
                   </Box>
 
-                  {/* 企業説明 */}
+                  {/* 自己紹介 */}
                   <Typography 
                     variant="body2" 
                     color="text.secondary" 
@@ -297,64 +320,95 @@ export default function StudentsPage() {
                       WebkitBoxOrient: 'vertical',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
-                      lineHeight: 1.6,
-                      minHeight: '72px'
+                      lineHeight: 1.6
                     }}
                   >
-                    {company.description}
+                    {student.bio}
                   </Typography>
 
-                  {/* ステータス表示 */}
-                  <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-                    <Chip
-                      label="募集中"
+                  {/* スキルタグ */}
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', color: 'text.secondary' }}>
+                      主なスキル
+                    </Typography>
+                    <Stack direction="row" spacing={0.5} flexWrap="wrap">
+                      {student.skills.slice(0, 4).map((skill, index) => (
+                        <Chip
+                          key={index}
+                          label={skill}
+                          size="small"
+                          variant="filled"
+                          color="primary"
+                          sx={{ 
+                            fontSize: '0.75rem',
+                            mb: 0.5,
+                            bgcolor: 'primary.50',
+                            color: 'primary.main',
+                            fontWeight: 500
+                          }}
+                        />
+                      ))}
+                      {student.skills.length > 4 && (
+                        <Chip
+                          label={`+${student.skills.length - 4}`}
+                          size="small"
+                          variant="outlined"
+                          color="default"
+                          sx={{ fontSize: '0.75rem', mb: 0.5 }}
+                        />
+                      )}
+                    </Stack>
+                  </Box>
+
+                  <Divider sx={{ mb: 2 }} />
+
+                  {/* アクションボタン */}
+                  <Box sx={{ display: 'flex', gap: 1, justifyContent: 'space-between' }}>
+                    <Button
+                      component={Link}
+                      href={`/students/${student.id}`}
+                      variant="contained"
+                      startIcon={<PersonIcon />}
                       size="small"
+                      sx={{ 
+                        flex: 1,
+                        textTransform: 'none',
+                        borderRadius: 2,
+                        fontWeight: 600
+                      }}
+                    >
+                      詳細を見る
+                    </Button>
+                    <IconButton 
+                      color="primary"
+                      sx={{ 
+                        border: '2px solid',
+                        borderColor: 'primary.main',
+                        '&:hover': {
+                          bgcolor: 'primary.main',
+                          color: 'white'
+                        }
+                      }}
+                      size="small"
+                    >
+                      <ChatIcon />
+                    </IconButton>
+                    <IconButton 
                       color="success"
-                      variant="outlined"
-                      sx={{ fontSize: '0.7rem' }}
-                    />
-                    <Chip
-                      label="急成長"
+                      sx={{ 
+                        border: '2px solid',
+                        borderColor: 'success.main',
+                        '&:hover': {
+                          bgcolor: 'success.main',
+                          color: 'white'
+                        }
+                      }}
                       size="small"
-                      color="warning"
-                      variant="outlined"
-                      sx={{ fontSize: '0.7rem' }}
-                    />
+                    >
+                      <WorkIcon />
+                    </IconButton>
                   </Box>
                 </CardContent>
-
-                {/* アクションボタン */}
-                <CardActions sx={{ p: 2, pt: 0, justifyContent: 'space-between' }}>
-                  <Button
-                    component={Link}
-                    href={`/company/${company.id}?from=students`}
-                    variant="contained"
-                    startIcon={<VisibilityIcon />}
-                    size="small"
-                    sx={{ 
-                      textTransform: 'none',
-                      borderRadius: 2,
-                      flexGrow: 1,
-                      mr: 1
-                    }}
-                  >
-                    詳細を見る
-                  </Button>
-                  <IconButton 
-                    color="primary"
-                    sx={{ 
-                      border: '2px solid',
-                      borderColor: 'primary.main',
-                      '&:hover': {
-                        bgcolor: 'primary.main',
-                        color: 'white'
-                      }
-                    }}
-                    size="small"
-                  >
-                    <WorkIcon />
-                  </IconButton>
-                </CardActions>
               </Card>
             </Fade>
           </Grid>
@@ -362,11 +416,11 @@ export default function StudentsPage() {
       </Grid>
 
       {/* 空の状態 */}
-      {filteredCompanies.length === 0 && !loading && (
+      {filteredStudents.length === 0 && !loading && (
         <Box sx={{ textAlign: 'center', py: 8 }}>
-          <BusinessIcon sx={{ fontSize: 100, color: 'text.secondary', mb: 2 }} />
+          <PersonIcon sx={{ fontSize: 100, color: 'text.secondary', mb: 2 }} />
           <Typography variant="h5" color="text.secondary" gutterBottom>
-            条件に合う企業が見つかりませんでした
+            条件に合う学生が見つかりませんでした
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
             検索条件を変更して、もう一度お試しください。
@@ -375,7 +429,8 @@ export default function StudentsPage() {
             variant="outlined"
             onClick={() => {
               setSearchQuery('');
-              setIndustryFilter('');
+              setUniversityFilter('');
+              setSkillFilter('');
             }}
           >
             フィルターをリセット
@@ -390,16 +445,16 @@ export default function StudentsPage() {
           mt: 6, 
           textAlign: 'center', 
           p: 4, 
-          background: 'linear-gradient(45deg, #FF6B6B 30%, #4ECDC4 90%)',
+          background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
           color: 'white'
         }}
       >
-        <BusinessIcon sx={{ fontSize: 60, mb: 2 }} />
+        <TrendingUpIcon sx={{ fontSize: 60, mb: 2 }} />
         <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold' }}>
-          あなたの企業も参加しませんか？
+          あなたも学生として参加しませんか？
         </Typography>
         <Typography variant="h6" sx={{ mb: 3, opacity: 0.9 }}>
-          優秀な学生との出会いが、ビジネスを加速させます。
+          地元企業との出会いが、あなたのキャリアを加速させます。
         </Typography>
         <Button 
           variant="contained" 
@@ -417,7 +472,7 @@ export default function StudentsPage() {
             }
           }}
         >
-          企業登録はこちら
+          学生登録はこちら
         </Button>
       </Paper>
     </Container>
@@ -430,10 +485,10 @@ function LoadingSkeleton() {
       <Skeleton variant="text" width="40%" height={60} sx={{ mb: 2 }} />
       <Skeleton variant="text" width="60%" height={40} sx={{ mb: 4 }} />
       
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        {[1, 2, 3].map((i) => (
-          <Grid size={{ xs: 12, sm: 4 }} key={i}>
-            <Skeleton variant="rectangular" height={100} sx={{ borderRadius: 3 }} />
+      <Grid container spacing={2} sx={{ mb: 4 }}>
+        {[1, 2, 3, 4].map((i) => (
+          <Grid item xs={6} sm={3} key={i}>
+            <Skeleton variant="rectangular" height={80} />
           </Grid>
         ))}
       </Grid>
@@ -442,8 +497,8 @@ function LoadingSkeleton() {
       
       <Grid container spacing={3}>
         {[1, 2, 3, 4, 5, 6].map((i) => (
-          <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={i}>
-            <Card sx={{ height: 380 }}>
+          <Grid item xs={12} sm={6} lg={4} key={i}>
+            <Card sx={{ height: 300 }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Skeleton variant="circular" width={60} height={60} sx={{ mr: 2 }} />
@@ -456,6 +511,7 @@ function LoadingSkeleton() {
                 <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
                   <Skeleton variant="rounded" width={60} height={24} />
                   <Skeleton variant="rounded" width={80} height={24} />
+                  <Skeleton variant="rounded" width={70} height={24} />
                 </Box>
                 <Skeleton variant="rectangular" height={40} />
               </CardContent>
