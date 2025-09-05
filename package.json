@@ -19,7 +19,6 @@
     "@supabase/auth-ui-react": "^0.4.7",
     "@supabase/auth-ui-shared": "^0.1.8",
     "@supabase/ssr": "^0.7.0",
-    "@mui/material-nextjs": "^7.3.2",
     "@mui/system": "^7.3.2",
     "next": "^15.5.2",
     "react": "^19.1.0",
