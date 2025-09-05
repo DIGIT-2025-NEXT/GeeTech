@@ -21,6 +21,8 @@ import {
   Paper,
   Breadcrumbs,
   Fade,
+  Stack,
+  Rating,
   Divider,
   Skeleton
 } from '@mui/material';
