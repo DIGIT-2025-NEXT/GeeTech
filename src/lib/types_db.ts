@@ -14,17 +14,17 @@ export interface BaseProfile {
   username: string;
   avatar_url: string;
   website: string;
-  role: UserRole;
+  profile_type: UserRole;
 }
 
 export interface students extends BaseProfile {
-  role: "students";
+  profile_type: "students";
   first_name: string;
   last_name: string;
 }
 
 export interface company extends BaseProfile {
-  role: "company";
+  profile_type: "company";
   company_name: string;
 }
 
@@ -40,7 +40,7 @@ export interface Database {
           username: string | null;
           avatar_url: string | null;
           website: string | null;
-          role: UserRole | null;
+          profile_type: UserRole | null;
           first_name: string | null;
           last_name: string | null;
           company_name: string | null;
@@ -51,7 +51,7 @@ export interface Database {
           username?: string | null;
           avatar_url?: string | null;
           website?: string | null;
-          role?: UserRole | null;
+          profile_type?: UserRole | null;
           first_name?: string | null;
           last_name?: string | null;
           company_name?: string | null;
@@ -62,7 +62,7 @@ export interface Database {
           username?: string | null;
           avatar_url?: string | null;
           website?: string | null;
-          role?: UserRole | null;
+          profile_type?: UserRole | null;
           first_name?: string | null;
           last_name?: string | null;
           company_name?: string | null;
