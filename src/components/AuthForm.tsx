@@ -7,8 +7,6 @@ export default function AuthForm() {
   const [isLogin, setIsLogin] = useState(true)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const { signIn, signUp } = useAuth()
@@ -21,7 +19,7 @@ export default function AuthForm() {
     try {
       const { error } = isLogin 
         ? await signIn(email, password)
-        : await signUp({ email, password, firstName, lastName })
+        : await signUp(email, password)
 
       if (error) {
         setMessage(error.message)
@@ -42,41 +40,6 @@ export default function AuthForm() {
       </h2>
       
       <form onSubmit={handleSubmit} className="space-y-4">
-        {!isLogin && (
-          <>
-            <div className="flex gap-4">
-              <div className="w-1/2">
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-                  姓
-                </label>
-                <input
-                  id="lastName"
-                  type="text"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  required
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="例：山田"
-                />
-              </div>
-              <div className="w-1/2">
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-                  名
-                </label>
-                <input
-                  id="firstName"
-                  type="text"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  required
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="例：太郎"
-                />
-              </div>
-            </div>
-          </>
-        )}
-
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700">
             メールアドレス

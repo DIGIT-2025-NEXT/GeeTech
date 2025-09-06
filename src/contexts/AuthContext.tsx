@@ -10,7 +10,7 @@ interface AuthContextType {
   session: Session | null
   loading: boolean
   error: string | null
-  signUp: (data: { email: string, password: string, firstName: string, lastName: string }) => Promise<{ error: any }>
+  signUp: (email: string, password: string) => Promise<{ error: any }>
   signIn: (email: string, password: string) => Promise<{ error: any }>
   signInWithGoogle: () => Promise<{ error: any }>
   signOut: () => Promise<void>
@@ -76,22 +76,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe()
   }, [supabase])
 
-  const signUp = async (data: { email: string, password: string, firstName: string, lastName: string }) => {
+  const signUp = async (email: string, password: string) => {
     if (!supabase) {
       return { error: { message: 'Supabase client not initialized' } }
     }
     
     try {
-      const { email, password, firstName, lastName } = data
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             role: 'students',
-            first_name: firstName,
-            last_name: lastName,
-            username: `${firstName} ${lastName}`,
           },
         },
       })
