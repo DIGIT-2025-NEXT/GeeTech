@@ -5,6 +5,7 @@ import Provider from "./_components/Provider";
 import MUIThemeProvider from "./_components/MUIThemeProvider";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
 import { AuthProvider } from "@/contexts/AuthContext";
+import SupabaseProvider from "./_components/SupabaseProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -46,11 +47,13 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${notoSansJp.variable} ${audiowide.variable} font-sans antialiased`}
       >
         <AppRouterCacheProvider>
-          <AuthProvider>
-            <MUIThemeProvider>
-              <Provider>{children}</Provider>
-            </MUIThemeProvider>
-          </AuthProvider>
+          <SupabaseProvider>
+            <AuthProvider>
+              <MUIThemeProvider>
+                <Provider>{children}</Provider>
+              </MUIThemeProvider>
+            </AuthProvider>
+          </SupabaseProvider>
         </AppRouterCacheProvider>
       </body>
     </html>
