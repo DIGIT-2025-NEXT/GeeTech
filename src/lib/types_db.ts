@@ -6,7 +6,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
-export type UserRole = "student" | "company";
+export type UserRole = "students" | "company";
 
 export interface BaseProfile {
   id: string; // Corresponds to the user's ID in Supabase Auth
@@ -17,8 +17,8 @@ export interface BaseProfile {
   role: UserRole;
 }
 
-export interface student extends BaseProfile {
-  role: "student";
+export interface students extends BaseProfile {
+  role: "students";
   first_name: string;
   last_name: string;
 }
@@ -28,7 +28,7 @@ export interface company extends BaseProfile {
   company_name: string;
 }
 
-export type ProfileType = student | company;
+export type ProfileType = students | company;
 
 export interface Database {
   public: {
