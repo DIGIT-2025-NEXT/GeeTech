@@ -19,7 +19,7 @@ import LoginIcon from "@mui/icons-material/Login";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { useSupabaseClient, useSession } from "@supabase/auth-helpers-react";
+import ExploreIcon from "@mui/icons-material/Explore";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function Header() {
@@ -54,6 +54,27 @@ export default function Header() {
 
   const links = (
     <>
+      {userStatus === "student" ? (
+        <Link href={"/company"} passHref>
+          <Button
+            color="primary"
+            startIcon={<ExploreIcon />}
+            sx={{ mr: 2, backgroundColor: "#ffffff", color: "#212121" }}
+          >
+            スタートアップを探す
+          </Button>
+        </Link>
+      ) : (
+        <Link href={"/students"} passHref>
+          <Button
+            color="primary"
+            startIcon={<ExploreIcon />}
+            sx={{ mr: 2, backgroundColor: "#ffffff", color: "#212121" }}
+          >
+            学生を探す
+          </Button>
+        </Link>
+      )}
       <Link href={"/dashboard"} passHref>
         <Button color="inherit" startIcon={<DashboardIcon />} sx={{ mr: 1 }}>
           ダッシュボード
