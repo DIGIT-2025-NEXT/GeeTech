@@ -64,7 +64,7 @@ export default async function CompanyDashboard() {
 
       <Grid container spacing={4}>
         {/* 左サイドバー: 企業情報と管理メニュー */}
-        <Grid item xs={12} lg={3}>
+        <Grid xs={12} lg={3}>
           {/* 企業プロフィール */}
           <Card sx={{ mb: 3 }}>
             <CardContent sx={{ textAlign: 'center', p: 3 }}>
