@@ -33,7 +33,17 @@ export interface Project {
   skills: string[];
   status: 'active' | 'closed' | 'draft';
 }
-
+export interface ChatLog{
+  speaker: `company`|`student`;
+  chattext: string;
+  chattime: string;
+}
+ export interface Chat {
+  id: string;
+  company: Company;
+  student: Student;
+  chatlog: ChatLog[];
+ }
 // Mock event data
 const mockEvents: Event[] = [
   {
@@ -223,6 +233,144 @@ const mockProjects: Project[] = [
     status: "active"
   }
 ];
+const mockChats: Chat[] = [
+  {
+    id: "1",
+    company: mockCompanies[0],
+    student: mockStudents[1],
+    chatlog: [
+      { speaker: "company", chattext: "田中さん、地域活性化のプロジェクトでSNS分析をお願いしたいのですが、対応可能でしょうか？", chattime: "2025-09-06 10:00" },
+      { speaker: "student", chattext: "はい、SNS運用とデータ分析の経験がありますので、協力できると思います！", chattime: "2025-09-06 10:02" }
+    ]
+  },
+  {
+    id: "2",
+    company: mockCompanies[1],
+    student: mockStudents[0],
+    chatlog: [
+      { speaker: "company", chattext: "山田さん、当社のSaaSのUI改善を手伝っていただけますか？Reactのスキルが必要です。", chattime: "2025-09-06 11:15" },
+      { speaker: "student", chattext: "ReactとFigmaでのUI設計が得意ですので、お役に立てると思います！", chattime: "2025-09-06 11:17" }
+    ]
+  },
+  {
+    id: "3",
+    company: mockCompanies[2],
+    student: mockStudents[4],
+    chatlog: [
+      { speaker: "company", chattext: "中村さん、再生可能エネルギー関連の調査を手伝ってもらえますか？データ分析が必要です。", chattime: "2025-09-06 09:30" },
+      { speaker: "student", chattext: "はい、環境工学とデータ分析を専攻しているので対応可能です！", chattime: "2025-09-06 09:32" }
+    ]
+  },
+  {
+    id: "4",
+    company: mockCompanies[3],
+    student: mockStudents[1],
+    chatlog: [
+      { speaker: "company", chattext: "田中さん、地元飲食店のマーケティング戦略を一緒に考えていただけますか？", chattime: "2025-09-06 12:00" },
+      { speaker: "student", chattext: "はい、マーケティングリサーチを通してお役に立てると思います！", chattime: "2025-09-06 12:03" }
+    ]
+  },
+  {
+    id: "5",
+    company: mockCompanies[4],
+    student: mockStudents[2],
+    chatlog: [
+      { speaker: "company", chattext: "鈴木さん、医療データの整理と課題抽出をお願いできますか？", chattime: "2025-09-06 13:20" },
+      { speaker: "student", chattext: "はい、医学部での知識を活かして協力させていただきます！", chattime: "2025-09-06 13:22" }
+    ]
+  },
+  {
+    id: "6",
+    company: mockCompanies[1],
+    student: mockStudents[3],
+    chatlog: [
+      { speaker: "company", chattext: "佐藤さん、製造業データを用いた機械学習モデルの構築をお願いしたいのですが可能ですか？", chattime: "2025-09-06 14:10" },
+      { speaker: "student", chattext: "はい、PythonとTensorFlowを使ったモデル構築経験があります！", chattime: "2025-09-06 14:12" }
+    ]
+  },
+  {
+    id: "7",
+    company: mockCompanies[0],
+    student: mockStudents[0],
+    chatlog: [
+      { speaker: "company", chattext: "山田さん、地域活性化アプリのUI改善に協力していただけますか？", chattime: "2025-09-06 15:05" },
+      { speaker: "student", chattext: "ぜひお願いします！FigmaとReactで改善に取り組めます。", chattime: "2025-09-06 15:07" }
+    ]
+  },
+  {
+    id: "8",
+    company: mockCompanies[3],
+    student: mockStudents[0],
+    chatlog: [
+      { speaker: "company", chattext: "山田さん、グルメアプリのデザイン案を作成していただけますか？", chattime: "2025-09-06 15:40" },
+      { speaker: "student", chattext: "はい、UIデザインが得意なのでお手伝いします！", chattime: "2025-09-06 15:42" }
+    ]
+  },
+  {
+    id: "9",
+    company: mockCompanies[2],
+    student: mockStudents[3],
+    chatlog: [
+      { speaker: "company", chattext: "佐藤さん、エネルギー消費データの予測モデルを作成できますか？", chattime: "2025-09-06 16:20" },
+      { speaker: "student", chattext: "はい、データサイエンスのスキルを活かして対応可能です！", chattime: "2025-09-06 16:23" }
+    ]
+  },
+  {
+    id: "10",
+    company: mockCompanies[4],
+    student: mockStudents[4],
+    chatlog: [
+      { speaker: "company", chattext: "中村さん、医療廃棄物処理に関する調査をお願いできますか？", chattime: "2025-09-06 17:00" },
+      { speaker: "student", chattext: "環境工学の視点から調査できます。ぜひ参加させてください！", chattime: "2025-09-06 17:03" }
+    ]
+  },
+  {
+    id: "11",
+    company: mockCompanies[1],
+    student: mockStudents[2],
+    chatlog: [
+      { speaker: "company", chattext: "鈴木さん、医療業界向けSaaSの課題分析をお願いできますか？", chattime: "2025-09-06 18:10" },
+      { speaker: "student", chattext: "はい、医療知識を活かして課題を整理できます！", chattime: "2025-09-06 18:13" }
+    ]
+  },
+  {
+    id: "12",
+    company: mockCompanies[0],
+    student: mockStudents[4],
+    chatlog: [
+      { speaker: "company", chattext: "中村さん、地域の環境課題に関するデータ整理をお願いできますか？", chattime: "2025-09-06 19:00" },
+      { speaker: "student", chattext: "はい、環境工学とデータ分析を活かして対応可能です！", chattime: "2025-09-06 19:02" }
+    ]
+  },
+  {
+    id: "13",
+    company: mockCompanies[2],
+    student: mockStudents[1],
+    chatlog: [
+      { speaker: "company", chattext: "田中さん、再エネ事業のマーケティング調査をお願いできますか？", chattime: "2025-09-06 19:40" },
+      { speaker: "student", chattext: "はい、マーケティングリサーチの知識を活かせます！", chattime: "2025-09-06 19:42" }
+    ]
+  },
+  {
+    id: "14",
+    company: mockCompanies[3],
+    student: mockStudents[2],
+    chatlog: [
+      { speaker: "company", chattext: "鈴木さん、フードテック領域での健康データ連携について意見を伺いたいです。", chattime: "2025-09-06 20:10" },
+      { speaker: "student", chattext: "はい、医学的な観点から助言できます！", chattime: "2025-09-06 20:12" }
+    ]
+  },
+  {
+    id: "15",
+    company: mockCompanies[4],
+    student: mockStudents[3],
+    chatlog: [
+      { speaker: "company", chattext: "佐藤さん、医療AIのアルゴリズム検証をお願いできますか？", chattime: "2025-09-06 21:00" },
+      { speaker: "student", chattext: "はい、機械学習を使った検証は得意なので問題ありません！", chattime: "2025-09-06 21:02" }
+    ]
+  }
+];
+
 
 export function getStudentById(id: string): Student | undefined {
   return mockStudents.find(student => student.id === id);
@@ -242,4 +390,11 @@ export function getProjectsByCompanyId(companyId: string): Project[] {
 
 export function getAllProjects(): Project[] {
   return mockProjects;
+}
+export function getAllChat(): Chat[] {
+  return mockChats;
+}
+
+export function getchatById(id: string): Chat | undefined {
+  return mockChats.find(chat => chat.id === id);
 }
