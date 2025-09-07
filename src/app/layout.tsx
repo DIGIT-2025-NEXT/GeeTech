@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Audiowide } from "next/font/google";
+import { Geist, Geist_Mono, Noto_Sans_JP, Audiowide } from "next/font/google";
 import "./globals.css";
-import Header from "./_components/Header";
-import Footer from "./_components/Footer";
+import Provider from "./_components/Provider";
 import MUIThemeProvider from "./_components/MUIThemeProvider";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -15,6 +14,13 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const notoSansJp = Noto_Sans_JP({
+  weight: ["400", "700"],
+  subsets: ["latin"],
+  variable: "--font-noto-sans-jp",
+  display: "swap",
 });
 
 const audiowide = Audiowide({
@@ -37,14 +43,12 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${audiowide.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${notoSansJp.variable} ${audiowide.variable} font-sans antialiased`}
       >
         <AppRouterCacheProvider>
           <AuthProvider>
             <MUIThemeProvider>
-              <Header />
-              {children}
-              <Footer />
+              <Provider>{children}</Provider>
             </MUIThemeProvider>
           </AuthProvider>
         </AppRouterCacheProvider>
