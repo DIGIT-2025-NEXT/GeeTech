@@ -40,8 +40,8 @@ export interface ChatLog{
 }
  export interface Chat {
   id: string;
-  company: Company;
-  student: Student;
+  companyid: string;
+  studentid: string;
   chatlog: ChatLog[];
  }
 // Mock event data
@@ -233,140 +233,336 @@ const mockProjects: Project[] = [
     status: "active"
   }
 ];
-const mockChats: Chat[] = [
+export const mockChats: Chat[] = [
   {
-    id: "1",
-    company: mockCompanies[0],
-    student: mockStudents[1],
+    id: "chat-1",
+    companyid: "1",
+    studentid: "1",
     chatlog: [
-      { speaker: "company", chattext: "田中さん、地域活性化のプロジェクトでSNS分析をお願いしたいのですが、対応可能でしょうか？", chattime: "2025-09-06 10:00" },
-      { speaker: "student", chattext: "はい、SNS運用とデータ分析の経験がありますので、協力できると思います！", chattime: "2025-09-06 10:02" }
+      { speaker: "company", chattext: "UIデザインの改善をお願いしたいのですが可能ですか？", chattime: "2025-09-01 10:00" },
+      { speaker: "student", chattext: "はい、Figmaでのデザイン経験がありますので対応できます。", chattime: "2025-09-01 10:05" },
+      { speaker: "company", chattext: "具体的には予約画面の操作性を改善したいと考えています。", chattime: "2025-09-01 10:10" },
+      { speaker: "student", chattext: "ユーザーフローを分析してワイヤーフレームを提案しますね。", chattime: "2025-09-01 10:15" }
     ]
   },
   {
-    id: "2",
-    company: mockCompanies[1],
-    student: mockStudents[0],
+    id: "chat-2",
+    companyid: "2",
+    studentid: "2",
     chatlog: [
-      { speaker: "company", chattext: "山田さん、当社のSaaSのUI改善を手伝っていただけますか？Reactのスキルが必要です。", chattime: "2025-09-06 11:15" },
-      { speaker: "student", chattext: "ReactとFigmaでのUI設計が得意ですので、お役に立てると思います！", chattime: "2025-09-06 11:17" }
+      { speaker: "company", chattext: "市場調査のレポートをお願いできますか？", chattime: "2025-09-01 11:00" },
+      { speaker: "student", chattext: "はい、データ分析とレポート作成は得意です。", chattime: "2025-09-01 11:04" },
+      { speaker: "company", chattext: "特に海外市場の比較データをまとめてほしいです。", chattime: "2025-09-01 11:08" },
+      { speaker: "student", chattext: "承知しました。英語資料も扱えるので問題ありません。", chattime: "2025-09-01 11:12" }
     ]
   },
   {
-    id: "3",
-    company: mockCompanies[2],
-    student: mockStudents[4],
+    id: "chat-3",
+    companyid: "5",
+    studentid: "3",
     chatlog: [
-      { speaker: "company", chattext: "中村さん、再生可能エネルギー関連の調査を手伝ってもらえますか？データ分析が必要です。", chattime: "2025-09-06 09:30" },
-      { speaker: "student", chattext: "はい、環境工学とデータ分析を専攻しているので対応可能です！", chattime: "2025-09-06 09:32" }
+      { speaker: "company", chattext: "医療従事者向けのアンケート調査を手伝えますか？", chattime: "2025-09-01 09:30" },
+      { speaker: "student", chattext: "はい、医学部での研究経験を活かして協力できます。", chattime: "2025-09-01 09:35" },
+      { speaker: "company", chattext: "対象者のリストアップも必要なのですが可能ですか？", chattime: "2025-09-01 09:40" },
+      { speaker: "student", chattext: "倫理面に配慮した形で提案させていただきます。", chattime: "2025-09-01 09:45" }
     ]
   },
   {
-    id: "4",
-    company: mockCompanies[3],
-    student: mockStudents[1],
+    id: "chat-4",
+    companyid: "1",
+    studentid: "4",
     chatlog: [
-      { speaker: "company", chattext: "田中さん、地元飲食店のマーケティング戦略を一緒に考えていただけますか？", chattime: "2025-09-06 12:00" },
-      { speaker: "student", chattext: "はい、マーケティングリサーチを通してお役に立てると思います！", chattime: "2025-09-06 12:03" }
+      { speaker: "company", chattext: "機械学習モデルの精度検証をお願いしたいです。可能ですか？", chattime: "2025-09-01 14:00" },
+      { speaker: "student", chattext: "はい、PythonとTensorFlowを使った経験があります。", chattime: "2025-09-01 14:07" },
+      { speaker: "company", chattext: "現在の精度が70%程度なのですが、改善の余地はありますか？", chattime: "2025-09-01 14:12" },
+      { speaker: "student", chattext: "データの前処理や特徴量エンジニアリングを検討すべきです。", chattime: "2025-09-01 14:18" }
     ]
   },
   {
-    id: "5",
-    company: mockCompanies[4],
-    student: mockStudents[2],
+    id: "chat-5",
+    companyid: "3",
+    studentid: "5",
     chatlog: [
-      { speaker: "company", chattext: "鈴木さん、医療データの整理と課題抽出をお願いできますか？", chattime: "2025-09-06 13:20" },
-      { speaker: "student", chattext: "はい、医学部での知識を活かして協力させていただきます！", chattime: "2025-09-06 13:22" }
+      { speaker: "company", chattext: "環境データの整理と分析をお願いできますか？", chattime: "2025-09-01 15:00" },
+      { speaker: "student", chattext: "はい、データ分析スキルを活かして対応できます。", chattime: "2025-09-01 15:05" },
+      { speaker: "company", chattext: "CO2排出量の時系列データを重点的に見ていただきたいです。", chattime: "2025-09-01 15:10" },
+      { speaker: "student", chattext: "分かりました、可視化してレポートにまとめます。", chattime: "2025-09-01 15:14" }
     ]
   },
   {
-    id: "6",
-    company: mockCompanies[1],
-    student: mockStudents[3],
+    id: "chat-6",
+    companyid: "4",
+    studentid: "1",
     chatlog: [
-      { speaker: "company", chattext: "佐藤さん、製造業データを用いた機械学習モデルの構築をお願いしたいのですが可能ですか？", chattime: "2025-09-06 14:10" },
-      { speaker: "student", chattext: "はい、PythonとTensorFlowを使ったモデル構築経験があります！", chattime: "2025-09-06 14:12" }
+      { speaker: "company", chattext: "グルメ紹介サイトのUI改善をお願いできますか？", chattime: "2025-09-02 10:20" },
+      { speaker: "student", chattext: "Reactを使ったUI改善の経験がありますので可能です。", chattime: "2025-09-02 10:25" },
+      { speaker: "company", chattext: "写真の見せ方を工夫して滞在時間を伸ばしたいです。", chattime: "2025-09-02 10:30" },
+      { speaker: "student", chattext: "カルーセル表示やアニメーションを試してみましょう。", chattime: "2025-09-02 10:35" }
     ]
   },
   {
-    id: "7",
-    company: mockCompanies[0],
-    student: mockStudents[0],
+    id: "chat-7",
+    companyid: "2",
+    studentid: "4",
     chatlog: [
-      { speaker: "company", chattext: "山田さん、地域活性化アプリのUI改善に協力していただけますか？", chattime: "2025-09-06 15:05" },
-      { speaker: "student", chattext: "ぜひお願いします！FigmaとReactで改善に取り組めます。", chattime: "2025-09-06 15:07" }
+      { speaker: "company", chattext: "製造業向けのデータ予測モデルを作れますか？", chattime: "2025-09-02 11:10" },
+      { speaker: "student", chattext: "はい、機械学習アルゴリズムを使った予測モデルを構築できます。", chattime: "2025-09-02 11:15" },
+      { speaker: "company", chattext: "欠損値が多いデータでも対応できますか？", chattime: "2025-09-02 11:20" },
+      { speaker: "student", chattext: "はい、前処理を工夫して精度を保つことが可能です。", chattime: "2025-09-02 11:25" }
     ]
   },
   {
-    id: "8",
-    company: mockCompanies[3],
-    student: mockStudents[0],
+    id: "chat-8",
+    companyid: "5",
+    studentid: "2",
     chatlog: [
-      { speaker: "company", chattext: "山田さん、グルメアプリのデザイン案を作成していただけますか？", chattime: "2025-09-06 15:40" },
-      { speaker: "student", chattext: "はい、UIデザインが得意なのでお手伝いします！", chattime: "2025-09-06 15:42" }
+      { speaker: "company", chattext: "医療系アプリのマーケティング戦略を一緒に考えられますか？", chattime: "2025-09-02 13:00" },
+      { speaker: "student", chattext: "はい、SNS運用やデータ分析を活かして提案できます。", chattime: "2025-09-02 13:04" },
+      { speaker: "company", chattext: "高齢者層にも届く施策があると助かります。", chattime: "2025-09-02 13:10" },
+      { speaker: "student", chattext: "分かりました。オフラインとの連動も含めて検討します。", chattime: "2025-09-02 13:15" }
     ]
   },
   {
-    id: "9",
-    company: mockCompanies[2],
-    student: mockStudents[3],
+    id: "chat-9",
+    companyid: "3",
+    studentid: "3",
     chatlog: [
-      { speaker: "company", chattext: "佐藤さん、エネルギー消費データの予測モデルを作成できますか？", chattime: "2025-09-06 16:20" },
-      { speaker: "student", chattext: "はい、データサイエンスのスキルを活かして対応可能です！", chattime: "2025-09-06 16:23" }
+      { speaker: "company", chattext: "再生可能エネルギーの調査に協力できますか？", chattime: "2025-09-02 14:20" },
+      { speaker: "student", chattext: "はい、研究や課題発見のスキルを活かして協力できます。", chattime: "2025-09-02 14:25" },
+      { speaker: "company", chattext: "特に太陽光発電の導入事例を集めたいです。", chattime: "2025-09-02 14:30" },
+      { speaker: "student", chattext: "最新の論文や報告書を調べてまとめます。", chattime: "2025-09-02 14:34" }
     ]
   },
   {
-    id: "10",
-    company: mockCompanies[4],
-    student: mockStudents[4],
+    id: "chat-10",
+    companyid: "4",
+    studentid: "5",
     chatlog: [
-      { speaker: "company", chattext: "中村さん、医療廃棄物処理に関する調査をお願いできますか？", chattime: "2025-09-06 17:00" },
-      { speaker: "student", chattext: "環境工学の視点から調査できます。ぜひ参加させてください！", chattime: "2025-09-06 17:03" }
+      { speaker: "company", chattext: "食に関するプロジェクトの調査を手伝ってもらえますか？", chattime: "2025-09-02 15:40" },
+      { speaker: "student", chattext: "はい、環境工学の視点から持続可能性についても考えられます。", chattime: "2025-09-02 15:45" },
+      { speaker: "company", chattext: "地域農家との連携にも興味があります。", chattime: "2025-09-02 15:50" },
+      { speaker: "student", chattext: "地産地消の観点も加えて分析してみます。", chattime: "2025-09-02 15:55" }
     ]
   },
   {
-    id: "11",
-    company: mockCompanies[1],
-    student: mockStudents[2],
+    id: "chat-11",
+    companyid: "1",
+    studentid: "2",
     chatlog: [
-      { speaker: "company", chattext: "鈴木さん、医療業界向けSaaSの課題分析をお願いできますか？", chattime: "2025-09-06 18:10" },
-      { speaker: "student", chattext: "はい、医療知識を活かして課題を整理できます！", chattime: "2025-09-06 18:13" }
+      { speaker: "company", chattext: "学生向けサービスの利用動向を調査できますか？", chattime: "2025-09-03 09:00" },
+      { speaker: "student", chattext: "はい、アンケート設計とデータ集計を担当できます。", chattime: "2025-09-03 09:05" },
+      { speaker: "company", chattext: "特にSNSでの拡散効果を知りたいです。", chattime: "2025-09-03 09:10" },
+      { speaker: "student", chattext: "SNS分析は得意なのでお任せください。", chattime: "2025-09-03 09:15" }
     ]
   },
   {
-    id: "12",
-    company: mockCompanies[0],
-    student: mockStudents[4],
+    id: "chat-12",
+    companyid: "2",
+    studentid: "1",
     chatlog: [
-      { speaker: "company", chattext: "中村さん、地域の環境課題に関するデータ整理をお願いできますか？", chattime: "2025-09-06 19:00" },
-      { speaker: "student", chattext: "はい、環境工学とデータ分析を活かして対応可能です！", chattime: "2025-09-06 19:02" }
+      { speaker: "company", chattext: "フロントエンド開発の経験を活かせますか？", chattime: "2025-09-03 11:00" },
+      { speaker: "student", chattext: "はい、ReactとTypeScriptを使った開発経験があります。", chattime: "2025-09-03 11:05" },
+      { speaker: "company", chattext: "既存のダッシュボードを改善してほしいです。", chattime: "2025-09-03 11:10" },
+      { speaker: "student", chattext: "UI/UXを意識してリデザインしてみます。", chattime: "2025-09-03 11:15" }
     ]
   },
   {
-    id: "13",
-    company: mockCompanies[2],
-    student: mockStudents[1],
+    id: "chat-13",
+    companyid: "3",
+    studentid: "4",
     chatlog: [
-      { speaker: "company", chattext: "田中さん、再エネ事業のマーケティング調査をお願いできますか？", chattime: "2025-09-06 19:40" },
-      { speaker: "student", chattext: "はい、マーケティングリサーチの知識を活かせます！", chattime: "2025-09-06 19:42" }
+      { speaker: "company", chattext: "AIを活用した環境モデルに興味はありますか？", chattime: "2025-09-03 13:00" },
+      { speaker: "student", chattext: "はい、機械学習を環境分野に応用するのは挑戦したい分野です。", chattime: "2025-09-03 13:05" },
+      { speaker: "company", chattext: "CO2予測モデルの試作を依頼したいです。", chattime: "2025-09-03 13:10" },
+      { speaker: "student", chattext: "必要なデータをいただければ対応可能です。", chattime: "2025-09-03 13:15" }
     ]
   },
   {
-    id: "14",
-    company: mockCompanies[3],
-    student: mockStudents[2],
+    id: "chat-14",
+    companyid: "5",
+    studentid: "1",
     chatlog: [
-      { speaker: "company", chattext: "鈴木さん、フードテック領域での健康データ連携について意見を伺いたいです。", chattime: "2025-09-06 20:10" },
-      { speaker: "student", chattext: "はい、医学的な観点から助言できます！", chattime: "2025-09-06 20:12" }
+      { speaker: "company", chattext: "医療システムのUI改善をお願いできますか？", chattime: "2025-09-03 15:00" },
+      { speaker: "student", chattext: "はい、患者さんが使いやすいデザインを考えられます。", chattime: "2025-09-03 15:05" },
+      { speaker: "company", chattext: "操作が複雑だと苦情が多いので改善したいです。", chattime: "2025-09-03 15:10" },
+      { speaker: "student", chattext: "シンプルなUIにする提案を準備します。", chattime: "2025-09-03 15:15" }
     ]
   },
   {
-    id: "15",
-    company: mockCompanies[4],
-    student: mockStudents[3],
+    id: "chat-15",
+    companyid: "4",
+    studentid: "3",
     chatlog: [
-      { speaker: "company", chattext: "佐藤さん、医療AIのアルゴリズム検証をお願いできますか？", chattime: "2025-09-06 21:00" },
-      { speaker: "student", chattext: "はい、機械学習を使った検証は得意なので問題ありません！", chattime: "2025-09-06 21:02" }
+      { speaker: "company", chattext: "健康志向の飲食店を紹介する記事を書けますか？", chattime: "2025-09-04 10:00" },
+      { speaker: "student", chattext: "はい、医療と食の観点から記事執筆が可能です。", chattime: "2025-09-04 10:05" },
+      { speaker: "company", chattext: "科学的根拠を交えて紹介したいです。", chattime: "2025-09-04 10:10" },
+      { speaker: "student", chattext: "論文を引用しながら記事を作成します。", chattime: "2025-09-04 10:15" }
+    ]
+  },
+  {
+    id: "chat-16",
+    companyid: "2",
+    studentid: "5",
+    chatlog: [
+      { speaker: "company", chattext: "SaaSサービスの環境面での評価が必要です。", chattime: "2025-09-04 11:00" },
+      { speaker: "student", chattext: "はい、環境工学を学んでいるので対応できます。", chattime: "2025-09-04 11:05" },
+      { speaker: "company", chattext: "省エネ効果の指標を調べてほしいです。", chattime: "2025-09-04 11:10" },
+      { speaker: "student", chattext: "基準に基づいて評価してみます。", chattime: "2025-09-04 11:15" }
+    ]
+  },
+  {
+    id: "chat-17",
+    companyid: "3",
+    studentid: "2",
+    chatlog: [
+      { speaker: "company", chattext: "再エネに関するSNSキャンペーンの分析が可能ですか？", chattime: "2025-09-04 14:00" },
+      { speaker: "student", chattext: "はい、SNS運用経験を活かして分析します。", chattime: "2025-09-04 14:05" },
+      { speaker: "company", chattext: "投稿の反応率を上げたいです。", chattime: "2025-09-04 14:10" },
+      { speaker: "student", chattext: "ターゲット層に合わせた改善提案をします。", chattime: "2025-09-04 14:15" }
+    ]
+  },
+  {
+    id: "chat-18",
+    companyid: "1",
+    studentid: "5",
+    chatlog: [
+      { speaker: "company", chattext: "AIを使った地域課題解決プロジェクトに興味はありますか？", chattime: "2025-09-05 09:00" },
+      { speaker: "student", chattext: "はい、持続可能性の観点から協力したいです。", chattime: "2025-09-05 09:05" },
+      { speaker: "company", chattext: "具体的には廃棄物処理の効率化を考えています。", chattime: "2025-09-05 09:10" },
+      { speaker: "student", chattext: "データ分析の視点から貢献できそうです。", chattime: "2025-09-05 09:15" }
+    ]
+  },
+  {
+    id: "chat-19",
+    companyid: "4",
+    studentid: "2",
+    chatlog: [
+      { speaker: "company", chattext: "グルメアプリの利用者データを解析できますか？", chattime: "2025-09-05 10:00" },
+      { speaker: "student", chattext: "はい、マーケティングリサーチとデータ分析を得意としています。", chattime: "2025-09-05 10:05" },
+      { speaker: "company", chattext: "利用頻度の高い層を把握したいです。", chattime: "2025-09-05 10:10" },
+      { speaker: "student", chattext: "年齢層や利用時間帯を軸に整理してみます。", chattime: "2025-09-05 10:15" }
+    ]
+  },
+  {
+    id: "chat-20",
+    companyid: "5",
+    studentid: "4",
+    chatlog: [
+      { speaker: "company", chattext: "医療AIの研究に興味はありますか？", chattime: "2025-09-05 11:00" },
+      { speaker: "student", chattext: "はい、AIと医療の融合は大きな可能性があると思います。", chattime: "2025-09-05 11:05" },
+      { speaker: "company", chattext: "画像診断支援の精度向上がテーマです。", chattime: "2025-09-05 11:10" },
+      { speaker: "student", chattext: "機械学習を応用して改善できそうです。", chattime: "2025-09-05 11:15" }
+    ]
+  },
+  {
+    id: "chat-21",
+    companyid: "2",
+    studentid: "3",
+    chatlog: [
+      { speaker: "company", chattext: "新製品の市場調査を医学的観点から分析できますか？", chattime: "2025-09-06 09:00" },
+      { speaker: "student", chattext: "はい、医療系の文献調査を踏まえて分析できます。", chattime: "2025-09-06 09:05" },
+      { speaker: "company", chattext: "健康志向の市場を特に調べたいです。", chattime: "2025-09-06 09:10" },
+      { speaker: "student", chattext: "国内外の動向を比較してまとめます。", chattime: "2025-09-06 09:15" }
+    ]
+  },
+  {
+    id: "chat-22",
+    companyid: "3",
+    studentid: "1",
+    chatlog: [
+      { speaker: "company", chattext: "環境政策に関するアプリのUI改善を依頼できますか？", chattime: "2025-09-06 10:00" },
+      { speaker: "student", chattext: "はい、ユーザーが使いやすいUI設計を提案できます。", chattime: "2025-09-06 10:05" },
+      { speaker: "company", chattext: "行政担当者が利用する前提です。", chattime: "2025-09-06 10:10" },
+      { speaker: "student", chattext: "専門用語を整理して直感的に操作できるようにします。", chattime: "2025-09-06 10:15" }
+    ]
+  },
+  {
+    id: "chat-23",
+    companyid: "4",
+    studentid: "4",
+    chatlog: [
+      { speaker: "company", chattext: "食の安全に関するデータベースを作成できますか？", chattime: "2025-09-06 11:00" },
+      { speaker: "student", chattext: "はい、データベース設計と構築の経験があります。", chattime: "2025-09-06 11:05" },
+      { speaker: "company", chattext: "農薬やアレルゲン情報を含めたいです。", chattime: "2025-09-06 11:10" },
+      { speaker: "student", chattext: "適切なスキーマを設計して実装します。", chattime: "2025-09-06 11:15" }
+    ]
+  },
+  {
+    id: "chat-24",
+    companyid: "1",
+    studentid: "3",
+    chatlog: [
+      { speaker: "company", chattext: "学生の医療データ分析をお願いできますか？", chattime: "2025-09-06 13:00" },
+      { speaker: "student", chattext: "はい、統計学の知識を活かして分析できます。", chattime: "2025-09-06 13:05" },
+      { speaker: "company", chattext: "特に生活習慣病の傾向を調べたいです。", chattime: "2025-09-06 13:10" },
+      { speaker: "student", chattext: "関連要因を整理して報告します。", chattime: "2025-09-06 13:15" }
+    ]
+  },
+  {
+    id: "chat-25",
+    companyid: "5",
+    studentid: "5",
+    chatlog: [
+      { speaker: "company", chattext: "病院でのエネルギー消費削減について研究したいです。", chattime: "2025-09-06 14:00" },
+      { speaker: "student", chattext: "はい、環境工学の視点から提案できます。", chattime: "2025-09-06 14:05" },
+      { speaker: "company", chattext: "空調と照明に焦点を当てたいです。", chattime: "2025-09-06 14:10" },
+      { speaker: "student", chattext: "省エネ効果を数値化して報告します。", chattime: "2025-09-06 14:15" }
+    ]
+  },
+  {
+    id: "chat-26",
+    companyid: "2",
+    studentid: "1",
+    chatlog: [
+      { speaker: "company", chattext: "クラウドサービスのUI改善を依頼できますか？", chattime: "2025-09-07 09:00" },
+      { speaker: "student", chattext: "はい、ダッシュボード設計を得意としています。", chattime: "2025-09-07 09:05" },
+      { speaker: "company", chattext: "管理者用と一般ユーザー用に分けたいです。", chattime: "2025-09-07 09:10" },
+      { speaker: "student", chattext: "権限ごとにUIを最適化して提案します。", chattime: "2025-09-07 09:15" }
+    ]
+  },
+  {
+    id: "chat-27",
+    companyid: "3",
+    studentid: "2",
+    chatlog: [
+      { speaker: "company", chattext: "エコキャンペーンの効果測定をお願いできますか？", chattime: "2025-09-07 10:00" },
+      { speaker: "student", chattext: "はい、SNSデータの分析を通じて測定します。", chattime: "2025-09-07 10:05" },
+      { speaker: "company", chattext: "キャンペーン前後の比較が欲しいです。", chattime: "2025-09-07 10:10" },
+      { speaker: "student", chattext: "時系列で可視化して報告します。", chattime: "2025-09-07 10:15" }
+    ]
+  },
+  {
+    id: "chat-28",
+    companyid: "4",
+    studentid: "5",
+    chatlog: [
+      { speaker: "company", chattext: "サステナブルフードに関する調査を依頼できますか？", chattime: "2025-09-07 11:00" },
+      { speaker: "student", chattext: "はい、環境工学を学んでいるので対応可能です。", chattime: "2025-09-07 11:05" },
+      { speaker: "company", chattext: "若者の意識調査を中心にお願いします。", chattime: "2025-09-07 11:10" },
+      { speaker: "student", chattext: "アンケートを設計してレポートします。", chattime: "2025-09-07 11:15" }
+    ]
+  },
+  {
+    id: "chat-29",
+    companyid: "5",
+    studentid: "4",
+    chatlog: [
+      { speaker: "company", chattext: "AIによる病気予測モデルに興味はありますか？", chattime: "2025-09-07 13:00" },
+      { speaker: "student", chattext: "はい、機械学習の応用研究に関心があります。", chattime: "2025-09-07 13:05" },
+      { speaker: "company", chattext: "心疾患リスクの予測を考えています。", chattime: "2025-09-07 13:10" },
+      { speaker: "student", chattext: "特徴量を工夫して精度向上に取り組みます。", chattime: "2025-09-07 13:15" }
+    ]
+  },
+  {
+    id: "chat-30",
+    companyid: "1",
+    studentid: "2",
+    chatlog: [
+      { speaker: "company", chattext: "学生支援プラットフォームのUI改善を依頼できますか？", chattime: "2025-09-07 15:00" },
+      { speaker: "student", chattext: "はい、ユーザーが使いやすい画面を設計します。", chattime: "2025-09-07 15:05" },
+      { speaker: "company", chattext: "多言語対応も視野に入れたいです。", chattime: "2025-09-07 15:10" },
+      { speaker: "student", chattext: "i18nライブラリを使って対応可能です。", chattime: "2025-09-07 15:15" },
+      { speaker: "company", chattext: "あなたを採用します", chattime: "2025-09-07 15:30"}
     ]
   }
 ];
