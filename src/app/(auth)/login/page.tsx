@@ -32,7 +32,7 @@ export default function LoginPage() {
         : await signUp(email, password)
 
       if (error) {
-        setMessage(error.message)
+        setMessage(error || 'エラーが発生しました')
       } else if (!isLogin) {
         setMessage('確認メールを送信しました。メールボックスを確認してください。')
       }
@@ -50,7 +50,7 @@ export default function LoginPage() {
     try {
       const { error } = await signInWithGoogle()
       if (error) {
-        setMessage(error.message)
+        setMessage(error || 'エラーが発生しました')
       }
     } catch (error) {
       setMessage('Google認証でエラーが発生しました。')

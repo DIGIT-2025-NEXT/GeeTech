@@ -131,8 +131,8 @@ export default function StudentsPage() {
       </Box>
 
       {/* 統計情報 */}
-      <Grid container spacing={2} sx={{ mb: 4 }}>
-        <Grid item xs={6} sm={3}>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 4 }}>
+        <Box sx={{ width: { xs: '50%', sm: '25%' }, minWidth: 120 }}>
           <Paper sx={{ p: 2, textAlign: 'center' }}>
             <Typography variant="h4" color="primary.main" sx={{ fontWeight: 'bold' }}>
               {students.length}
@@ -141,8 +141,8 @@ export default function StudentsPage() {
               登録学生数
             </Typography>
           </Paper>
-        </Grid>
-        <Grid item xs={6} sm={3}>
+        </Box>
+        <Box sx={{ width: { xs: '50%', sm: '25%' }, minWidth: 120 }}>
           <Paper sx={{ p: 2, textAlign: 'center' }}>
             <Typography variant="h4" color="success.main" sx={{ fontWeight: 'bold' }}>
               {universities.length}
@@ -151,8 +151,8 @@ export default function StudentsPage() {
               参加大学数
             </Typography>
           </Paper>
-        </Grid>
-        <Grid item xs={6} sm={3}>
+        </Box>
+        <Box sx={{ width: { xs: '50%', sm: '25%' }, minWidth: 120 }}>
           <Paper sx={{ p: 2, textAlign: 'center' }}>
             <Typography variant="h4" color="warning.main" sx={{ fontWeight: 'bold' }}>
               {allSkills.length}
@@ -161,8 +161,8 @@ export default function StudentsPage() {
               スキル種類
             </Typography>
           </Paper>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
 
       {/* 検索・フィルターセクション */}
       <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
@@ -171,8 +171,8 @@ export default function StudentsPage() {
           検索・フィルター
         </Typography>
         
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={6}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+          <Box sx={{ width: { xs: '100%', md: '50%' }, minWidth: 200 }}>
             <TextField
               fullWidth
               placeholder="学生名、スキル、自己紹介で検索..."
@@ -186,8 +186,8 @@ export default function StudentsPage() {
                 ),
               }}
             />
-          </Grid>
-          <Grid item xs={12} md={3}>
+          </Box>
+          <Box sx={{ width: { xs: '100%', md: '25%' }, minWidth: 150 }}>
             <FormControl fullWidth>
               <InputLabel>大学で絞り込み</InputLabel>
               <Select
@@ -201,8 +201,8 @@ export default function StudentsPage() {
                 ))}
               </Select>
             </FormControl>
-          </Grid>
-          <Grid item xs={12} md={3}>
+          </Box>
+          <Box sx={{ width: { xs: '100%', md: '25%' }, minWidth: 150 }}>
             <FormControl fullWidth>
               <InputLabel>スキルで絞り込み</InputLabel>
               <Select
@@ -216,8 +216,8 @@ export default function StudentsPage() {
                 ))}
               </Select>
             </FormControl>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
 
         <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="body2" color="text.secondary">
@@ -238,9 +238,9 @@ export default function StudentsPage() {
       </Paper>
 
       {/* 学生一覧 */}
-      <Grid container spacing={3}>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
         {filteredStudents.map((student, index) => (
-          <Grid item xs={12} sm={6} lg={4} key={student.id}>
+          <Box key={student.id} sx={{ width: { xs: '100%', sm: '50%', lg: '33.33%' }, minWidth: 300 }}>
             <Fade in={true} timeout={300 + index * 100}>
               <Card 
                 sx={{ 
@@ -411,9 +411,9 @@ export default function StudentsPage() {
                 </CardContent>
               </Card>
             </Fade>
-          </Grid>
+          </Box>
         ))}
-      </Grid>
+      </Box>
 
       {/* 空の状態 */}
       {filteredStudents.length === 0 && !loading && (
@@ -485,19 +485,19 @@ function LoadingSkeleton() {
       <Skeleton variant="text" width="40%" height={60} sx={{ mb: 2 }} />
       <Skeleton variant="text" width="60%" height={40} sx={{ mb: 4 }} />
       
-      <Grid container spacing={2} sx={{ mb: 4 }}>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 4 }}>
         {[1, 2, 3, 4].map((i) => (
-          <Grid item xs={6} sm={3} key={i}>
+          <Box key={i} sx={{ width: { xs: '50%', sm: '25%' }, minWidth: 120 }}>
             <Skeleton variant="rectangular" height={80} />
-          </Grid>
+          </Box>
         ))}
-      </Grid>
+      </Box>
       
       <Skeleton variant="rectangular" height={120} sx={{ mb: 4 }} />
       
-      <Grid container spacing={3}>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
         {[1, 2, 3, 4, 5, 6].map((i) => (
-          <Grid item xs={12} sm={6} lg={4} key={i}>
+          <Box key={i} sx={{ width: { xs: '100%', sm: '50%', lg: '33.33%' }, minWidth: 300 }}>
             <Card sx={{ height: 300 }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -516,9 +516,9 @@ function LoadingSkeleton() {
                 <Skeleton variant="rectangular" height={40} />
               </CardContent>
             </Card>
-          </Grid>
+          </Box>
         ))}
-      </Grid>
+      </Box>
     </Container>
   );
 }

@@ -2,7 +2,6 @@
 import {
   Container,
   Typography,
-  Grid,
   Card,
   CardContent,
   Avatar,
@@ -22,7 +21,8 @@ import {
   TableContainer,
   TableHead,
   TableRow
-} from '@mui/material';
+} from '@mui/material'
+import { Grid } from '@mui/material';
 import {
   Add as AddIcon,
   Person as PersonIcon,
@@ -62,9 +62,9 @@ export default async function CompanyDashboard() {
         </Typography>
       </Box>
 
-      <Grid container spacing={4}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', lg: 'row' }, gap: 4 }}>
         {/* 左サイドバー: 企業情報と管理メニュー */}
-        <Grid xs={12} lg={3}>
+        <Box sx={{ width: { xs: '100%', lg: '25%' } }}>
           {/* 企業プロフィール */}
           <Card sx={{ mb: 3 }}>
             <CardContent sx={{ textAlign: 'center', p: 3 }}>
@@ -138,10 +138,10 @@ export default async function CompanyDashboard() {
               </List>
             </CardContent>
           </Card>
-        </Grid>
+        </Box>
 
         {/* メインコンテンツエリア */}
-        <Grid item xs={12} lg={9}>
+        <Box sx={{ width: { xs: '100%', lg: '75%' } }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             
             {/* プロジェクト管理セクション */}
@@ -240,9 +240,9 @@ export default async function CompanyDashboard() {
                   </Button>
                 </Box>
 
-                <Grid container spacing={2}>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
                   {students.map((student) => (
-                    <Grid item xs={12} sm={6} md={4} key={student.id}>
+                    <Box key={student.id} sx={{ width: { xs: '100%', sm: '50%', md: '33.33%' }, minWidth: 280 }}>
                       <Paper 
                         elevation={1} 
                         sx={{ 
@@ -309,9 +309,9 @@ export default async function CompanyDashboard() {
                           </Button>
                         </Box>
                       </Paper>
-                    </Grid>
+                    </Box>
                   ))}
-                </Grid>
+                </Box>
               </CardContent>
             </Card>
 
@@ -356,8 +356,8 @@ export default async function CompanyDashboard() {
               </CardContent>
             </Card>
           </Box>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
     </Container>
   );
 }

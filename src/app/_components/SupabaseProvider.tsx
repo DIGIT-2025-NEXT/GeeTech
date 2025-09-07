@@ -17,7 +17,7 @@ export default function SupabaseProvider({
   );
 
   return (
-    <SessionContextProvider supabaseClient={supabaseClient as any}>
+    <SessionContextProvider supabaseClient={supabaseClient as never}>
       {children}
     </SessionContextProvider>
   );
