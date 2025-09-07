@@ -3,7 +3,7 @@
 
 import { Box, Button, Card, CardActions, CardContent, Container, Stack, TextField, Typography,Breadcrumbs} from '@mui/material';
 import Link from 'next/link';
-import { getAllChat, type Chat } from '@/lib/mock';
+import { getAllChat, type Chat, getCompanyById } from '@/lib/mock';
 import { useState } from "react";
 
 export default function Chat() {
@@ -40,9 +40,9 @@ export default function Chat() {
         <Typography variant='h4'>直近のチャット</Typography>
             <Stack spacing={2}>
               {sortedchats.map((e)=>
-              <Card>
+              <Card key={e.id}>
                 <CardContent>
-                  <Typography variant='h6'>{e.company.name}</Typography>
+                  <Typography variant='h6'>{getCompanyById(e.companyid)?.name}</Typography>
                   <Typography>{e.chatlog[e.chatlog.length-1].chattext}</Typography>
                   <Button href={`/chat/${e.id}`} sx={{bgcolor:"black",color:"white"}}>チャットを見る</Button>
                 </CardContent>
