@@ -103,7 +103,17 @@ export default function CompanyPage() {
 
 
   const universities = Array.from(new Set(students.map(s => s.university.split(' ')[0])));
-  const allSkills = Array.from(new Set(students.flatMap(s => s.skills)));
+  
+  // SkillIcon.tsxからスキル一覧を取得
+  const skillIconSkills = [
+    'HTML/CSS', 'JavaScript', 'TypeScript', 'React', 'Vue.js', 'Angular', 'Next.js', 'Nuxt.js', 'Svelte',
+    'Node.js', 'Express', 'Python', 'Django', 'Flask', 'Go', 'Ruby on Rails', 'PHP', 'Laravel',
+    'Java', 'Spring', 'Swift', 'Kotlin', 'AWS', 'Google Cloud', 'Azure', 'Docker', 'Kubernetes', 'Terraform',
+    'PostgreSQL', 'MySQL', 'MongoDB', 'Redis', 'Prisma', 'C++', 'C#', 'Rust', 'Unity', 'Unreal Engine',
+    'TensorFlow', 'PyTorch', 'GraphQL', 'Supabase', 'Firebase', 'Git', 'Figma', 'Storybook', 'Jest', 'Flutter'
+  ];
+  
+  const allSkills = skillIconSkills;
 
   if (loading) {
     return <LoadingSkeleton />;
@@ -215,7 +225,7 @@ export default function CompanyPage() {
                 onChange={(e) => setSkillFilter(e.target.value)}
               >
                 <MenuItem value="">すべて</MenuItem>
-                {allSkills.slice(0, 10).map((skill) => (
+                {allSkills.map((skill) => (
                   <MenuItem key={skill} value={skill}>{skill}</MenuItem>
                 ))}
               </Select>
@@ -370,8 +380,7 @@ export default function CompanyPage() {
                   <Box sx={{ display: 'flex', gap: 1, justifyContent: 'space-between' }}>
                     <Button
                       onClick={() => {
-                        // 詳細情報をモーダルで表示するか、他の処理を実行
-                        alert(`${student.name}さんの詳細情報を表示する機能は準備中です。`);
+                        window.location.href = `/student/${student.id}`;
                       }}
                       variant="contained"
                       startIcon={<PersonIcon />}
@@ -463,10 +472,10 @@ export default function CompanyPage() {
       >
         <TrendingUpIcon sx={{ fontSize: 60, mb: 2 }} />
         <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold' }}>
-          あなたも学生として参加しませんか？
+          あなたの企業も参加しませんか？
         </Typography>
         <Typography variant="h6" sx={{ mb: 3, opacity: 0.9 }}>
-          地元企業との出会いが、あなたのキャリアを加速させます。
+          優秀な学生との出会いが、あなたの事業を加速させます。
         </Typography>
         <Button 
           variant="contained" 
@@ -484,7 +493,7 @@ export default function CompanyPage() {
             }
           }}
         >
-          学生登録はこちら
+          企業登録はこちら
         </Button>
       </Paper>
     </Container>
