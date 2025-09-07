@@ -1,75 +1,45 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useSkills } from "@/hooks/useSkills";
 import {
-  SupabaseClient,
-  useSupabaseClient,
-} from "@supabase/auth-helpers-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { Box, Chip, CircularProgress, Typography, Paper } from "@mui/material";
-import { Database } from "@/types/supabase";
-import {
-  getAllSkills,
-  getUserSkills,
-  addSkillToUser,
-  removeSkillFromUser,
-  type Skill,
-} from "@/lib/skills";
+  Box,
+  Chip,
+  CircularProgress,
+  Typography,
+  Paper,
+  Button,
+  Snackbar,
+  Alert,
+} from "@mui/material";
 import { SkillIcon } from "../_components/SkillIcon";
 
 export default function ProfilePage() {
-  const supabase =
-    useSupabaseClient<Database>() as unknown as SupabaseClient<Database>;
-  const { user } = useAuth();
+  const {
+    user,
+    allSkills,
+    currentUserSkills,
+    loading,
+    saving,
+    error,
+    successMessage,
+    hasChanges,
+    handleSkillToggle,
+    handleSave,
+    setSuccessMessage,
+  } = useSkills();
 
-  const [allSkills, setAllSkills] = useState<Skill[]>([]);
-  const [userSkills, setUserSkills] = useState<Skill[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
-  const userSkillIds = new Set(userSkills.map((s) => s.id));
-
-  const fetchData = useCallback(async () => {
-    if (!user) return;
-    try {
-      setLoading(true);
-      setError(null);
-      const [all, userSkillsData] = await Promise.all([
-        getAllSkills(supabase),
-        getUserSkills(supabase, user.id),
-      ]);
-      setAllSkills(all);
-      setUserSkills(userSkillsData);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [supabase, user]);
-
+  // 未ログインならloginにリダイレクトする
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  const handleSkillToggle = async (skill: Skill) => {
-    if (!user) return;
-    const isSkillSet = userSkillIds.has(skill.id);
-    try {
-      if (isSkillSet) {
-        await removeSkillFromUser(supabase, user.id, skill.id);
-        setUserSkills((prev) => prev.filter((s) => s.id !== skill.id));
-      } else {
-        await addSkillToUser(supabase, user.id, skill.id);
-        setUserSkills((prev) => [...prev, skill]);
-      }
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      }
+    if (!user && !loading) {
+      router.replace("/login");
     }
-  };
+  }, [user, loading, router]);
+
+  const userSkillIds = new Set(currentUserSkills.map((s) => s.id));
 
   if (loading) {
     return (
@@ -79,27 +49,34 @@ export default function ProfilePage() {
     );
   }
 
-  if (error) {
-    return (
-      <Typography color="error" sx={{ mt: 4 }}>
-        エラーが発生しました: {error}
-      </Typography>
-    );
-  }
-
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        プロフィール設定
-      </Typography>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+        <Typography variant="h4" gutterBottom>
+          プロフィール設定
+        </Typography>
+        <Button
+          variant="contained"
+          onClick={handleSave}
+          disabled={!hasChanges || saving}
+        >
+          {saving ? <CircularProgress size={24} /> : "保存する"}
+        </Button>
+      </Box>
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          エラーが発生しました: {error}
+        </Alert>
+      )}
 
       <Paper sx={{ p: 2, mb: 3 }}>
         <Typography variant="h6" gutterBottom>
           あなたのスキル
         </Typography>
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-          {userSkills.length > 0 ? (
-            userSkills.map((skill) => (
+          {currentUserSkills.length > 0 ? (
+            currentUserSkills.map((skill) => (
               <Chip
                 key={skill.id}
                 label={
@@ -145,6 +122,19 @@ export default function ProfilePage() {
           ))}
         </Box>
       </Paper>
+      <Snackbar
+        open={!!successMessage}
+        autoHideDuration={6000}
+        onClose={() => setSuccessMessage(null)}
+      >
+        <Alert
+          onClose={() => setSuccessMessage(null)}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          {successMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

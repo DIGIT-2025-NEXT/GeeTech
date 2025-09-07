@@ -1,4 +1,4 @@
-import { SupabaseClient } from "@supabase/auth-helpers-react";
+import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/types/supabase";
 
 // 型エイリアスもここに集約
@@ -68,4 +68,23 @@ export async function removeSkillFromUser(
     .delete()
     .match({ user_id: userId, skill_id: skillId });
   if (error) throw error;
+}
+
+/**
+ * 指定したスキルをすべて持っているユーザのIDを返す
+ */
+export async function getUsersWithAllSkills(
+  supabase: SupabaseClient<Database>,
+  skillIds: string[]
+): Promise<string[]> {
+  if (!skillIds || skillIds.length === 0) {
+    return [];
+  }
+
+  const { data, error } = await supabase.rpc("get_users_with_all_skills", {
+    skill_ids_array: skillIds,
+  });
+
+  if (error) throw error;
+  return data.map((item) => item.user_id);
 }
