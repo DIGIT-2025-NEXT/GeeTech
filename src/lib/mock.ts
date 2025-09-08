@@ -23,6 +23,9 @@ export interface Company {
   description: string;
   logo?: string;
   projects?: Project[];
+  partcipantsid?: string[];
+  adoptedid?: string[];
+  Rejectedid?: string[];
 }
 
 export interface Project {
@@ -178,31 +181,36 @@ const mockCompanies: Company[] = [
     id: "1",
     name: "株式会社 未来創造",
     industry: "AI・地域活性化",
-    description: "私たちはAI技術を駆使して、北九州市の地域課題解決に取り組むスタートアップです。あなたの若い力で、未来の北九州を一緒に創りませんか？"
+    description: "私たちはAI技術を駆使して、北九州市の地域課題解決に取り組むスタートアップです。あなたの若い力で、未来の北九州を一緒に創りませんか？",
+    partcipantsid: ["1", "4", "5"]
   },
   {
     id: "2", 
     name: "TechForward Inc.",
     industry: "製造業向けSaaS",
-    description: "製造業のDXを推進するための革新的なSaaSを開発しています。世界に通用するプロダクト開発に興味がある学生を募集しています。"
+    description: "製造業のDXを推進するための革新的なSaaSを開発しています。世界に通用するプロダクト開発に興味がある学生を募集しています。",
+    partcipantsid: ["2", "3"]
   },
   {
     id: "3",
     name: "Kitakyushu Labs",
     industry: "環境エネルギー", 
-    description: "持続可能な社会を目指し、再生可能エネルギーに関する研究開発を行っています。環境問題に情熱を持つ仲間を探しています。"
+    description: "持続可能な社会を目指し、再生可能エネルギーに関する研究開発を行っています。環境問題に情熱を持つ仲間を探しています。",
+    partcipantsid: []
   },
   {
     id: "4",
     name: "株式会社グルメディスカバリー",
     industry: "フードテック",
-    description: "地元の隠れた名店と食を愛する人々をつなぐ新しいプラットフォームを開発中。食べることが好きな人大歓迎！"
+    description: "地元の隠れた名店と食を愛する人々をつなぐ新しいプラットフォームを開発中。食べることが好きな人大歓迎！",
+    partcipantsid: ["1", "2", "3", "4"]
   },
   {
     id: "5",
     name: "NextGen Solutions",
     industry: "ヘルスケアIT",
-    description: "医療現場のデジタル化を推進し、患者さんと医療従事者の双方にメリットをもたらすソリューションを開発しています。"
+    description: "医療現場のデジタル化を推進し、患者さんと医療従事者の双方にメリットをもたらすソリューションを開発しています。",
+    partcipantsid: []
   }
 ];
 
@@ -593,4 +601,43 @@ export function getAllChat(): Chat[] {
 
 export function getchatById(id: string): Chat | undefined {
   return mockChats.find(chat => chat.id === id);
+}
+
+export function addAdoptedid(companyid: string,studentid: string){
+  const company = mockCompanies.find(company => company.id === companyid);
+  if (!company) return;
+  if (!company.adoptedid) company.adoptedid = [];
+  if (!company.adoptedid.includes(studentid)) company.adoptedid.push(studentid);
+}
+
+export function removeAdoptedid(companyid: string,studentid: string){
+  const company = mockCompanies.find(company => company.id === companyid);
+  if (!company) return;
+  company.adoptedid = (company.adoptedid || []).filter(id => id !== studentid);
+}
+
+export function addRejectedid(companyid: string,studentid: string){
+  const company = mockCompanies.find(company => company.id === companyid);
+  if (!company) return;
+  if (!company.Rejectedid) company.Rejectedid = [];
+  if (!company.Rejectedid.includes(studentid)) company.Rejectedid.push(studentid);
+}
+
+export function removerejectedid(companyid: string,studentid: string){
+  const company = mockCompanies.find(company => company.id === companyid);
+  if (!company) return;
+  company.Rejectedid = (company.Rejectedid || []).filter(id => id !== studentid);
+}
+
+export function addParticipartedid(companyid: string,studentid: string){
+  const company = mockCompanies.find(company => company.id === companyid);
+  if (!company) return;
+  if (!company.partcipantsid) company.partcipantsid = [];
+  if (!company.partcipantsid.includes(studentid)) company.partcipantsid.push(studentid);
+}
+
+export function removeParticipartedid(companyid: string,studentid: string){
+  const company = mockCompanies.find(company => company.id === companyid);
+  if (!company) return;
+  company.partcipantsid = (company.partcipantsid || []).filter(id => id !== studentid);
 }
