@@ -16,7 +16,14 @@ export default function Provider({ children }: { children: ReactNode }) {
     >
       <CssBaseline />
       <Header />
-      <Box component="main" sx={{ flex: "1 0 auto" }}>
+      <Box
+        component="main"
+        sx={{
+          flex: "1 0 auto",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         {children}
       </Box>
       <Footer />
