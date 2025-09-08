@@ -1,0 +1,50 @@
+# System and user directories to ignore
+.anaconda/
+.bito/
+.cache/
+.claude.json
+.claude.json.backup
+.claude/
+.codegpt/
+.codex/
+.config/
+.continuum/
+.cursor/
+.gemini/
+.gitconfig
+.lesshst
+.matplotlib/
+.node_repl_history
+.ssh/
+.streamlit/
+.viminfo
+.vscode/
+AppData/
+Contacts/
+Documents/
+Downloads/
+Favorites/
+Links/
+Music/
+NTUSER.DAT*
+OneDrive*/
+Pictures/
+Saved\ Games/
+Searches/
+Videos/
+ntuser.*
+my-app/
+pokemon-game-app/
+
+# Desktop shortcuts and folders
+Desktop/*.lnk
+Desktop/DIG\ IT/
+Desktop/Figma\ Beta.lnk
+Desktop/Python3*/
+Desktop/koshiro-y-0-app/
+Desktop/アプリ開発/
+Desktop/山田航士朗/
+Desktop/授業科目/
+
+# Keep only GeeTech project
+!Desktop/GeeTech/
