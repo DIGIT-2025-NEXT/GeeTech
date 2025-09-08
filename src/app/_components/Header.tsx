@@ -9,6 +9,10 @@ import {
   MenuItem,
   ListItemIcon,
   Skeleton,
+  useMediaQuery,
+  useTheme,
+  Box,
+  Stack,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -23,14 +27,20 @@ import ExploreIcon from "@mui/icons-material/Explore";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function Header() {
-  // 後で差し替える
-  const userName = "山田太郎";
   const router = useRouter();
   const { user, signOut, loading } = useAuth();
+  // userStatusとuserNameは将来的にはContextやDBから取得することを想定
   const userStatus = "student" as "unauthenticated" | "student" | "company";
+  const userName = "山田太郎";
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+
+  // レスポンシブ対応
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const title = isMobile ? "K" : "Kitaq_Startup";
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -47,44 +57,63 @@ export default function Header() {
 
   const handleLogout = async () => {
     handleClose();
-
     await signOut();
     router.replace("/login");
+  };
+
+  const commonButtonSx = {
+    minWidth: "auto", // アイコンのみの時に幅を詰める
+    px: { xs: 1, sm: 2 }, // スマホではパディングを小さく
+    "& .MuiButton-startIcon": {
+      mr: { xs: 0.5, sm: 1 }, // スマホではアイコンの右マージンをなくす
+    },
   };
 
   const links = (
     <>
       {userStatus === "student" ? (
-        <Link href={"/company"} passHref>
-          <Button
-            color="primary"
-            startIcon={<ExploreIcon />}
-            sx={{ mr: 2, backgroundColor: "#ffffff", color: "#212121" }}
-          >
-            スタートアップを探す
-          </Button>
-        </Link>
+        <Button
+          color="inherit"
+          startIcon={<ExploreIcon />}
+          sx={commonButtonSx}
+          onClick={() => router.push("/company")}
+        >
+          <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
+            企業を探す
+          </Box>
+        </Button>
       ) : (
-        <Link href={"/students"} passHref>
-          <Button
-            color="primary"
-            startIcon={<ExploreIcon />}
-            sx={{ mr: 2, backgroundColor: "#ffffff", color: "#212121" }}
-          >
+        <Button
+          color="inherit"
+          startIcon={<ExploreIcon />}
+          sx={commonButtonSx}
+          onClick={() => router.push("/students")}
+        >
+          <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
             学生を探す
-          </Button>
-        </Link>
+          </Box>
+        </Button>
       )}
-      <Link href={"/dashboard"} passHref>
-        <Button color="inherit" startIcon={<DashboardIcon />} sx={{ mr: 1 }}>
+      <Button
+        color="inherit"
+        startIcon={<DashboardIcon />}
+        sx={commonButtonSx}
+        onClick={() => router.push("/dashboard")}
+      >
+        <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
           ダッシュボード
-        </Button>
-      </Link>
-      <Link href={"/chat"} passHref>
-        <Button color="inherit" startIcon={<ChatIcon />} sx={{ mr: 1 }}>
+        </Box>
+      </Button>
+      <Button
+        color="inherit"
+        startIcon={<ChatIcon />}
+        sx={commonButtonSx}
+        onClick={() => router.push("/chat")}
+      >
+        <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
           チャット
-        </Button>
-      </Link>
+        </Box>
+      </Button>
       <Button
         color="inherit"
         id="user-menu-button"
@@ -93,29 +122,35 @@ export default function Header() {
         aria-expanded={open ? "true" : undefined}
         onClick={handleClick}
         startIcon={<AccountCircleIcon />}
-        endIcon={<ArrowDropDownIcon />}
+        endIcon={isMobile ? undefined : <ArrowDropDownIcon />} // スマホでは矢印を非表示
+        sx={commonButtonSx}
       >
-        {userName} ({userStatus === "student" ? "学生" : "企業"})
+        <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
+          {userName} ({userStatus === "student" ? "学生" : "企業"})
+        </Box>
       </Button>
     </>
   );
 
   const linksSkelton = (
-    <>
-      <Skeleton variant="text" width={240} height={40} />
-      <Skeleton variant="text" width={240} height={40} />
-      <Skeleton variant="text" width={240} height={40} />
-    </>
+    <Stack direction="row" spacing={2}>
+      <Skeleton variant="rounded" width={isMobile ? 40 : 120} height={36} />
+      <Skeleton variant="rounded" width={isMobile ? 40 : 120} height={36} />
+      <Skeleton variant="rounded" width={isMobile ? 40 : 120} height={36} />
+    </Stack>
   );
 
   const unauthenticatedLinks = (
-    <>
-      <Link href={"/login"} passHref>
-        <Button color="inherit" startIcon={<LoginIcon />}>
-          ログイン
-        </Button>
-      </Link>
-    </>
+    <Button
+      color="inherit"
+      startIcon={<LoginIcon />}
+      sx={commonButtonSx}
+      onClick={() => router.push("/login")}
+    >
+      <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
+        ログイン
+      </Box>
+    </Button>
   );
 
   return (
@@ -127,7 +162,7 @@ export default function Header() {
           sx={{ flexGrow: 1, fontFamily: "var(--audiowide)" }}
         >
           <Link href="/" style={{ textDecoration: "none", color: "inherit" }}>
-            Kitaq_Startup
+            {title}
           </Link>
         </Typography>
         {loading ? linksSkelton : user ? links : unauthenticatedLinks}
