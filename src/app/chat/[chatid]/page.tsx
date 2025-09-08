@@ -2,7 +2,7 @@
 import { Box, Button, Container, Stack, TextField, Typography, Breadcrumbs, Card } from '@mui/material';
 import Link from 'next/link';
 import React from 'react';
-import { getchatById, type Chat } from '@/lib/mock';
+import {getStudentById,getCompanyById,getchatById, type Chat } from '@/lib/mock';
 
 export default async function Chat({ params }: { params: { chatid: string } }) {
     const chatlogs=getchatById(params.chatid);
@@ -18,13 +18,13 @@ export default async function Chat({ params }: { params: { chatid: string } }) {
     return (
         <Container maxWidth="xl" sx={{ display: "flex", flexDirection: "column",height: "85vh"}}>
         <Box sx={{py:4}}><Link href="/chat">←チャット一覧に戻る</Link></Box>
-        <Typography variant='h5'>{chatlogs.company.name}</Typography>
+        <Typography variant='h5'>{getCompanyById(chatlogs.companyid)?.name}</Typography>
             <Box sx={{ flex:1,overflowY: "auto",p:2}}>
                 <Stack spacing={1}>
                     {chatlogs.chatlog.map((e,index)=>
                     e.speaker ==="student"?(
                     <Stack key={index} sx={{alignSelf: "flex-end"}}>
-                        <Typography sx={{fontSize:16}}>{chatlogs.student.name}</Typography>
+                        <Typography sx={{fontSize:16}}>{getStudentById(chatlogs.studentid)?.name}</Typography>
                         <Card sx={{p:1,maxWidth: 600, width: "fit-content",bgcolor:"aqua"}}>
                             <Typography>{e.chattext}</Typography>
                         </Card>
@@ -34,7 +34,7 @@ export default async function Chat({ params }: { params: { chatid: string } }) {
                     </Stack>
                     ):(
                     <Stack key={index} sx={{alignSelf: "flex-start"}}>
-                        <Typography sx={{fontSize:16}}>{chatlogs.company.name}</Typography>
+                        <Typography sx={{fontSize:16}}>{getCompanyById(chatlogs.companyid)?.name}</Typography>
                         <Card sx={{p:1,maxWidth: 600, width: "fit-content",bgcolor:"white"}}>
                             <Typography>{e.chattext}</Typography>
                         </Card>

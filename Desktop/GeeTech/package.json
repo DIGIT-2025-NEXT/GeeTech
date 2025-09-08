@@ -1,0 +1,32 @@
+{
+  "name": "geetech-platform",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.38.0",
+    "@mui/material": "^5.14.18",
+    "@mui/icons-material": "^5.14.18",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "next": "14.0.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typescript": "^5.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.9.4",
+    "@types/react": "^18.2.38",
+    "@types/react-dom": "^18.2.17",
+    "eslint": "^8.54.0",
+    "eslint-config-next": "14.0.3",
+    "tailwindcss": "^3.3.6",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.31"
+  }
+}

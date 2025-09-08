@@ -22,7 +22,7 @@ export default function AuthForm() {
         : await signUp(email, password)
 
       if (error) {
-        setMessage(error.message)
+        setMessage(error || 'エラーが発生しました')
       } else if (!isLogin) {
         setMessage('確認メールを送信しました。メールボックスを確認してください。')
       }

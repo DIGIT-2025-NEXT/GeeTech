@@ -1,4 +1,4 @@
-// app/company/page.tsx - 学生一覧ページ（MUI版・改良版）
+// app/students/page.tsx - 学生一覧ページ（MUI版・改良版）
 'use client';
 
 import {
@@ -24,7 +24,7 @@ import {
   Stack,
   Rating,
   Divider,
-  Skeleton,
+  Skeleton
 } from '@mui/material';
 import {
   Person as PersonIcon,
@@ -33,15 +33,17 @@ import {
   Work as WorkIcon,
   Search as SearchIcon,
   Filter as FilterIcon,
+  Star as StarIcon,
+  LocationOn as LocationIcon,
   TrendingUp as TrendingUpIcon,
   FavoriteBorder as FavoriteBorderIcon,
   Favorite as FavoriteIcon
 } from '@mui/icons-material';
-// import Link from 'next/link'; // 不要になったためコメントアウト
+import Link from 'next/link';
 import { getAllStudents, type Student } from '@/lib/mock';
 import { useState, useEffect } from 'react';
 
-export default function CompanyPage() {
+export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -101,19 +103,8 @@ export default function CompanyPage() {
     });
   };
 
-
   const universities = Array.from(new Set(students.map(s => s.university.split(' ')[0])));
-  
-  // SkillIcon.tsxからスキル一覧を取得
-  const skillIconSkills = [
-    'HTML/CSS', 'JavaScript', 'TypeScript', 'React', 'Vue.js', 'Angular', 'Next.js', 'Nuxt.js', 'Svelte',
-    'Node.js', 'Express', 'Python', 'Django', 'Flask', 'Go', 'Ruby on Rails', 'PHP', 'Laravel',
-    'Java', 'Spring', 'Swift', 'Kotlin', 'AWS', 'Google Cloud', 'Azure', 'Docker', 'Kubernetes', 'Terraform',
-    'PostgreSQL', 'MySQL', 'MongoDB', 'Redis', 'Prisma', 'C++', 'C#', 'Rust', 'Unity', 'Unreal Engine',
-    'TensorFlow', 'PyTorch', 'GraphQL', 'Supabase', 'Firebase', 'Git', 'Figma', 'Storybook', 'Jest', 'Flutter'
-  ];
-  
-  const allSkills = skillIconSkills;
+  const allSkills = Array.from(new Set(students.flatMap(s => s.skills)));
 
   if (loading) {
     return <LoadingSkeleton />;
@@ -124,12 +115,9 @@ export default function CompanyPage() {
       {/* ヘッダーセクション */}
       <Box sx={{ mb: 4 }}>
         <Breadcrumbs sx={{ mb: 2 }}>
-          <Typography 
-            sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
-            onClick={() => window.location.href = '/'}
-          >
+          <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
             ホーム
-          </Typography>
+          </Link>
           <Typography color="text.primary">学生一覧</Typography>
         </Breadcrumbs>
 
@@ -145,34 +133,44 @@ export default function CompanyPage() {
       </Box>
 
       {/* 統計情報 */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 2 }}>
+      <Grid container spacing={2} sx={{ mb: 4 }}>
+        <Grid size={{ xs: 6, sm: 3 }}>
+          <Paper sx={{ p: 2, textAlign: 'center' }}>
             <Typography variant="h4" color="primary.main" sx={{ fontWeight: 'bold' }}>
               {students.length}
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
+            <Typography variant="body2" color="text.secondary">
               登録学生数
             </Typography>
           </Paper>
         </Grid>
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 2 }}>
+        <Grid size={{ xs: 6, sm: 3 }}>
+          <Paper sx={{ p: 2, textAlign: 'center' }}>
             <Typography variant="h4" color="success.main" sx={{ fontWeight: 'bold' }}>
               {universities.length}
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
+            <Typography variant="body2" color="text.secondary">
               参加大学数
             </Typography>
           </Paper>
         </Grid>
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 2 }}>
+        <Grid size={{ xs: 6, sm: 3 }}>
+          <Paper sx={{ p: 2, textAlign: 'center' }}>
             <Typography variant="h4" color="warning.main" sx={{ fontWeight: 'bold' }}>
               {allSkills.length}
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
+            <Typography variant="body2" color="text.secondary">
               スキル種類
+            </Typography>
+          </Paper>
+        </Grid>
+        <Grid size={{ xs: 6, sm: 3 }}>
+          <Paper sx={{ p: 2, textAlign: 'center' }}>
+            <Typography variant="h4" color="info.main" sx={{ fontWeight: 'bold' }}>
+              85%
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              マッチング成功率
             </Typography>
           </Paper>
         </Grid>
@@ -225,7 +223,7 @@ export default function CompanyPage() {
                 onChange={(e) => setSkillFilter(e.target.value)}
               >
                 <MenuItem value="">すべて</MenuItem>
-                {allSkills.map((skill) => (
+                {allSkills.slice(0, 10).map((skill) => (
                   <MenuItem key={skill} value={skill}>{skill}</MenuItem>
                 ))}
               </Select>
@@ -379,9 +377,8 @@ export default function CompanyPage() {
                   {/* アクションボタン */}
                   <Box sx={{ display: 'flex', gap: 1, justifyContent: 'space-between' }}>
                     <Button
-                      onClick={() => {
-                        window.location.href = `/student/${student.id}`;
-                      }}
+                      component={Link}
+                      href={`/students/${student.id}`}
                       variant="contained"
                       startIcon={<PersonIcon />}
                       size="small"
@@ -396,9 +393,6 @@ export default function CompanyPage() {
                     </Button>
                     <IconButton 
                       color="primary"
-                      onClick={() => {
-                        alert(`${student.name}さんとのチャット機能は準備中です。`);
-                      }}
                       sx={{ 
                         border: '2px solid',
                         borderColor: 'primary.main',
@@ -413,9 +407,6 @@ export default function CompanyPage() {
                     </IconButton>
                     <IconButton 
                       color="success"
-                      onClick={() => {
-                        alert(`${student.name}さんの採用検討機能は準備中です。`);
-                      }}
                       sx={{ 
                         border: '2px solid',
                         borderColor: 'success.main',
@@ -472,10 +463,10 @@ export default function CompanyPage() {
       >
         <TrendingUpIcon sx={{ fontSize: 60, mb: 2 }} />
         <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold' }}>
-          あなたの企業も参加しませんか？
+          あなたも学生として参加しませんか？
         </Typography>
         <Typography variant="h6" sx={{ mb: 3, opacity: 0.9 }}>
-          優秀な学生との出会いが、あなたの事業を加速させます。
+          地元企業との出会いが、あなたのキャリアを加速させます。
         </Typography>
         <Button 
           variant="contained" 
@@ -493,7 +484,7 @@ export default function CompanyPage() {
             }
           }}
         >
-          企業登録はこちら
+          学生登録はこちら
         </Button>
       </Paper>
     </Container>
@@ -506,10 +497,10 @@ function LoadingSkeleton() {
       <Skeleton variant="text" width="40%" height={60} sx={{ mb: 2 }} />
       <Skeleton variant="text" width="60%" height={40} sx={{ mb: 4 }} />
       
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        {[1, 2, 3].map((i) => (
-          <Grid size={{ xs: 12, sm: 4 }} key={i}>
-            <Skeleton variant="rectangular" height={100} sx={{ borderRadius: 2 }} />
+      <Grid container spacing={2} sx={{ mb: 4 }}>
+        {[1, 2, 3, 4].map((i) => (
+          <Grid size={{ xs: 6, sm: 3 }} key={i}>
+            <Skeleton variant="rectangular" height={80} />
           </Grid>
         ))}
       </Grid>

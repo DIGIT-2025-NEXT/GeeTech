@@ -10,9 +10,9 @@ interface AuthContextType {
   session: Session | null
   loading: boolean
   error: string | null
-  signUp: (email: string, password: string) => Promise<{ error: any }>
-  signIn: (email: string, password: string) => Promise<{ error: any }>
-  signInWithGoogle: () => Promise<{ error: any }>
+  signUp: (email: string, password: string) => Promise<{ error: string | null }>
+  signIn: (email: string, password: string) => Promise<{ error: string | null }>
+  signInWithGoogle: () => Promise<{ error: string | null }>
   signOut: () => Promise<void>
 }
 
@@ -78,7 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = async (email: string, password: string) => {
     if (!supabase) {
-      return { error: { message: 'Supabase client not initialized' } }
+      return { error: 'Supabase client not initialized' }
     }
     
     try {
@@ -91,16 +91,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           },
         },
       })
-      return { error }
+      return { error: error?.message || null }
     } catch (err) {
       console.error('Sign up error:', err)
-      return { error: { message: err instanceof Error ? err.message : 'Sign up failed' } }
+      return { error: err instanceof Error ? err.message : 'Sign up failed' }
     }
   }
 
   const signIn = async (email: string, password: string) => {
     if (!supabase) {
-      return { error: { message: 'Supabase client not initialized' } }
+      return { error: 'Supabase client not initialized' }
     }
     
     try {
@@ -108,24 +108,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email,
         password,
       })
-      return { error }
+      return { error: error?.message || null }
     } catch (err) {
       console.error('Sign in error:', err)
-      return { error: { message: err instanceof Error ? err.message : 'Sign in failed' } }
+      return { error: err instanceof Error ? err.message : 'Sign in failed' }
     }
   }
 
   const signInWithGoogle = async () => {
     if (!supabase) {
-      return { error: { message: 'Supabase client not initialized' } }
+      return { error: 'Supabase client not initialized' }
     }
     
     const redirectUri = getGoogleRedirectUri()
     if (!redirectUri) {
       return { 
-        error: { 
-          message: 'SupabaseプロジェクトIDが正しく設定されていません。環境変数 NEXT_PUBLIC_SUPABASE_URL を確認してください。' 
-        } 
+        error: 'SupabaseプロジェクトIDが正しく設定されていません。環境変数 NEXT_PUBLIC_SUPABASE_URL を確認してください。'
       }
     }
 
@@ -136,10 +134,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           redirectTo: `${window.location.origin}/auth/callback`
         }
       })
-      return { error }
+      return { error: error?.message || null }
     } catch (err) {
       console.error('Google sign in error:', err)
-      return { error: { message: err instanceof Error ? err.message : 'Google sign in failed' } }
+      return { error: err instanceof Error ? err.message : 'Google sign in failed' }
     }
   }
 
