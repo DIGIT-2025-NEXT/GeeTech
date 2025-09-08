@@ -1,81 +1,39 @@
-# Dependencies
-node_modules/
-.pnp
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
 .pnp.js
 
-# Testing
+# testing
 /coverage
 
-# Next.js
+# next.js
 /.next/
 /out/
 
-# Production
+# production
 /build
 
-# Misc
+# misc
 .DS_Store
 *.pem
 
-# Debug
+# debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Local env files
+# local env files
 .env*.local
+.env
 
-# Vercel
+# vercel
 .vercel
 
-# TypeScript
+# typescript
 *.tsbuildinfo
 next-env.d.ts
 
-# System and user config files
-../../.anaconda/
-../../.bito/
-../../.cache/
-../../.claude.json
-../../.claude.json.backup
-../../.claude/
-../../.codegpt/
-../../.codex/
-../../.config/
-../../.continuum/
-../../.cursor/
-../../.gemini/
-../../.gitconfig
-../../.lesshst
-../../.matplotlib/
-../../.node_repl_history
-../../.ssh/
-../../.streamlit/
-../../.viminfo
-../../.vscode/
-../../AppData/
-../../Contacts/
-../../Documents/
-../../Downloads/
-../../Favorites/
-../../Links/
-../../Music/
-../../NTUSER.DAT*
-../../OneDrive*/
-../../Pictures/
-../../Saved\ Games/
-../../Searches/
-../../Videos/
-../../ntuser.*
-
-# Desktop shortcuts and other directories
-../*.lnk
-../DIG\ IT/
-../Figma\ Beta.lnk
-../Python3*/
-../koshiro-y-0-app/
-../アプリ開発/
-../山田航士朗/
-../授業科目/
-../../my-app/
-../../pokemon-game-app/
+# supabase
+/supabase/.env
