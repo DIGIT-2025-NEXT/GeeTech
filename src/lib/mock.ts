@@ -21,6 +21,7 @@ export interface Company {
   name: string;
   industry: string;
   description: string;
+  features?: string[];
   logo?: string;
   projects?: Project[];
   partcipantsid?: string[];
@@ -183,6 +184,7 @@ const mockCompanies: Company[] = [
     name: "株式会社 未来創造",
     industry: "AI・地域活性化",
     description: "私たちはAI技術を駆使して、北九州市の地域課題解決に取り組むスタートアップです。あなたの若い力で、未来の北九州を一緒に創りませんか？",
+    features: ["リモートワーク可", "オンライン面談OK", "フレックス制度"],
     partcipantsid: ["1", "4", "5"]
   },
   {
@@ -190,6 +192,7 @@ const mockCompanies: Company[] = [
     name: "TechForward Inc.",
     industry: "製造業向けSaaS",
     description: "製造業のDXを推進するための革新的なSaaSを開発しています。世界に通用するプロダクト開発に興味がある学生を募集しています。",
+    features: ["オンライン面談OK", "住宅手当あり", "研修制度充実"],
     partcipantsid: ["2", "3"]
   },
   {
@@ -197,6 +200,7 @@ const mockCompanies: Company[] = [
     name: "Kitakyushu Labs",
     industry: "環境エネルギー", 
     description: "持続可能な社会を目指し、再生可能エネルギーに関する研究開発を行っています。環境問題に情熱を持つ仲間を探しています。",
+    features: ["リモートワーク可", "社会貢献活動参加", "学会発表支援"],
     partcipantsid: []
   },
   {
@@ -204,6 +208,7 @@ const mockCompanies: Company[] = [
     name: "株式会社グルメディスカバリー",
     industry: "フードテック",
     description: "地元の隠れた名店と食を愛する人々をつなぐ新しいプラットフォームを開発中。食べることが好きな人大歓迎！",
+    features: ["食事補助", "オンライン面談OK", "カジュアル面談可"],
     partcipantsid: ["1", "2", "3", "4"]
   },
   {
@@ -211,6 +216,7 @@ const mockCompanies: Company[] = [
     name: "NextGen Solutions",
     industry: "ヘルスケアIT",
     description: "医療現場のデジタル化を推進し、患者さんと医療従事者の双方にメリットをもたらすソリューションを開発しています。",
+    features: ["フレックス制度", "研修制度充実", "リモートワーク可"],
     partcipantsid: []
   }
 ];

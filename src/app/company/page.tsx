@@ -25,6 +25,7 @@ import {
   Rating,
   Divider,
   Skeleton,
+  Collapse,
 } from '@mui/material';
 import {
   Person as PersonIcon,
@@ -35,7 +36,9 @@ import {
   Filter as FilterIcon,
   TrendingUp as TrendingUpIcon,
   FavoriteBorder as FavoriteBorderIcon,
-  Favorite as FavoriteIcon
+  Favorite as FavoriteIcon,
+  ExpandMore as ExpandMoreIcon,
+  ExpandLess as ExpandLessIcon
 } from '@mui/icons-material';
 // import Link from 'next/link'; // 不要になったためコメントアウト
 import { getAllStudents, type Student } from '@/lib/mock';
@@ -49,6 +52,7 @@ export default function CompanyPage() {
   const [skillFilter, setSkillFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [filterExpanded, setFilterExpanded] = useState(false);
 
   useEffect(() => {
     // シミュレートされたローディング
@@ -180,75 +184,89 @@ export default function CompanyPage() {
 
       {/* 検索・フィルターセクション */}
       <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
-        <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-          <FilterIcon sx={{ mr: 1 }} />
-          検索・フィルター
-        </Typography>
-        
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <TextField
-              fullWidth
-              placeholder="学生名、スキル、自己紹介で検索..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, md: 3 }}>
-            <FormControl fullWidth>
-              <InputLabel>大学で絞り込み</InputLabel>
-              <Select
-                value={universityFilter}
-                label="大学で絞り込み"
-                onChange={(e) => setUniversityFilter(e.target.value)}
-              >
-                <MenuItem value="">すべて</MenuItem>
-                {universities.map((uni) => (
-                  <MenuItem key={uni} value={uni}>{uni}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid size={{ xs: 12, md: 3 }}>
-            <FormControl fullWidth>
-              <InputLabel>スキルで絞り込み</InputLabel>
-              <Select
-                value={skillFilter}
-                label="スキルで絞り込み"
-                onChange={(e) => setSkillFilter(e.target.value)}
-              >
-                <MenuItem value="">すべて</MenuItem>
-                {allSkills.map((skill) => (
-                  <MenuItem key={skill} value={skill}>{skill}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-        </Grid>
-
-        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="body2" color="text.secondary">
-            {filteredStudents.length}件の学生が見つかりました
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            cursor: 'pointer',
+            mb: filterExpanded ? 2 : 0
+          }}
+          onClick={() => setFilterExpanded(!filterExpanded)}
+        >
+          <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
+            <FilterIcon sx={{ mr: 1 }} />
+            検索・フィルター
           </Typography>
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={() => {
-              setSearchQuery('');
-              setUniversityFilter('');
-              setSkillFilter('');
-            }}
-          >
-            フィルターをリセット
-          </Button>
+          {filterExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
         </Box>
+
+        <Collapse in={filterExpanded}>
+          <Grid container spacing={2} sx={{ mb: 2 }}>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <TextField
+                fullWidth
+                placeholder="学生名、スキル、自己紹介で検索..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, md: 3 }}>
+              <FormControl fullWidth>
+                <InputLabel>大学で絞り込み</InputLabel>
+                <Select
+                  value={universityFilter}
+                  label="大学で絞り込み"
+                  onChange={(e) => setUniversityFilter(e.target.value)}
+                >
+                  <MenuItem value="">すべて</MenuItem>
+                  {universities.map((uni) => (
+                    <MenuItem key={uni} value={uni}>{uni}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid size={{ xs: 12, md: 3 }}>
+              <FormControl fullWidth>
+                <InputLabel>スキルで絞り込み</InputLabel>
+                <Select
+                  value={skillFilter}
+                  label="スキルで絞り込み"
+                  onChange={(e) => setSkillFilter(e.target.value)}
+                >
+                  <MenuItem value="">すべて</MenuItem>
+                  {allSkills.map((skill) => (
+                    <MenuItem key={skill} value={skill}>{skill}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="body2" color="text.secondary">
+              {filteredStudents.length}件の学生が見つかりました
+            </Typography>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => {
+                setSearchQuery('');
+                setUniversityFilter('');
+                setSkillFilter('');
+              }}
+            >
+              フィルターをリセット
+            </Button>
+          </Box>
+        </Collapse>
       </Paper>
 
       {/* 学生一覧 */}

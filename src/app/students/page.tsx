@@ -24,7 +24,8 @@ import {
   Stack,
   Rating,
   Divider,
-  Skeleton
+  Skeleton,
+  Collapse
 } from '@mui/material';
 import {
   Person as PersonIcon,
@@ -36,7 +37,9 @@ import {
   Filter as FilterIcon,
   TrendingUp as TrendingUpIcon,
   FavoriteBorder as FavoriteBorderIcon,
-  Favorite as FavoriteIcon
+  Favorite as FavoriteIcon,
+  ExpandMore as ExpandMoreIcon,
+  ExpandLess as ExpandLessIcon
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { getAllCompanies, type Company } from '@/lib/mock';
@@ -47,8 +50,10 @@ export default function StudentsPage() {
   const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [industryFilter, setIndustryFilter] = useState('');
+  const [featureFilter, setFeatureFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [filterExpanded, setFilterExpanded] = useState(false);
 
   useEffect(() => {
     // シミュレートされたローディング
@@ -79,8 +84,15 @@ export default function StudentsPage() {
       filtered = filtered.filter(company => company.industry.includes(industryFilter));
     }
 
+    // 特徴フィルター
+    if (featureFilter) {
+      filtered = filtered.filter(company => 
+        company.features && company.features.includes(featureFilter)
+      );
+    }
+
     setFilteredCompanies(filtered);
-  }, [searchQuery, industryFilter, companies]);
+  }, [searchQuery, industryFilter, featureFilter, companies]);
 
   const toggleFavorite = (companyId: string) => {
     setFavorites(prev => {
@@ -95,6 +107,7 @@ export default function StudentsPage() {
   };
 
   const industries = Array.from(new Set(companies.map(c => c.industry)));
+  const features = Array.from(new Set(companies.flatMap(c => c.features || [])));
 
   if (loading) {
     return <LoadingSkeleton />;
@@ -158,70 +171,99 @@ export default function StudentsPage() {
 
       {/* 検索・フィルターセクション */}
       <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
-        <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-          <FilterIcon sx={{ mr: 1 }} />
-          検索・フィルター
-        </Typography>
-        
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-          <Box sx={{ width: { xs: '100%', md: '50%' }, minWidth: 200 }}>
-            <TextField
-              fullWidth
-              placeholder="企業名、業界、説明で検索..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Box>
-          <Box sx={{ width: { xs: '100%', md: '25%' }, minWidth: 150 }}>
-            <FormControl fullWidth>
-              <InputLabel>業界で絞り込み</InputLabel>
-              <Select
-                value={industryFilter}
-                label="業界で絞り込み"
-                onChange={(e) => setIndustryFilter(e.target.value)}
-              >
-                <MenuItem value="">すべて</MenuItem>
-                {industries.map((industry) => (
-                  <MenuItem key={industry} value={industry}>{industry}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Box>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            cursor: 'pointer',
+            mb: filterExpanded ? 2 : 0
+          }}
+          onClick={() => setFilterExpanded(!filterExpanded)}
+        >
+          <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
+            <FilterIcon sx={{ mr: 1 }} />
+            検索・フィルター
+          </Typography>
+          {filterExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
         </Box>
 
-        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="body2" color="text.secondary">
-            {filteredCompanies.length}件の企業が見つかりました
-          </Typography>
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={() => {
-              setSearchQuery('');
-              setIndustryFilter('');
-            }}
-          >
-            フィルターをリセット
-          </Button>
-        </Box>
+        <Collapse in={filterExpanded}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2 }}>
+            <Box sx={{ width: { xs: '100%', md: '40%' }, minWidth: 200 }}>
+              <TextField
+                fullWidth
+                placeholder="企業名、業界、説明で検索..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Box>
+            <Box sx={{ width: { xs: '100%', md: '20%' }, minWidth: 150 }}>
+              <FormControl fullWidth>
+                <InputLabel>業界で絞り込み</InputLabel>
+                <Select
+                  value={industryFilter}
+                  label="業界で絞り込み"
+                  onChange={(e) => setIndustryFilter(e.target.value)}
+                >
+                  <MenuItem value="">すべて</MenuItem>
+                  {industries.map((industry) => (
+                    <MenuItem key={industry} value={industry}>{industry}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+            <Box sx={{ width: { xs: '100%', md: '20%' }, minWidth: 150 }}>
+              <FormControl fullWidth>
+                <InputLabel>特徴で絞り込み</InputLabel>
+                <Select
+                  value={featureFilter}
+                  label="特徴で絞り込み"
+                  onChange={(e) => setFeatureFilter(e.target.value)}
+                >
+                  <MenuItem value="">すべて</MenuItem>
+                  {features.map((feature) => (
+                    <MenuItem key={feature} value={feature}>{feature}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+          </Box>
+
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="body2" color="text.secondary">
+              {filteredCompanies.length}件の企業が見つかりました
+            </Typography>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => {
+                setSearchQuery('');
+                setIndustryFilter('');
+                setFeatureFilter('');
+              }}
+            >
+              フィルターをリセット
+            </Button>
+          </Box>
+        </Collapse>
       </Paper>
 
       {/* 企業一覧 */}
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+      <Grid container spacing={3}>
         {filteredCompanies.map((company, index) => (
-          <Box key={company.id} sx={{ width: { xs: '100%', sm: '50%', lg: '33.33%' }, minWidth: 300 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }} key={company.id}>
             <Fade in={true} timeout={300 + index * 100}>
               <Card 
                 sx={{ 
                   height: '100%',
-
                   display: 'flex',
                   flexDirection: 'column',
                   transition: 'all 0.3s ease-in-out',
@@ -252,29 +294,29 @@ export default function StudentsPage() {
                   }
                 </IconButton>
 
-                <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                <CardContent sx={{ flexGrow: 1, p: 2 }}>
                   {/* プロフィール部分 */}
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <Avatar 
                       sx={{ 
-                        width: 70, 
-                        height: 70, 
-                        mr: 2,
+                        width: 50, 
+                        height: 50, 
+                        mr: 1.5,
                         bgcolor: 'primary.main',
-                        fontSize: '1.8rem',
-                        border: '3px solid',
+                        fontSize: '1.4rem',
+                        border: '2px solid',
                         borderColor: 'primary.light'
                       }}
                     >
                       {company.name.charAt(0)}
                     </Avatar>
                     <Box sx={{ flexGrow: 1 }}>
-                      <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold', mb: 0.5 }}>
+                      <Typography variant="subtitle1" component="h2" sx={{ fontWeight: 'bold', mb: 0.3, lineHeight: 1.2 }}>
                         {company.name}
                       </Typography>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                        <BusinessIcon sx={{ fontSize: 16, mr: 0.5, color: 'text.secondary' }} />
-                        <Typography variant="body2" color="text.secondary">
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                        <BusinessIcon sx={{ fontSize: 14, mr: 0.3, color: 'text.secondary' }} />
+                        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.2, fontSize: '0.8rem' }}>
                           {company.industry}
                         </Typography>
                       </Box>
@@ -287,55 +329,84 @@ export default function StudentsPage() {
                     variant="body2" 
                     color="text.secondary" 
                     sx={{ 
-                      mb: 3,
+                      mb: 2,
                       display: '-webkit-box',
-                      WebkitLineClamp: 3,
+                      WebkitLineClamp: 2,
                       WebkitBoxOrient: 'vertical',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
-                      lineHeight: 1.6
+                      lineHeight: 1.3,
+                      fontSize: '0.8rem'
                     }}
                   >
                     {company.description}
                   </Typography>
 
                   {/* 業界タグ */}
-                  <Box sx={{ mb: 3 }}>
-                    <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', color: 'text.secondary' }}>
-                      業界
+                  <Box sx={{ mb: 1.5 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 'bold', color: 'text.secondary', mb: 0.5, display: 'block' }}>
+                      業界・特徴
                     </Typography>
-                    <Stack direction="row" spacing={0.5} flexWrap="wrap">
+                    <Stack direction="row" spacing={0.3} flexWrap="wrap">
                       <Chip
                         label={company.industry}
                         size="small"
                         variant="filled"
                           color="primary"
                           sx={{ 
-                            fontSize: '0.75rem',
-                            mb: 0.5,
+                            fontSize: '0.65rem',
+                            height: 20,
+                            mb: 0.3,
                             bgcolor: 'primary.50',
                             color: 'primary.main',
                             fontWeight: 500
                           }}
                         />
+                      {company.features?.slice(0, 2).map((feature, index) => (
+                        <Chip
+                          key={index}
+                          label={feature}
+                          size="small"
+                          variant="outlined"
+                          color="secondary"
+                          sx={{ 
+                            fontSize: '0.65rem',
+                            height: 20,
+                            mb: 0.3,
+                            fontWeight: 500
+                          }}
+                        />
+                      ))}
+                      {company.features && company.features.length > 2 && (
+                        <Chip
+                          label={`+${company.features.length - 2}`}
+                          size="small"
+                          variant="outlined"
+                          color="default"
+                          sx={{ fontSize: '0.65rem', height: 20, mb: 0.3 }}
+                        />
+                      )}
                     </Stack>
                   </Box>
 
-                  <Divider sx={{ mb: 2 }} />
+                  <Divider sx={{ mb: 1.5 }} />
 
                   {/* アクションボタン */}
-                  <Box sx={{ display: 'flex', gap: 1, justifyContent: 'space-between' }}>
+                  <Box sx={{ display: 'flex', gap: 0.8, justifyContent: 'space-between' }}>
                     <Button
                       component={Link}
                       href={`/company/${company.id}`}
                       variant="contained"
-                      startIcon={<BusinessIcon />}
+                      startIcon={<BusinessIcon sx={{ fontSize: 16 }} />}
                       size="small"
                       sx={{ 
                         flex: 1,
                         textTransform: 'none',
                         borderRadius: 2,
-                        fontWeight: 600
+                        fontWeight: 600,
+                        fontSize: '0.75rem',
+                        height: 32,
+                        px: 1.5
                       }}
                     >
                       詳細を見る
@@ -343,38 +414,42 @@ export default function StudentsPage() {
                     <IconButton 
                       color="primary"
                       sx={{ 
-                        border: '2px solid',
+                        border: '1.5px solid',
                         borderColor: 'primary.main',
                         '&:hover': {
                           bgcolor: 'primary.main',
                           color: 'white'
-                        }
+                        },
+                        width: 32,
+                        height: 32
                       }}
                       size="small"
                     >
-                      <ChatIcon />
+                      <ChatIcon sx={{ fontSize: 16 }} />
                     </IconButton>
                     <IconButton 
                       color="success"
                       sx={{ 
-                        border: '2px solid',
+                        border: '1.5px solid',
                         borderColor: 'success.main',
                         '&:hover': {
                           bgcolor: 'success.main',
                           color: 'white'
-                        }
+                        },
+                        width: 32,
+                        height: 32
                       }}
                       size="small"
                     >
-                      <WorkIcon />
+                      <WorkIcon sx={{ fontSize: 16 }} />
                     </IconButton>
                   </Box>
                 </CardContent>
               </Card>
             </Fade>
-          </Box>
+          </Grid>
         ))}
-      </Box>
+      </Grid>
 
       {/* 空の状態 */}
       {filteredCompanies.length === 0 && !loading && (
@@ -391,6 +466,7 @@ export default function StudentsPage() {
             onClick={() => {
               setSearchQuery('');
               setIndustryFilter('');
+              setFeatureFilter('');
             }}
           >
             フィルターをリセット
@@ -445,19 +521,19 @@ function LoadingSkeleton() {
       <Skeleton variant="text" width="40%" height={60} sx={{ mb: 2 }} />
       <Skeleton variant="text" width="60%" height={40} sx={{ mb: 4 }} />
       
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 4 }}>
+      <Grid container spacing={2} sx={{ mb: 4 }}>
         {[1, 2, 3, 4].map((i) => (
-          <Box key={i} sx={{ width: { xs: '50%', sm: '25%' }, minWidth: 120 }}>
+          <Grid size={{ xs: 6, sm: 3 }} key={i}>
             <Skeleton variant="rectangular" height={80} />
-          </Box>
+          </Grid>
         ))}
-      </Box>
+      </Grid>
       
       <Skeleton variant="rectangular" height={120} sx={{ mb: 4 }} />
       
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+      <Grid container spacing={3}>
         {[1, 2, 3, 4, 5, 6].map((i) => (
-          <Box key={i} sx={{ width: { xs: '100%', sm: '50%', lg: '33.33%' }, minWidth: 300 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }} key={i}>
             <Card sx={{ height: 300 }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -476,9 +552,9 @@ function LoadingSkeleton() {
                 <Skeleton variant="rectangular" height={40} />
               </CardContent>
             </Card>
-          </Box>
+          </Grid>
         ))}
-      </Box>
+      </Grid>
     </Container>
   );
 }

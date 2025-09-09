@@ -189,7 +189,7 @@ export default function StudentDetailPage() {
               startIcon={<ChatIcon />}
               size="large"
               onClick={() => {
-                alert(`${student.name}さんとのチャット機能は準備中です。`);
+                window.location.href = '/chat';
               }}
               sx={{ 
                 textTransform: 'none',
