@@ -1,15 +1,15 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
-import { User, Session, SupabaseClient } from '@supabase/supabase-js'
+import { User, Session } from '@supabase/supabase-js'
 import { useSupabaseClient } from '@supabase/auth-helpers-react'
 import { logAuthConfig, getGoogleRedirectUri } from '@/utils/auth-helpers'
 import { Database } from '@/lib/types_db'
 
+// Contextの型からsupabaseを削除
 interface AuthContextType {
   user: User | null
   session: Session | null
-  supabase: SupabaseClient<Database> | null
   loading: boolean
   error: string | null
   signUp: (email: string, password: string) => Promise<{ error: string | null }>
@@ -29,10 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const supabase = useSupabaseClient<Database>()
 
   useEffect(() => {
-    if (!supabase) {
-      // supabaseが利用可能になるまで待つ
-      return
-    }
+    if (!supabase) return
 
     logAuthConfig()
 
@@ -124,10 +121,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  // valueからsupabaseを削除
   const value = {
     user,
     session,
-    supabase,
     loading,
     error,
     signUp,
