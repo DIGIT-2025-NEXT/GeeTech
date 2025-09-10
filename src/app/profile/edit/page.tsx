@@ -2,15 +2,14 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/lib/types_db'
 import { useRouter } from 'next/navigation'
 
 type Profile = Database['public']['Tables']['profiles']['Row']
 
 export default function EditProfilePage() {
-  const { user } = useAuth()
-  const supabase = createClient()
+  // useAuthからsupabaseクライアントを取得する
+  const { user, supabase } = useAuth()
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -20,7 +19,7 @@ export default function EditProfilePage() {
   const [website, setWebsite] = useState('')
 
   const fetchProfile = useCallback(async () => {
-    if (user) {
+    if (user && supabase) {
       setLoading(true)
       const { data, error } = await supabase
         .from('profiles')
@@ -47,7 +46,7 @@ export default function EditProfilePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!user || !profile) return
+    if (!user || !profile || !supabase) return
 
     setLoading(true)
     const { error } = await supabase

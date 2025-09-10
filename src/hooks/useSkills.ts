@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { SupabaseClient, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Database } from "@/types/supabase";
+import { Database } from "@/lib/types_db";
 import {
   getAllSkills,
   getUserSkills,
