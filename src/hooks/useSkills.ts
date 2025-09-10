@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { SupabaseClient, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Database } from "@/lib/types_db";
+import { Database } from "@/types/supabase";
 import {
   getAllSkills,
   getUserSkills,
@@ -107,7 +107,6 @@ export function useSkills() {
     user,
     allSkills,
     currentUserSkills,
-    initialUserSkills, // ここに追加
     loading,
     saving,
     error,
