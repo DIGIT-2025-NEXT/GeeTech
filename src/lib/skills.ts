@@ -1,5 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Database } from "@/types/supabase";
+import { Database } from "@/lib/types_db";
 
 // 型エイリアスもここに集約
 export type Skill = Database["public"]["Tables"]["skills"]["Row"];

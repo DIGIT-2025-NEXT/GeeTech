@@ -2,12 +2,14 @@
 
 import { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session, SupabaseClient } from '@supabase/supabase-js'
-import { createClient } from '@/lib/supabase/client'
+import { useSupabaseClient } from '@supabase/auth-helpers-react'
 import { logAuthConfig, getGoogleRedirectUri } from '@/utils/auth-helpers'
+import { Database } from '@/lib/types_db'
 
 interface AuthContextType {
   user: User | null
   session: Session | null
+  supabase: SupabaseClient<Database> | null
   loading: boolean
   error: string | null
   signUp: (email: string, password: string) => Promise<{ error: string | null }>
@@ -24,25 +26,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
-  let supabase: SupabaseClient | null = null
-  try {
-    supabase = createClient()
-  } catch (err) {
-    console.error('Failed to initialize Supabase client:', err)
-    setError(err instanceof Error ? err.message : 'Failed to initialize Supabase client')
-    setLoading(false)
-  }
+  const supabase = useSupabaseClient<Database>()
 
   useEffect(() => {
     if (!supabase) {
-      setLoading(false)
+      // supabaseが利用可能になるまで待つ
       return
     }
 
-    // 開発時に認証設定をログ出力
     logAuthConfig()
 
-    // 初期セッションを取得
     const getInitialSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession()
@@ -63,13 +56,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     getInitialSession()
 
-    // 認証状態の変更を監視
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event: string, session: Session | null) => {
+      (event, session) => {
         setSession(session)
         setUser(session?.user ?? null)
         setLoading(false)
-        setError(null) // 認証状態が変更されたらエラーをクリア
+        setError(null)
       }
     )
 
@@ -77,10 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase])
 
   const signUp = async (email: string, password: string) => {
-    if (!supabase) {
-      return { error: 'Supabase client not initialized' }
-    }
-    
+    if (!supabase) return { error: 'Supabase client not initialized' }
     try {
       const { error } = await supabase.auth.signUp({
         email,
@@ -93,59 +82,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
       return { error: error?.message || null }
     } catch (err) {
-      console.error('Sign up error:', err)
       return { error: err instanceof Error ? err.message : 'Sign up failed' }
     }
   }
 
   const signIn = async (email: string, password: string) => {
-    if (!supabase) {
-      return { error: 'Supabase client not initialized' }
-    }
-    
+    if (!supabase) return { error: 'Supabase client not initialized' }
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
       return { error: error?.message || null }
     } catch (err) {
-      console.error('Sign in error:', err)
       return { error: err instanceof Error ? err.message : 'Sign in failed' }
     }
   }
 
   const signInWithGoogle = async () => {
-    if (!supabase) {
-      return { error: 'Supabase client not initialized' }
-    }
-    
+    if (!supabase) return { error: 'Supabase client not initialized' }
     const redirectUri = getGoogleRedirectUri()
     if (!redirectUri) {
       return { 
         error: 'SupabaseプロジェクトIDが正しく設定されていません。環境変数 NEXT_PUBLIC_SUPABASE_URL を確認してください。'
       }
     }
-
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`
-        }
+        options: { redirectTo: `${window.location.origin}/auth/callback` }
       })
       return { error: error?.message || null }
     } catch (err) {
-      console.error('Google sign in error:', err)
       return { error: err instanceof Error ? err.message : 'Google sign in failed' }
     }
   }
 
   const signOut = async () => {
-    if (!supabase) {
-      return
-    }
-    
+    if (!supabase) return
     try {
       await supabase.auth.signOut()
     } catch (err) {
@@ -156,6 +127,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = {
     user,
     session,
+    supabase,
     loading,
     error,
     signUp,
