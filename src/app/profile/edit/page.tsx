@@ -2,14 +2,15 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
+import { useSupabaseClient } from '@supabase/auth-helpers-react' // useSupabaseClientをインポート
 import { Database } from '@/lib/types_db'
 import { useRouter } from 'next/navigation'
 
 type Profile = Database['public']['Tables']['profiles']['Row']
 
 export default function EditProfilePage() {
-  // useAuthからsupabaseクライアントを取得する
-  const { user, supabase } = useAuth()
+  const { user } = useAuth()
+  const supabase = useSupabaseClient<Database>() // 直接呼び出す
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [profile, setProfile] = useState<Profile | null>(null)
