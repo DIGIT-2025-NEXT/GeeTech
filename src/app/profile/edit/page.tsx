@@ -1,152 +1,266 @@
-'use client'
+"use client";
 
-import { useState, useEffect, useCallback } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
-import { createClient } from '@/lib/supabase/client'
-import { Database } from '@/lib/types_db'
-import { useRouter } from 'next/navigation'
-
-type Profile = Database['public']['Tables']['profiles']['Row']
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSkills } from "@/hooks/useSkills";
+import { useProfile } from "@/hooks/useProfile";
+import {
+  Box,
+  Typography,
+  CircularProgress,
+  Paper,
+  TextField,
+  Button,
+  Chip,
+  Snackbar,
+  Alert,
+  Stack,
+} from "@mui/material";
+import { SkillIcon } from "@/app/_components/SkillIcon";
 
 export default function EditProfilePage() {
-  const { user } = useAuth()
-  const supabase = createClient()
-  const router = useRouter()
-  const [loading, setLoading] = useState(true)
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
-  const [username, setUsername] = useState('')
-  const [website, setWebsite] = useState('')
+  const {
+    loading: profileLoading,
+    error: profileError,
+    firstName,
+    lastName,
+    username,
+    website,
+    bio,
+    email,
+    setFirstName,
+    setLastName,
+    setUsername,
+    setWebsite,
+    setBio,
+    setEmail,
+    updateProfile,
+    hasChanges: profileHasChanges,
+  } = useProfile();
 
-  const fetchProfile = useCallback(async () => {
-    if (user) {
-      setLoading(true)
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single()
+  const {
+    allSkills,
+    currentUserSkills,
+    loading: skillsLoading,
+    error: skillsError,
+    hasChanges: skillsHasChanges,
+    handleSkillToggle,
+    handleSave: handleSkillsSave,
+  } = useSkills();
 
-      if (error) {
-        console.error('Error fetching profile:', error)
-      } else {
-        setProfile(data)
-        setFirstName(data.first_name || '')
-        setLastName(data.last_name || '')
-        setUsername(data.username || '')
-        setWebsite(data.website || '')
+  const [saving, setSaving] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const hasChanges = profileHasChanges || skillsHasChanges;
+
+  const handleSave = async () => {
+    setSaving(true);
+    setSuccessMessage(null);
+
+    try {
+      if (profileHasChanges) {
+        await updateProfile({
+          firstName,
+          lastName,
+          username,
+          website,
+          bio,
+          email,
+        });
       }
-      setLoading(false)
+      if (skillsHasChanges) {
+        await handleSkillsSave();
+      }
+      setSuccessMessage("プロフィールを更新しました！");
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSaving(false);
     }
-  }, [user, supabase])
+  };
 
-  useEffect(() => {
-    fetchProfile()
-  }, [fetchProfile])
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!user || !profile) return
-
-    setLoading(true)
-    const { error } = await supabase
-      .from('profiles')
-      .update({
-        first_name: firstName,
-        last_name: lastName,
-        username,
-        website,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', user.id)
-
-    if (error) {
-      alert('エラーが発生しました。')
-      console.error(error)
-    } else {
-      alert('プロフィールを更新しました。')
-      router.push('/dashboard') // Redirect to dashboard after update
-    }
-    setLoading(false)
+  if (profileLoading || skillsLoading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
   }
 
-  if (loading) {
-    return <div>読み込み中...</div>
-  }
-
-  if (!user) {
-    return <div>ログインしてください。</div>
-  }
+  const error = profileError || skillsError;
 
   return (
-    <div className="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-6 text-center">プロフィール登録</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex gap-4">
-          <div className="w-1/2">
-            <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-              姓
-            </label>
-            <input
-              id="lastName"
-              type="text"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="例：山田"
-            />
-          </div>
-          <div className="w-1/2">
-            <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-              名
-            </label>
-            <input
-              id="firstName"
-              type="text"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="例：太郎"
-            />
-          </div>
-        </div>
-        <div>
-          <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-            ユーザー名
-          </label>
-          <input
-            id="username"
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-          />
-        </div>
-        <div>
-          <label htmlFor="website" className="block text-sm font-medium text-gray-700">
-            ウェブサイト
-          </label>
-          <input
-            id="website"
-            type="url"
-            value={website}
-            onChange={(e) => setWebsite(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            placeholder="https://example.com"
-          />
-        </div>
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+    <Box sx={{ p: 3 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 2,
+        }}
+      >
+        <Typography variant="h4">プロフィール編集</Typography>
+        <Button
+          variant="contained"
+          onClick={handleSave}
+          disabled={!hasChanges || saving}
         >
-          {loading ? '更新中...' : '登録'}
-        </button>
-      </form>
-    </div>
-  )
+          {saving ? <CircularProgress size={24} /> : "保存する"}
+        </Button>
+      </Box>
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          gap: 3,
+        }}
+      >
+        {/* 基本情報フォーム */}
+        <Box sx={{ width: { xs: "100%", md: "50%" } }}>
+          <Paper sx={{ p: 3, height: "100%" }}>
+            <Typography variant="h6" gutterBottom>
+              基本情報
+            </Typography>
+            <Stack spacing={2}>
+              <Stack direction="row" spacing={2}>
+                <TextField
+                  label="姓"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  fullWidth
+                />
+                <TextField
+                  label="名"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  fullWidth
+                />
+              </Stack>
+              <TextField
+                label="ユーザー名"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                fullWidth
+              />
+              <TextField
+                label="メールアドレス"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                fullWidth
+              />
+              <TextField
+                label="ウェブサイト"
+                type="url"
+                value={website}
+                onChange={(e) => setWebsite(e.target.value)}
+                fullWidth
+              />
+              <TextField
+                label="自己紹介"
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                fullWidth
+                multiline
+                rows={4}
+              />
+            </Stack>
+          </Paper>
+        </Box>
+
+        {/* スキル編集 */}
+        <Box sx={{ width: { xs: "100%", md: "50%" } }}>
+          <Stack spacing={3}>
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="h6" gutterBottom>
+                あなたのスキル
+              </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 1,
+                  minHeight: "40px",
+                }}
+              >
+                {currentUserSkills.length > 0 ? (
+                  currentUserSkills.map((skill) => (
+                    <Chip
+                      key={skill.id}
+                      label={
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          <SkillIcon iconName={skill.icon_name} />
+                          <Box component="span" sx={{ ml: 1 }}>
+                            {skill.skill_name}
+                          </Box>
+                        </Box>
+                      }
+                      onDelete={() => handleSkillToggle(skill)}
+                      color="primary"
+                    />
+                  ))
+                ) : (
+                  <Typography variant="body2" color="text.secondary">
+                    スキルを選択してください。
+                  </Typography>
+                )}
+              </Box>
+            </Paper>
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="h6" gutterBottom>
+                利用可能なスキル
+              </Typography>
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                {allSkills.map((skill) => (
+                  <Chip
+                    key={skill.id}
+                    label={
+                      <Box sx={{ display: "flex", alignItems: "center" }}>
+                        <SkillIcon iconName={skill.icon_name} />
+                        <Box component="span" sx={{ ml: 1 }}>
+                          {skill.skill_name}
+                        </Box>
+                      </Box>
+                    }
+                    onClick={() => handleSkillToggle(skill)}
+                    color={
+                      currentUserSkills.some((s) => s.id === skill.id)
+                        ? "primary"
+                        : "default"
+                    }
+                    variant={
+                      currentUserSkills.some((s) => s.id === skill.id)
+                        ? "filled"
+                        : "outlined"
+                    }
+                  />
+                ))}
+              </Box>
+            </Paper>
+          </Stack>
+        </Box>
+      </Box>
+
+      <Snackbar
+        open={!!successMessage}
+        autoHideDuration={6000}
+        onClose={() => setSuccessMessage(null)}
+      >
+        <Alert
+          onClose={() => setSuccessMessage(null)}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          {successMessage}
+        </Alert>
+      </Snackbar>
+    </Box>
+  );
 }
