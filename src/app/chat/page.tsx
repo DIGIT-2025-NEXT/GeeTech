@@ -1,22 +1,39 @@
 
 "use client";
 
-import { Box, Button, Card, CardActions, CardContent, Container, Stack, TextField, Typography,Breadcrumbs} from '@mui/material';
+import { Button, Card, CardContent, Container, Stack, Typography,Breadcrumbs} from '@mui/material';
 import Link from 'next/link';
 import { getAllChat, type Chat, getCompanyById } from '@/lib/mock';
 import { useState } from "react";
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Chat() {
   const [morecount, setMorecount] = useState(1);
+  const { user, loading } = useAuth();
 
   const addmorecount = () => {
     setMorecount((prev) => prev + 1);
   };
-  const chats=getAllChat();
-  const sortedchats = chats
+  const userid = user?.id ?? '';
+  console.log(`${userid}`);
+  const sortedchats = getAllChat()
+    .filter((chat) => chat.studentid === userid)
     .sort((a, b) => +new Date(b.chatlog[b.chatlog.length-1].chattime)- +new Date(a.chatlog[a.chatlog.length-1].chattime))
     .slice(0, morecount*10);
-  if(!chats||chats.length==0){
+  if (loading) {
+    return (
+      <Container maxWidth="xl" sx={{ py: 4 }}>
+        <Breadcrumbs sx={{ mb: 2 }}>
+          <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+            ホーム
+          </Link>
+          <Typography color="text.primary">チャット</Typography>
+        </Breadcrumbs>
+        <Typography variant='h4'>読み込み中...</Typography>
+      </Container>
+    );
+  }
+  if(!sortedchats||sortedchats.length==0){
     return(
       <Container maxWidth="xl" sx={{ py: 4 }}>
         <Breadcrumbs sx={{ mb: 2 }}>
@@ -48,7 +65,7 @@ export default function Chat() {
                 </CardContent>
               </Card>
             )}
-            {chats.length>morecount*10 ?(<Button variant='outlined' onClick={addmorecount}>もっと見る</Button>):("")}
+            {sortedchats.length>morecount*10 ?(<Button variant='outlined' onClick={addmorecount} sx={{color:'"blue"'}}>もっと見る</Button>):("")}
             </Stack>
         </Container>
     )
