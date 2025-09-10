@@ -107,6 +107,7 @@ export function useSkills() {
     user,
     allSkills,
     currentUserSkills,
+    initialUserSkills, // ここに追加
     loading,
     saving,
     error,
