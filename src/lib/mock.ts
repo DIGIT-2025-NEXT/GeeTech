@@ -610,6 +610,10 @@ export function getchatById(id: string): Chat | undefined {
   return mockChats.find(chat => chat.id === id);
 }
 
+export function findChatByStudentId(studentId: string): Chat | undefined {
+  return mockChats.find(chat => chat.studentid === studentId);
+}
+
 export function addAdoptedid(companyid: string,studentid: string){
   const company = mockCompanies.find(company => company.id === companyid);
   if (!company) return;

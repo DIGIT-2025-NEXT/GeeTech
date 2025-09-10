@@ -27,15 +27,80 @@ import {
   Phone as PhoneIcon,
   LinkedIn as LinkedInIcon,
 } from '@mui/icons-material';
-import { getStudentById, type Student } from '@/lib/mock';
+import { getStudentById, findChatByStudentId, type Student } from '@/lib/mock';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import { SkillIcon } from '@/app/_components/SkillIcon';
 
 export default function StudentDetailPage() {
   const params = useParams();
   const studentId = params.id as string;
   const [student, setStudent] = useState<Student | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // スキル名からアイコン名へのマッピング
+  const getSkillIconName = (skillName: string): string | null => {
+    const skillToIconMap: { [key: string]: string } = {
+      'HTML/CSS': 'html5',
+      'JavaScript': 'javascript',
+      'TypeScript': 'typescript',
+      'React': 'react',
+      'Vue.js': 'vuejs',
+      'Angular': 'angular',
+      'Next.js': 'nextjs',
+      'Nuxt.js': 'nuxtjs',
+      'Svelte': 'svelte',
+      'Node.js': 'nodejs',
+      'Express': 'express',
+      'Python': 'python',
+      'Django': 'django',
+      'Flask': 'flask',
+      'Go': 'go',
+      'Ruby on Rails': 'rubyonrails',
+      'PHP': 'php',
+      'Laravel': 'laravel',
+      'Java': 'java',
+      'Spring': 'spring',
+      'Swift': 'swift',
+      'Kotlin': 'kotlin',
+      'AWS': 'aws',
+      'Google Cloud': 'googlecloud',
+      'Azure': 'azure',
+      'Docker': 'docker',
+      'Kubernetes': 'kubernetes',
+      'Terraform': 'terraform',
+      'PostgreSQL': 'postgresql',
+      'MySQL': 'mysql',
+      'MongoDB': 'mongodb',
+      'Redis': 'redis',
+      'Prisma': 'prisma',
+      'C++': 'cplusplus',
+      'C#': 'csharp',
+      'Rust': 'rust',
+      'Unity': 'unity',
+      'Unreal Engine': 'unrealengine',
+      'TensorFlow': 'tensorflow',
+      'PyTorch': 'pytorch',
+      'GraphQL': 'graphql',
+      'Supabase': 'supabase',
+      'Firebase': 'firebase',
+      'Git': 'git',
+      'Figma': 'figma',
+      'Storybook': 'storybook',
+      'Jest': 'jest',
+      'Flutter': 'flutter'
+    };
+    return skillToIconMap[skillName] || null;
+  };
+
+  // SkillIcon.tsxで利用可能なスキル一覧
+  const availableSkills = [
+    'HTML/CSS', 'JavaScript', 'TypeScript', 'React', 'Vue.js', 'Angular', 'Next.js', 'Nuxt.js', 'Svelte',
+    'Node.js', 'Express', 'Python', 'Django', 'Flask', 'Go', 'Ruby on Rails', 'PHP', 'Laravel',
+    'Java', 'Spring', 'Swift', 'Kotlin', 'AWS', 'Google Cloud', 'Azure', 'Docker', 'Kubernetes', 'Terraform',
+    'PostgreSQL', 'MySQL', 'MongoDB', 'Redis', 'Prisma', 'C++', 'C#', 'Rust', 'Unity', 'Unreal Engine',
+    'TensorFlow', 'PyTorch', 'GraphQL', 'Supabase', 'Firebase', 'Git', 'Figma', 'Storybook', 'Jest', 'Flutter'
+  ];
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -153,25 +218,40 @@ export default function StudentDetailPage() {
 
           {/* スキル */}
           <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-            スキル・得意分野
+            スキル
           </Typography>
           <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 3 }}>
-            {student.skills.map((skill, index) => (
-              <Chip
-                key={index}
-                label={skill}
-                variant="filled"
-                color="primary"
-                sx={{ 
-                  fontSize: '0.9rem',
-                  mb: 1,
-                  bgcolor: 'primary.50',
-                  color: 'primary.main',
-                  fontWeight: 600,
-                  height: 36
-                }}
-              />
-            ))}
+            {(() => {
+              // プロフィール設定で利用可能なスキルのみフィルタリング
+              const validSkills = student.skills.filter(skill => 
+                availableSkills.includes(skill)
+              );
+              
+              return validSkills.map((skill, index) => {
+                const iconName = getSkillIconName(skill);
+                return (
+                  <Chip
+                    key={index}
+                    icon={iconName ? <SkillIcon iconName={iconName} /> : undefined}
+                    label={skill}
+                    variant="filled"
+                    sx={{ 
+                      fontSize: '0.9rem',
+                      mb: 1,
+                      bgcolor: '#f5f5f5',
+                      color: '#333',
+                      fontWeight: 600,
+                      height: 36,
+                      border: '1px solid #e0e0e0',
+                      '& .MuiChip-icon': {
+                        fontSize: '18px',
+                        marginLeft: '6px'
+                      }
+                    }}
+                  />
+                );
+              });
+            })()}
           </Stack>
         </CardContent>
       </Card>
@@ -189,7 +269,15 @@ export default function StudentDetailPage() {
               startIcon={<ChatIcon />}
               size="large"
               onClick={() => {
-                window.location.href = '/chat';
+                // 学生IDからチャットを検索
+                const existingChat = findChatByStudentId(studentId);
+                if (existingChat) {
+                  // 既存のチャットがあれば直接そのチャットページに遷移
+                  window.location.href = `/chat/${existingChat.id}`;
+                } else {
+                  // 既存のチャットがなければチャット一覧ページに遷移
+                  window.location.href = '/chat';
+                }
               }}
               sx={{ 
                 textTransform: 'none',

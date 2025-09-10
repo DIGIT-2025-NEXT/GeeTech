@@ -44,6 +44,7 @@ import {
 import Link from 'next/link';
 import { getAllCompanies, type Company } from '@/lib/mock';
 import { useState, useEffect } from 'react';
+import { IndustryIcon } from '@/app/_components/IndustryIcon';
 
 export default function StudentsPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -315,8 +316,8 @@ export default function StudentsPage() {
                         {company.name}
                       </Typography>
                       <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                        <BusinessIcon sx={{ fontSize: 14, mr: 0.3, color: 'text.secondary' }} />
-                        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.2, fontSize: '0.8rem' }}>
+                        <IndustryIcon industry={company.industry} size={14} />
+                        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.2, fontSize: '0.8rem', ml: 0.3 }}>
                           {company.industry}
                         </Typography>
                       </Box>
@@ -342,27 +343,13 @@ export default function StudentsPage() {
                     {company.description}
                   </Typography>
 
-                  {/* 業界タグ */}
+                  {/* 特徴タグ */}
                   <Box sx={{ mb: 1.5 }}>
                     <Typography variant="caption" sx={{ fontWeight: 'bold', color: 'text.secondary', mb: 0.5, display: 'block' }}>
-                      業界・特徴
+                      特徴
                     </Typography>
                     <Stack direction="row" spacing={0.3} flexWrap="wrap">
-                      <Chip
-                        label={company.industry}
-                        size="small"
-                        variant="filled"
-                          color="primary"
-                          sx={{ 
-                            fontSize: '0.65rem',
-                            height: 20,
-                            mb: 0.3,
-                            bgcolor: 'primary.50',
-                            color: 'primary.main',
-                            fontWeight: 500
-                          }}
-                        />
-                      {company.features?.slice(0, 2).map((feature, index) => (
+                      {company.features?.slice(0, 3).map((feature, index) => (
                         <Chip
                           key={index}
                           label={feature}
@@ -377,9 +364,9 @@ export default function StudentsPage() {
                           }}
                         />
                       ))}
-                      {company.features && company.features.length > 2 && (
+                      {company.features && company.features.length > 3 && (
                         <Chip
-                          label={`+${company.features.length - 2}`}
+                          label={`+${company.features.length - 3}`}
                           size="small"
                           variant="outlined"
                           color="default"
