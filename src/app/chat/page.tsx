@@ -1,7 +1,7 @@
 
 "use client";
 
-import { Button, Card, CardContent, Container, Stack, Typography,Breadcrumbs} from '@mui/material';
+import { Box, Button, Card, CardContent, Container, Stack, Typography,Breadcrumbs} from '@mui/material';
 import Link from 'next/link';
 import { getAllChat, type Chat, getCompanyById } from '@/lib/mock';
 import { useState } from "react";
@@ -30,6 +30,26 @@ export default function Chat() {
           <Typography color="text.primary">チャット</Typography>
         </Breadcrumbs>
         <Typography variant='h4'>読み込み中...</Typography>
+      </Container>
+    );
+  }
+  if(!userid){
+    return (
+      <Container maxWidth="xl" sx={{ py: 4 }}>
+        <Breadcrumbs sx={{ mb: 2 }}>
+          <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+            ホーム
+          </Link>
+          <Typography color="text.primary">チャット</Typography>
+        </Breadcrumbs>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+          <Card sx={{ p: 3 }}>
+            <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 2 }}>
+              <Typography variant='h5'>チャットにアクセスするにはログインが必要です</Typography>
+              <Button variant='contained' href='/login' sx={{ bgcolor: 'green', ':hover': { bgcolor: 'darkgreen' } , color: 'white' }}>ログインする</Button>
+            </CardContent>
+          </Card>
+        </Box>
       </Container>
     );
   }

@@ -1,11 +1,39 @@
 
-import { Box, Button, Container, Stack, TextField, Typography, Breadcrumbs, Card } from '@mui/material';
+"use client";
+
+import { Box, Button, Container, Stack, TextField, Typography, Card, CardContent} from '@mui/material';
 import Link from 'next/link';
 import React from 'react';
-import {getStudentById,getCompanyById,getchatById, type Chat } from '@/lib/mock';
+import {getStudentById,getCompanyById,getchatById} from '@/lib/mock';
+import { useAuth } from '@/contexts/AuthContext';
 
-export default async function Chat({ params }: { params: { chatid: string } }) {
-    const chatlogs=getchatById(params.chatid);
+export default function Chat({ params }: { params: { chatid: string } }) {
+    const chatlogs = getchatById(params.chatid);
+    const { user, loading } = useAuth();
+    const userid = user?.id ?? '';
+    if (loading) {
+        return (
+          <Container maxWidth="xl" sx={{ py: 4 }}>
+            <Box sx={{py:4}}><Link href="/chat">←チャット一覧に戻る</Link></Box>
+            <Typography variant='h4'>読み込み中...</Typography>
+          </Container>
+        );
+      }
+      if(!userid){
+        return (
+          <Container maxWidth="xl" sx={{ py: 4 }}>
+            <Box sx={{py:4}}><Link href="/chat">←チャット一覧に戻る</Link></Box>
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+              <Card sx={{ p: 3 }}>
+                <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 2 }}>
+                  <Typography variant='h5'>チャットにアクセスするにはログインが必要です</Typography>
+                  <Button variant='contained' href='/login' sx={{ bgcolor: 'green', ':hover': { bgcolor: 'darkgreen' } , color: 'white' }}>ログインする</Button>
+                </CardContent>
+              </Card>
+            </Box>
+          </Container>
+        );
+      }
     if(!chatlogs){
         return(
             <Container sx={{height: "85vh"} }>
@@ -15,6 +43,16 @@ export default async function Chat({ params }: { params: { chatid: string } }) {
             </Container>
         )
     }
+    //ユーザーidの確認（チャットの作成後メッセージ解除）
+    /*
+    if (user?.id !== chatlogs.studentid&&user?.id !== chatlogs.companyid) {
+        return (
+          <Container maxWidth="xl" sx={{ py: 4 }}>
+            <Box sx={{py:4}}><Link href="/chat">←チャット一覧に戻る</Link></Box>
+            <Typography variant='h6'>このチャットにアクセスする権限がありません。</Typography>
+          </Container>
+        );
+    */
     return (
         <Container maxWidth="xl" sx={{ display: "flex", flexDirection: "column",height: "85vh"}}>
         <Box sx={{py:4}}><Link href="/chat">←チャット一覧に戻る</Link></Box>
