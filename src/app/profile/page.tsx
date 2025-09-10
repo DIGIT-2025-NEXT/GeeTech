@@ -12,7 +12,6 @@ import {
   Button,
   Chip,
   Stack,
-  Avatar,
   Divider,
   Link as MuiLink,
 } from "@mui/material";

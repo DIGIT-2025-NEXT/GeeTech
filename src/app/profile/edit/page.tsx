@@ -19,8 +19,6 @@ import {
 import { SkillIcon } from "@/app/_components/SkillIcon";
 
 export default function EditProfilePage() {
-  const router = useRouter();
-
   const {
     loading: profileLoading,
     error: profileError,
