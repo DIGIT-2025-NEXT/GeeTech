@@ -55,6 +55,7 @@ export default function StudentsPage() {
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [filterExpanded, setFilterExpanded] = useState(false);
+  const [displayCount, setDisplayCount] = useState(5);
 
   useEffect(() => {
     // シミュレートされたローディング
@@ -93,6 +94,7 @@ export default function StudentsPage() {
     }
 
     setFilteredCompanies(filtered);
+    setDisplayCount(5);
   }, [searchQuery, industryFilter, featureFilter, companies]);
 
   const toggleFavorite = (companyId: string) => {
@@ -137,38 +139,38 @@ export default function StudentsPage() {
       </Box>
 
       {/* 統計情報 */}
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 4 }}>
-        <Box sx={{ width: { xs: '50%', sm: '25%' }, minWidth: 120 }}>
-          <Paper sx={{ p: 2, textAlign: 'center' }}>
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid size={{ xs: 12, sm: 4 }}>
+          <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 2 }}>
             <Typography variant="h4" color="primary.main" sx={{ fontWeight: 'bold' }}>
               {companies.length}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
               登録企業数
             </Typography>
           </Paper>
-        </Box>
-        <Box sx={{ width: { xs: '50%', sm: '25%' }, minWidth: 120 }}>
-          <Paper sx={{ p: 2, textAlign: 'center' }}>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 4 }}>
+          <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 2 }}>
             <Typography variant="h4" color="success.main" sx={{ fontWeight: 'bold' }}>
               {industries.length}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
               業界分野数
             </Typography>
           </Paper>
-        </Box>
-        <Box sx={{ width: { xs: '50%', sm: '25%' }, minWidth: 120 }}>
-          <Paper sx={{ p: 2, textAlign: 'center' }}>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 4 }}>
+          <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 2 }}>
             <Typography variant="h4" color="warning.main" sx={{ fontWeight: 'bold' }}>
               12+
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
               募集案件数
             </Typography>
           </Paper>
-        </Box>
-      </Box>
+        </Grid>
+      </Grid>
 
       {/* 検索・フィルターセクション */}
       <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
@@ -190,8 +192,8 @@ export default function StudentsPage() {
         </Box>
 
         <Collapse in={filterExpanded}>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2 }}>
-            <Box sx={{ width: { xs: '100%', md: '40%' }, minWidth: 200 }}>
+          <Grid container spacing={2} sx={{ mb: 2 }}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <TextField
                 fullWidth
                 placeholder="企業名、業界、説明で検索..."
@@ -205,8 +207,8 @@ export default function StudentsPage() {
                   ),
                 }}
               />
-            </Box>
-            <Box sx={{ width: { xs: '100%', md: '20%' }, minWidth: 150 }}>
+            </Grid>
+            <Grid size={{ xs: 12, md: 3 }}>
               <FormControl fullWidth>
                 <InputLabel>業界で絞り込み</InputLabel>
                 <Select
@@ -220,8 +222,8 @@ export default function StudentsPage() {
                   ))}
                 </Select>
               </FormControl>
-            </Box>
-            <Box sx={{ width: { xs: '100%', md: '20%' }, minWidth: 150 }}>
+            </Grid>
+            <Grid size={{ xs: 12, md: 3 }}>
               <FormControl fullWidth>
                 <InputLabel>特徴で絞り込み</InputLabel>
                 <Select
@@ -235,8 +237,8 @@ export default function StudentsPage() {
                   ))}
                 </Select>
               </FormControl>
-            </Box>
-          </Box>
+            </Grid>
+          </Grid>
 
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="body2" color="text.secondary">
@@ -259,7 +261,7 @@ export default function StudentsPage() {
 
       {/* 企業一覧 */}
       <Grid container spacing={3}>
-        {filteredCompanies.map((company, index) => (
+        {filteredCompanies.slice(0, displayCount).map((company, index) => (
           <Grid size={{ xs: 12, sm: 6, md: 4 }} key={company.id}>
             <Fade in={true} timeout={300 + index * 100}>
               <Card 
@@ -437,6 +439,46 @@ export default function StudentsPage() {
           </Grid>
         ))}
       </Grid>
+
+      {/* もっと見る/折りたたむボタン */}
+      {filteredCompanies.length > 5 && (
+        <Box sx={{ textAlign: 'center', mt: 4, display: 'flex', gap: 2, justifyContent: 'center' }}>
+          {filteredCompanies.length > displayCount && (
+            <Button
+              variant="outlined"
+              size="large"
+              onClick={() => setDisplayCount(prev => prev + 5)}
+              sx={{
+                textTransform: 'none',
+                borderRadius: 3,
+                px: 4,
+                py: 1.5,
+                fontWeight: 600,
+                fontSize: '1rem'
+              }}
+            >
+              もっと見る
+            </Button>
+          )}
+          {displayCount > 5 && (
+            <Button
+              variant="outlined"
+              size="large"
+              onClick={() => setDisplayCount(5)}
+              sx={{
+                textTransform: 'none',
+                borderRadius: 3,
+                px: 4,
+                py: 1.5,
+                fontWeight: 600,
+                fontSize: '1rem'
+              }}
+            >
+              折りたたむ
+            </Button>
+          )}
+        </Box>
+      )}
 
       {/* 空の状態 */}
       {filteredCompanies.length === 0 && !loading && (
