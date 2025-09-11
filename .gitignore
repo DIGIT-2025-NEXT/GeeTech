@@ -1,3 +1,4 @@
+terraform/.terraform/
 # System and user directories to ignore
 .anaconda/
 .bito/
@@ -82,3 +83,4 @@ coverage/
 
 # その他
 *.pem
+
