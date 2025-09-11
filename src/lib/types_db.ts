@@ -39,6 +39,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      company_participants_data: {
+        Row: {
+          adopted_id: string[] | null
+          applyed_id: string[] | null
+          id: string
+          rejected_id: string[] | null
+        }
+        Insert: {
+          adopted_id?: string[] | null
+          applyed_id?: string[] | null
+          id: string
+          rejected_id?: string[] | null
+        }
+        Update: {
+          adopted_id?: string[] | null
+          applyed_id?: string[] | null
+          id?: string
+          rejected_id?: string[] | null
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           created_at: string
@@ -60,6 +81,42 @@ export type Database = {
           starts_on?: string
           title?: string
           venue?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          body: string | null
+          created_at: string | null
+          icon_url: string | null
+          id: string
+          is_read: boolean | null
+          link: string | null
+          recipient_id: string
+          title: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          body?: string | null
+          created_at?: string | null
+          icon_url?: string | null
+          id?: string
+          is_read?: boolean | null
+          link?: string | null
+          recipient_id: string
+          title?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          body?: string | null
+          created_at?: string | null
+          icon_url?: string | null
+          id?: string
+          is_read?: boolean | null
+          link?: string | null
+          recipient_id?: string
+          title?: string | null
         }
         Relationships: []
       }
@@ -157,6 +214,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      append_applyed_id: {
+        Args: { p_company_id: string; p_student_id: string }
+        Returns: undefined
+      }
       get_users_with_all_skills: {
         Args: { skill_ids_array: string[] }
         Returns: {
@@ -171,6 +232,17 @@ export type Database = {
           skills: Json
           username: string
         }[]
+      }
+      send_notification: {
+        Args: {
+          p_actor_id: string
+          p_body: string
+          p_icon_url?: string
+          p_link?: string
+          p_recipient_id: string
+          p_title: string
+        }
+        Returns: undefined
       }
     }
     Enums: {
