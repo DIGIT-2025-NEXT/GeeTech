@@ -192,7 +192,7 @@ export default function StudentDetailPage() {
                   {student.university}
                 </Typography>
               </Box>
-              <Rating value={4.5} precision={0.5} readOnly />
+              <Rating value={Math.min(student.skills.length * 0.5, 5)} precision={0.5} readOnly />
             </Box>
           </Box>
 
@@ -221,37 +221,30 @@ export default function StudentDetailPage() {
             スキル
           </Typography>
           <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 3 }}>
-            {(() => {
-              // プロフィール設定で利用可能なスキルのみフィルタリング
-              const validSkills = student.skills.filter(skill => 
-                availableSkills.includes(skill)
+            {student.skills.map((skill, index) => {
+              const iconName = getSkillIconName(skill);
+              return (
+                <Chip
+                  key={index}
+                  icon={iconName ? <SkillIcon iconName={iconName} /> : undefined}
+                  label={skill}
+                  variant="filled"
+                  sx={{ 
+                    fontSize: '0.9rem',
+                    mb: 1,
+                    bgcolor: '#f5f5f5',
+                    color: '#333',
+                    fontWeight: 600,
+                    height: 36,
+                    border: '1px solid #e0e0e0',
+                    '& .MuiChip-icon': {
+                      fontSize: '18px',
+                      marginLeft: '6px'
+                    }
+                  }}
+                />
               );
-              
-              return validSkills.map((skill, index) => {
-                const iconName = getSkillIconName(skill);
-                return (
-                  <Chip
-                    key={index}
-                    icon={iconName ? <SkillIcon iconName={iconName} /> : undefined}
-                    label={skill}
-                    variant="filled"
-                    sx={{ 
-                      fontSize: '0.9rem',
-                      mb: 1,
-                      bgcolor: '#f5f5f5',
-                      color: '#333',
-                      fontWeight: 600,
-                      height: 36,
-                      border: '1px solid #e0e0e0',
-                      '& .MuiChip-icon': {
-                        fontSize: '18px',
-                        marginLeft: '6px'
-                      }
-                    }}
-                  />
-                );
-              });
-            })()}
+            })}
           </Stack>
         </CardContent>
       </Card>

@@ -124,6 +124,7 @@ const mockEvents: Event[] = [
   }
 ];
 
+
 // Mock student data
 const mockStudents: Student[] = [
   {
@@ -131,105 +132,105 @@ const mockStudents: Student[] = [
     name: "山田 花子",
     university: "九州工業大学 情報工学部",
     bio: "Web開発とUI/UXデザインに興味があります。ユーザーに愛されるサービスを作る経験を積みたいです。",
-    skills: ["HTML/CSS", "JavaScript", "Figma", "React"]
+    skills: ["HTML/CSS", "JavaScript", "Figma", "React", "TypeScript", "Vue.js"] // 6個 → 3.0星
   },
   {
     id: "2", 
     name: "田中 太郎",
     university: "北九州市立大学 経済学部",
     bio: "マーケティングとデータ分析を学んでいます。スタートアップのグロース戦略に貢献したいです。",
-    skills: ["マーケティングリサーチ", "データ分析", "SNS運用"]
+    skills: ["マーケティングリサーチ", "データ分析", "SNS運用"] // 3個 → 1.5星
   },
   {
     id: "3",
     name: "鈴木 一郎", 
     university: "産業医科大学 医学部",
     bio: "医療分野の課題をテクノロジーで解決することに情熱を持っています。ヘルスケア関連の事業に携わりたいです。",
-    skills: ["医療知識", "研究", "課題発見能力"]
+    skills: ["医療知識", "研究", "課題発見能力", "医療統計", "データ解釈"] // 5個 → 2.5星
   },
   {
     id: "4",
     name: "佐藤 美咲",
     university: "九州工業大学 情報工学部",
     bio: "AI・機械学習に興味があり、社会課題解決に技術を活用したいと考えています。",
-    skills: ["Python", "機械学習", "データサイエンス", "TensorFlow"]
+    skills: ["Python", "機械学習"] // 2個 → 1.0星
   },
   {
     id: "5",
     name: "中村 健太",
     university: "北九州市立大学 国際環境工学部",
     bio: "環境問題に関心があり、持続可能な社会の実現に貢献したいです。",
-    skills: ["環境工学", "プロジェクト管理", "データ分析"]
+    skills: ["環境工学", "プロジェクト管理", "データ分析", "シミュレーション"] // 4個 → 2.0星
   },
   {
     id: "6",
     name: "高橋 彩香",
     university: "九州工業大学 情報工学部",
     bio: "VRとARの技術開発に興味があり、新しい体験を作り出すことに挑戦したいです。",
-    skills: ["Unity", "C#", "VR/AR開発", "3Dモデリング"]
+    skills: ["Unity", "C#", "VR/AR開発", "3Dモデリング", "JavaScript", "Python", "Go"] // 7個 → 3.5星
   },
   {
     id: "7",
     name: "渡辺 拓真",
     university: "北九州市立大学 経済学部",
     bio: "デジタルマーケティングとデータ分析を学んでいます。EC事業の成長戦略に興味があります。",
-    skills: ["Google Analytics", "SEO", "SNSマーケティング", "データ分析"]
+    skills: ["Google Analytics", "SEO", "SNSマーケティング", "データ分析", "Python"] // 5個 → 2.5星
   },
   {
     id: "8",
     name: "松本 優子",
     university: "産業医科大学 医学部",
     bio: "医療DXの推進に関心があり、患者さんの体験向上に貢献したいと考えています。",
-    skills: ["医療知識", "UI/UX基礎", "プロセス改善", "データ分析"]
+    skills: ["医療知識"] // 1個 → 0.5星
   },
   {
     id: "9",
     name: "森田 慎一",
     university: "九州工業大学 情報工学部",
     bio: "IoTとスマートシティの実現に向けて、センサーデータの活用に取り組んでいます。",
-    skills: ["IoT", "Python", "センサーネットワーク", "データ可視化"]
+    skills: ["IoT", "Python", "センサーネットワーク", "データ可視化", "JavaScript", "AWS", "Docker", "PostgreSQL"] // 8個 → 4.0星
   },
   {
     id: "10",
     name: "小川 恵美",
     university: "北九州市立大学 国際環境工学部",
     bio: "サステナブルなビジネスモデルの構築に興味があり、循環経済の実現に貢献したいです。",
-    skills: ["環境経済学", "プロジェクト企画", "プレゼンテーション", "英語"]
+    skills: ["環境経済学", "プロジェクト企画", "プレゼンテーション", "英語"] // 4個 → 2.0星
   },
   {
     id: "11",
     name: "加藤 雄介",
     university: "九州工業大学 情報工学部",
     bio: "ブロックチェーン技術を活用した新しいサービス開発に挑戦したいと考えています。",
-    skills: ["Solidity", "Web3.js", "JavaScript", "暗号化技術"]
+    skills: ["Solidity", "Web3.js", "JavaScript", "暗号化技術", "Node.js", "TypeScript", "React", "Python", "Go"] // 9個 → 4.5星
   },
   {
     id: "12",
     name: "岡田 亜衣",
     university: "産業医科大学 医学部",
     bio: "医療現場でのAI活用に興味があり、診断支援システムの開発に携わりたいです。",
-    skills: ["医療統計", "機械学習基礎", "研究", "データ解釈"]
+    skills: ["医療統計", "機械学習基礎"] // 2個 → 1.0星
   },
   {
     id: "13",
     name: "石井 翔太",
     university: "北九州市立大学 経済学部",
     bio: "地域創生とスタートアップエコシステムの構築に関心があります。",
-    skills: ["ビジネス企画", "市場調査", "プレゼンテーション", "チームワーク"]
+    skills: ["ビジネス企画", "市場調査", "プレゼンテーション", "チームワーク", "データ分析"] // 5個 → 2.5星
   },
   {
     id: "14",
     name: "村上 美里",
     university: "九州工業大学 情報工学部",
     bio: "AIとロボティクスの融合技術に興味があり、人と機械の協働を実現したいです。",
-    skills: ["ROS", "Python", "機械学習", "制御工学"]
+    skills: ["ROS", "Python", "機械学習", "制御工学", "C++", "TensorFlow", "Docker", "AWS", "JavaScript", "TypeScript"] // 10個 → 5.0星
   },
   {
     id: "15",
     name: "長谷川 健二",
     university: "北九州市立大学 国際環境工学部",
     bio: "再生可能エネルギーの効率化と蓄電技術の開発に取り組みたいと考えています。",
-    skills: ["電気工学", "バッテリー技術", "シミュレーション", "実験設計"]
+    skills: ["電気工学", "バッテリー技術", "シミュレーション", "実験設計", "Python", "MATLAB"] // 6個 → 3.0星
   }
 ];
 
