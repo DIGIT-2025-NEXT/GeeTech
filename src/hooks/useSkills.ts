@@ -1,9 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { SupabaseClient, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Database } from "@/lib/types_db";
 import {
   getAllSkills,
   getUserSkills,
@@ -11,10 +9,10 @@ import {
   removeSkillFromUser,
   type Skill,
 } from "@/lib/skills";
+import { createClient } from "@/lib/supabase/client";
 
 export function useSkills() {
-  const supabase =
-    useSupabaseClient<Database>() as unknown as SupabaseClient<Database>;
+  const supabase = createClient();
   const { user } = useAuth();
 
   const [allSkills, setAllSkills] = useState<Skill[]>([]);
@@ -78,7 +76,9 @@ export function useSkills() {
       const initialIds = new Set(initialUserSkills.map((s) => s.id));
       const currentIds = new Set(currentUserSkills.map((s) => s.id));
 
-      const skillsToAdd = currentUserSkills.filter((s) => !initialIds.has(s.id));
+      const skillsToAdd = currentUserSkills.filter(
+        (s) => !initialIds.has(s.id)
+      );
       const skillsToRemove = initialUserSkills.filter(
         (s) => !currentIds.has(s.id)
       );

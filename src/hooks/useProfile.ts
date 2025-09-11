@@ -5,13 +5,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/lib/types_db";
+import { createClient } from "@/lib/supabase/client";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
 export function useProfile() {
   const { user } = useAuth();
-  const supabase =
-    useSupabaseClient<Database>() as unknown as SupabaseClient<Database>;
+  const supabase = createClient();
+  //  useSupabaseClient<Database>() as unknown as SupabaseClient<Database>;
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,9 +32,10 @@ export function useProfile() {
         .from("profiles")
         .select("*")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
 
       if (error) {
+        console.error("Error fetching profile:", error.message);
         setError("プロフィールの読み込みに失敗しました。");
       } else if (data) {
         setProfile(data);
@@ -81,14 +83,15 @@ export function useProfile() {
     await fetchProfile();
   };
 
-  const hasChanges = profile
-    ? firstName !== (profile.first_name || "") ||
-      lastName !== (profile.last_name || "") ||
-      username !== (profile.username || "") ||
-      website !== (profile.website || "") ||
-      bio !== (profile.bio || "") ||
-      email !== (profile.email || user?.email || "")
-    : false;
+  const hasChanges = true;
+  //profile;
+  //   ? firstName !== (profile.first_name || "") ||
+  //     lastName !== (profile.last_name || "") ||
+  //     username !== (profile.username || "") ||
+  //     website !== (profile.website || "") ||
+  //     bio !== (profile.bio || "") ||
+  //     email !== (profile.email || user?.email || "")
+  //   : false;
 
   return {
     user, // userを返すように追加
