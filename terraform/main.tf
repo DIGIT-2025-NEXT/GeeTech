@@ -19,7 +19,7 @@ resource "null_resource" "deploy" {
       "git pull",
       "npm i",
       "npm run build",
-      "npm run start",
+      "pm2 restart GeeTech",
       "echo 'Deployment completed successfully!'"
     ]
   }
