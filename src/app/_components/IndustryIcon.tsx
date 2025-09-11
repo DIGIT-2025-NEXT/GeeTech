@@ -11,7 +11,7 @@ import {
 } from "@mui/icons-material";
 
 // 業界アイコンと色のマッピング
-const industryConfig: { [key: string]: { icon: React.ReactElement; color: string; bgColor: string } } = {
+const industryConfig: { [key: string]: { icon: React.ReactElement<{ sx?: object }>; color: string; bgColor: string } } = {
   "AI・地域活性化": {
     icon: <AIIcon />,
     color: "#1976d2", // 青
