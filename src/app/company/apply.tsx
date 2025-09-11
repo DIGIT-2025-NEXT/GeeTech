@@ -32,20 +32,37 @@ export default function ApplyButton({ companyid: companyid }: Props){
             setLoginDialogOpen(true);
             return;
         }
+        const { data: current } = await supabase
+                .from('company_participants_data')
+                .select('*')
+                .eq('id', companyid)
+                .single();
         const company = getCompanyById(companyid);
-        if (company?.partcipantsid?.includes(STUDENT_ID)) {
+        const appliedIds: string[] = current?.applyed_id || [];
+        const adoptedIds: string[] = current?.adopted_id || [];
+        const rejectedIds: string[] = current?.rejected_id || [];
+        if (appliedIds?.includes(STUDENT_ID)) {
             setSnackMsg(`${companyname}にすでに応募しています`);
             setSnackOpen(true);
-        } else if (company?.adoptedid?.includes(STUDENT_ID)) {
+        } else if (adoptedIds?.includes(STUDENT_ID)) {
             setUItext(`あなたは${companyname}に採用されています`)
             setConfirmOpen(true);
-        } else if (company?.Rejectedid?.includes(STUDENT_ID)){
+        } else if (rejectedIds?.includes(STUDENT_ID)){
             setUItext(`あなたは${companyname}に不採用にされています`)
             setConfirmOpen(true);
         } else {
             //supabaseでのやつを実装
-            const { data, error } = await supabase.from('company_participants_data').update({
-                applyed_id: supabase.rpc('array_append', { arr: 'applyed_id', value: STUDENT_ID })}).eq('id', user.id);
+
+            const newArray = [...(current?.applyed_id || []), STUDENT_ID];
+            const { data, error } = await supabase
+                .from('company_participants_data')
+                .update({ applyed_id: newArray })
+                .eq('id', companyid);
+            if(error){
+                setSnackMsg(`応募に失敗しました`);
+                setSnackOpen(true);
+                return
+            }
             addParticipartedid(companyid,STUDENT_ID);
             setSnackMsg(`${companyname}に応募しました`);
             setSnackOpen(true);
