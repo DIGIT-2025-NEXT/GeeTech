@@ -1,3 +1,0 @@
-[submodule "terraform"]
-	path = terraform
-	url = https://github.com/dokkiitech/terraform
