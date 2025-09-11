@@ -1,73 +1,90 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '@/contexts/AuthContext'
-import { Container, Paper, Typography, TextField, Button, Box, Divider, Alert } from '@mui/material'
-import { Google as GoogleIcon } from '@mui/icons-material'
-import AuthDebug from '@/components/AuthDebug'
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  Container,
+  Paper,
+  Typography,
+  TextField,
+  Button,
+  Box,
+  Divider,
+  Alert,
+} from "@mui/material";
+import { Google as GoogleIcon } from "@mui/icons-material";
+import AuthDebug from "@/components/AuthDebug";
 
 export default function LoginPage() {
-  const [isLogin, setIsLogin] = useState(true)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState('')
-  const { user, signIn, signUp, signInWithGoogle, error: authError } = useAuth()
-  const router = useRouter()
+  const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const {
+    user,
+    signIn,
+    signUp,
+    signInWithGoogle,
+    error: authError,
+  } = useAuth();
+  const router = useRouter();
 
   // すでにサインインしているならトップへ
   useEffect(() => {
-    if (user) router.replace('/events')
-  }, [user, router])
+    if (user) router.replace("/events");
+  }, [user, router]);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setMessage('')
+    e.preventDefault();
+    setLoading(true);
+    setMessage("");
 
     try {
-      const { error } = isLogin 
+      const { error } = isLogin
         ? await signIn(email, password)
-        : await signUp(email, password)
+        : await signUp(email, password);
 
       if (error) {
-        setMessage(error || 'エラーが発生しました')
+        setMessage(error || "エラーが発生しました");
       } else if (!isLogin) {
-        setMessage('確認メールを送信しました。メールボックスを確認してください。')
+        setMessage(
+          "確認メールを送信しました。メールボックスを確認してください。"
+        );
       }
     } catch (error) {
-      setMessage('エラーが発生しました。')
+      setMessage("エラーが発生しました。");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleGoogleAuth = async () => {
-    setLoading(true)
-    setMessage('')
+    setLoading(true);
+    setMessage("");
 
     try {
-      const { error } = await signInWithGoogle()
+      const { error } = await signInWithGoogle();
       if (error) {
-        setMessage(error || 'エラーが発生しました')
+        setMessage(error || "エラーが発生しました");
       }
     } catch (error) {
-      setMessage('Google認証でエラーが発生しました。')
+      setMessage("Google認証でエラーが発生しました。");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   if (user) {
-    return null // リダイレクト中
+    return null; // リダイレクト中
   }
 
   return (
     <Container maxWidth="sm" sx={{ py: 6 }}>
       <Paper elevation={3} sx={{ p: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom align="center">
-          {isLogin ? 'ログイン' : '新規登録'}
+          {isLogin ? "ログイン" : "新規登録"}
         </Typography>
 
         {/* Google認証ボタン */}
@@ -79,7 +96,7 @@ export default function LoginPage() {
           disabled={loading}
           sx={{ mb: 3, py: 1.5 }}
         >
-          Googleで{isLogin ? 'ログイン' : '登録'}
+          Googleで{isLogin ? "ログイン" : "登録"}
         </Button>
 
         <Divider sx={{ mb: 3 }}>
@@ -123,14 +140,18 @@ export default function LoginPage() {
             sx={{ mt: 3, mb: 2, py: 1.5 }}
             disabled={loading}
           >
-            {loading ? '処理中...' : (isLogin ? 'ログイン' : '新規登録')}
+            {loading ? "処理中..." : isLogin ? "ログイン" : "新規登録"}
           </Button>
         </Box>
 
         {/* メッセージ表示 */}
         {message && (
-          <Alert 
-            severity={message.includes('エラー') || message.includes('error') ? 'error' : 'success'}
+          <Alert
+            severity={
+              message.includes("エラー") || message.includes("error")
+                ? "error"
+                : "success"
+            }
             sx={{ mt: 2 }}
           >
             {message}
@@ -144,7 +165,9 @@ export default function LoginPage() {
               <strong>認証エラー:</strong> {authError}
             </Typography>
             <Typography variant="body2" sx={{ mt: 1 }}>
-              環境変数 <code>NEXT_PUBLIC_SUPABASE_URL</code> と <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> が正しく設定されているか確認してください。
+              環境変数 <code>NEXT_PUBLIC_SUPABASE_URL</code> と{" "}
+              <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>{" "}
+              が正しく設定されているか確認してください。
             </Typography>
           </Alert>
         )}
@@ -154,15 +177,17 @@ export default function LoginPage() {
           <Button
             onClick={() => setIsLogin(!isLogin)}
             disabled={loading}
-            sx={{ textTransform: 'none' }}
+            sx={{ textTransform: "none" }}
           >
-            {isLogin ? 'アカウントをお持ちでない方はこちら' : 'すでにアカウントをお持ちの方はこちら'}
+            {isLogin
+              ? "アカウントをお持ちでない方はこちら"
+              : "すでにアカウントをお持ちの方はこちら"}
           </Button>
         </Box>
       </Paper>
-      
+
       {/* 開発環境でのデバッグ情報 */}
       <AuthDebug />
     </Container>
-  )
+  );
 }
