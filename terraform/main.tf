@@ -15,11 +15,11 @@ resource "null_resource" "deploy" {
 
   provisioner "remote-exec" {
     inline = [
-      "cd /home/dokkiitech/DIGITKITAQ/GeeTech", 
+      "cd /home/dokkiitech/DIGITKITAQ/GeeTech",
       "git pull",
-      "npm i",
-      "npm run build",
-      "pm2 restart GeeTech",
+      "/home/linuxbrew/.linuxbrew/bin/npm i",
+      "/home/linuxbrew/.linuxbrew/bin/npm run build",
+      "/home/dokkiitech/.nvm/versions/node/v22.16.0/bin/pm2 restart GeeTech",
       "echo 'Deployment completed successfully!'"
     ]
   }
