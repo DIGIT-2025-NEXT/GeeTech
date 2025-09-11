@@ -27,13 +27,7 @@ import {
   Business as BusinessIcon,
   Notifications as NotificationsIcon,
 } from "@mui/icons-material";
-
-// --- ダミーデータ定義 ---
-const dummyProfile = {
-  username: "田中 圭",
-  email: "kei.tanaka@example.com",
-  avatar_url: null,
-};
+import { useProfile } from "@/hooks/useProfile";
 
 const dummyNotifications = [
   {
@@ -99,6 +93,7 @@ const getStatusChipColor = (status: "Reviewing" | "Accepted" | "Rejected") => {
 
 export default function Dashboard() {
   const router = useRouter();
+  const { profile } = useProfile();
 
   return (
     <Box sx={{ flexGrow: 1, p: 3, backgroundColor: "#f4f6f8" }}>
@@ -119,17 +114,17 @@ export default function Dashboard() {
               <Stack alignItems="center" spacing={2} sx={{ p: 2 }}>
                 <Avatar
                   sx={{ width: 80, height: 80, mb: 1, bgcolor: "primary.main" }}
-                  src={dummyProfile.avatar_url || undefined}
+                  src={profile?.avatar_url || undefined}
                 >
-                  {dummyProfile.username?.charAt(0).toUpperCase()}
+                  {profile?.username?.charAt(0).toUpperCase()}
                 </Avatar>
-                <Typography variant="h6">{dummyProfile.username}</Typography>
+                <Typography variant="h6">{profile?.username}</Typography>
                 <Typography
                   color="text.secondary"
                   variant="body2"
                   sx={{ mb: 2 }}
                 >
-                  {dummyProfile.email}
+                  {profile?.email}
                 </Typography>
                 <Button
                   variant="contained"
@@ -142,9 +137,23 @@ export default function Dashboard() {
               </Stack>
               <Divider sx={{ my: 3 }} />
               <Stack spacing={2}>
-                <Button variant="outlined" startIcon={<SearchIcon />}>
-                  企業を探す
-                </Button>
+                {profile?.profile_type === "company" ? (
+                  <Button
+                    variant="outlined"
+                    href="/company"
+                    startIcon={<BusinessIcon />}
+                  >
+                    学生を探す
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outlined"
+                    href="/students"
+                    startIcon={<SearchIcon />}
+                  >
+                    企業を探す
+                  </Button>
+                )}
                 <Button variant="outlined" startIcon={<EmailIcon />}>
                   メッセージを確認
                 </Button>
