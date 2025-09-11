@@ -54,6 +54,7 @@ export default function CompanyPage() {
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [filterExpanded, setFilterExpanded] = useState(false);
+  const [displayCount, setDisplayCount] = useState(5);
 
   useEffect(() => {
     // シミュレートされたローディング
@@ -92,6 +93,7 @@ export default function CompanyPage() {
     }
 
     setFilteredStudents(filtered);
+    setDisplayCount(5);
   }, [searchQuery, universityFilter, skillFilter, students]);
 
   const toggleFavorite = (studentId: string) => {
@@ -328,7 +330,7 @@ export default function CompanyPage() {
 
       {/* 学生一覧 */}
       <Grid container spacing={3}>
-        {filteredStudents.map((student, index) => (
+        {filteredStudents.slice(0, displayCount).map((student, index) => (
           <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={student.id}>
             <Fade in={true} timeout={300 + index * 100}>
               <Card 
@@ -539,6 +541,46 @@ export default function CompanyPage() {
           </Grid>
         ))}
       </Grid>
+
+      {/* もっと見る/折りたたむボタン */}
+      {filteredStudents.length > 5 && (
+        <Box sx={{ textAlign: 'center', mt: 4, display: 'flex', gap: 2, justifyContent: 'center' }}>
+          {filteredStudents.length > displayCount && (
+            <Button
+              variant="outlined"
+              size="large"
+              onClick={() => setDisplayCount(prev => prev + 5)}
+              sx={{
+                textTransform: 'none',
+                borderRadius: 3,
+                px: 4,
+                py: 1.5,
+                fontWeight: 600,
+                fontSize: '1rem'
+              }}
+            >
+              もっと見る
+            </Button>
+          )}
+          {displayCount > 5 && (
+            <Button
+              variant="outlined"
+              size="large"
+              onClick={() => setDisplayCount(5)}
+              sx={{
+                textTransform: 'none',
+                borderRadius: 3,
+                px: 4,
+                py: 1.5,
+                fontWeight: 600,
+                fontSize: '1rem'
+              }}
+            >
+              折りたたむ
+            </Button>
+          )}
+        </Box>
+      )}
 
       {/* 空の状態 */}
       {filteredStudents.length === 0 && !loading && (

@@ -27,34 +27,12 @@ import {
   Business as BusinessIcon,
   Notifications as NotificationsIcon,
 } from "@mui/icons-material";
+import { Tables } from "@/lib/types_db";
+import { useProfile } from "@/hooks/useProfile";
+import { useNotifications } from "@/hooks/useNotifications";
+import { useAuth } from "@/contexts/AuthContext";
 
-// --- ダミーデータ定義 ---
-const dummyProfile = {
-  username: "田中 圭",
-  email: "kei.tanaka@example.com",
-  avatar_url: null,
-};
-
-const dummyNotifications = [
-  {
-    id: 1,
-    icon: <BusinessIcon />,
-    primary: "株式会社TechCorpからスカウトが届きました",
-    secondary: "2時間前",
-  },
-  {
-    id: 2,
-    icon: <EmailIcon />,
-    primary: "株式会社Innovateからメッセージがあります",
-    secondary: "昨日",
-  },
-  {
-    id: 3,
-    icon: <NotificationsIcon />,
-    primary: "新しいスキル「AI」が追加されました",
-    secondary: "3日前",
-  },
-];
+type Notification = Tables<"notifications">;
 
 const dummyApplicationStatus: {
   id: number;
@@ -99,6 +77,23 @@ const getStatusChipColor = (status: "Reviewing" | "Accepted" | "Rejected") => {
 
 export default function Dashboard() {
   const router = useRouter();
+  const { profile } = useProfile();
+  const { notifications, markAsRead } = useNotifications();
+  const { signOut } = useAuth();
+
+  const handleNotificationClick = async (notification: Notification) => {
+    if (!notification.is_read) {
+      await markAsRead(notification.id);
+    }
+    if (notification.link) {
+      router.push(notification.link);
+    }
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+    router.replace("/login");
+  };
 
   return (
     <Box sx={{ flexGrow: 1, p: 3, backgroundColor: "#f4f6f8" }}>
@@ -119,17 +114,17 @@ export default function Dashboard() {
               <Stack alignItems="center" spacing={2} sx={{ p: 2 }}>
                 <Avatar
                   sx={{ width: 80, height: 80, mb: 1, bgcolor: "primary.main" }}
-                  src={dummyProfile.avatar_url || undefined}
+                  src={profile?.avatar_url || undefined}
                 >
-                  {dummyProfile.username?.charAt(0).toUpperCase()}
+                  {profile?.username?.charAt(0).toUpperCase()}
                 </Avatar>
-                <Typography variant="h6">{dummyProfile.username}</Typography>
+                <Typography variant="h6">{profile?.username}</Typography>
                 <Typography
                   color="text.secondary"
                   variant="body2"
                   sx={{ mb: 2 }}
                 >
-                  {dummyProfile.email}
+                  {profile?.email}
                 </Typography>
                 <Button
                   variant="contained"
@@ -142,13 +137,35 @@ export default function Dashboard() {
               </Stack>
               <Divider sx={{ my: 3 }} />
               <Stack spacing={2}>
-                <Button variant="outlined" startIcon={<SearchIcon />}>
-                  企業を探す
-                </Button>
-                <Button variant="outlined" startIcon={<EmailIcon />}>
+                {profile?.profile_type === "company" ? (
+                  <Button
+                    variant="outlined"
+                    href="/company"
+                    startIcon={<BusinessIcon />}
+                  >
+                    学生を探す
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outlined"
+                    href="/students"
+                    startIcon={<SearchIcon />}
+                  >
+                    企業を探す
+                  </Button>
+                )}
+                <Button
+                  variant="outlined"
+                  href="/chat"
+                  startIcon={<EmailIcon />}
+                >
                   メッセージを確認
                 </Button>
-                <Button variant="outlined" startIcon={<LogoutIcon />}>
+                <Button
+                  variant="outlined"
+                  onClick={handleLogout}
+                  startIcon={<LogoutIcon />}
+                >
                   ログアウト
                 </Button>
               </Stack>
@@ -198,31 +215,59 @@ export default function Dashboard() {
               <Typography variant="h6" gutterBottom>
                 通知
               </Typography>
-              <List sx={{ width: "100%", bgcolor: "background.paper", p: 0 }}>
-                {dummyNotifications.map((notification, index) => (
-                  <Box key={notification.id}>
-                    <ListItem disablePadding>
-                      <ListItemButton
-                        onClick={() =>
-                          router.push(`/notifications/${notification.id}`)
-                        }
-                      >
-                        <ListItemAvatar>
-                          <Avatar sx={{ bgcolor: "secondary.main" }}>
-                            {notification.icon}
-                          </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={notification.primary}
-                          secondary={notification.secondary}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                    {index < dummyNotifications.length - 1 && (
-                      <Divider variant="inset" component="li" />
-                    )}
-                  </Box>
-                ))}
+              <List
+                sx={{
+                  width: "100%",
+                  bgcolor: "background.paper",
+                  p: 0,
+                  maxHeight: 400,
+                  overflowY: "auto",
+                }}
+              >
+                {notifications && notifications.length > 0 ? (
+                  notifications.map((notification, index) => (
+                    <Box key={notification.id}>
+                      <ListItem disablePadding>
+                        <ListItemButton
+                          onClick={() => handleNotificationClick(notification)}
+                          sx={{
+                            backgroundColor: notification.is_read
+                              ? "transparent"
+                              : "#f0f8ff",
+                            alignItems: "flex-start",
+                          }}
+                        >
+                          <ListItemAvatar>
+                            <Avatar
+                              sx={{ bgcolor: "secondary.main" }}
+                              src={notification.icon_url || undefined}
+                            >
+                              <NotificationsIcon />
+                            </Avatar>
+                          </ListItemAvatar>
+                          <ListItemText
+                            primary={notification.title}
+                            secondary={new Date(
+                              notification.created_at || ""
+                            ).toLocaleString("ja-JP")}
+                            primaryTypographyProps={{
+                              fontWeight: notification.is_read
+                                ? "normal"
+                                : "bold",
+                            }}
+                          />
+                        </ListItemButton>
+                      </ListItem>
+                      {index < notifications.length - 1 && (
+                        <Divider variant="inset" component="li" />
+                      )}
+                    </Box>
+                  ))
+                ) : (
+                  <ListItem>
+                    <ListItemText primary="新しい通知はありません" />
+                  </ListItem>
+                )}
               </List>
             </CardContent>
           </Card>
