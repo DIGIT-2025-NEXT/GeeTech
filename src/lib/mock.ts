@@ -1,11 +1,8 @@
 // lib/mock.ts - Mock data for events and students
+import { createClient } from './supabase/client'
+import type { Tables } from './types_db'
 
-export interface Event {
-  id: string;
-  title: string;
-  starts_on: string;
-  venue?: string;
-}
+export type Event = Tables<'events'>;
 
 export interface Student {
   id: string;
@@ -48,81 +45,6 @@ export interface ChatLog{
   studentid: string;
   chatlog: ChatLog[];
  }
-// Mock event data
-const mockEvents: Event[] = [
-  {
-    id: "1",
-    title: "React勉強会",
-    starts_on: "2025-09-10T19:00:00Z",
-    venue: "オンライン"
-  },
-  {
-    id: "2", 
-    title: "TypeScript入門セミナー",
-    starts_on: "2025-09-15T14:00:00Z",
-    venue: "東京会場"
-  },
-  {
-    id: "3",
-    title: "Web開発ハンズオン",
-    starts_on: "2025-09-20T10:00:00Z",
-    venue: "大阪会場"
-  },
-  {
-    id: "4",
-    title: "デザインシステム構築講座",
-    starts_on: "2025-09-25T16:00:00Z",
-    venue: "オンライン"
-  },
-  {
-    id: "5",
-    title: "Next.js実践講座",
-    starts_on: "2025-10-01T13:00:00Z",
-    venue: "名古屋会場"
-  },
-  {
-    id: "6",
-    title: "アクセシビリティ改善ワークショップ",
-    starts_on: "2025-10-05T15:00:00Z",
-    venue: "オンライン"
-  },
-  {
-    id: "7",
-    title: "パフォーマンス最適化セミナー",
-    starts_on: "2025-10-10T11:00:00Z",
-    venue: "福岡会場"
-  },
-  {
-    id: "8",
-    title: "CI/CD導入実践",
-    starts_on: "2025-10-15T14:30:00Z",
-    venue: "オンライン"
-  },
-  {
-    id: "9",
-    title: "モバイルファースト開発",
-    starts_on: "2025-10-20T10:00:00Z",
-    venue: "仙台会場"
-  },
-  {
-    id: "10",
-    title: "GraphQL API設計",
-    starts_on: "2025-10-25T16:00:00Z",
-    venue: "オンライン"
-  },
-  {
-    id: "11",
-    title: "Dockerコンテナ化入門",
-    starts_on: "2025-11-01T13:00:00Z",
-    venue: "札幌会場"
-  },
-  {
-    id: "12",
-    title: "セキュリティベストプラクティス",
-    starts_on: "2025-11-05T15:30:00Z",
-    venue: "オンライン"
-  }
-];
 
 // Mock student data
 const mockStudents: Student[] = [
@@ -234,13 +156,21 @@ const mockStudents: Student[] = [
 ];
 
 
-export function getNext10(): Event[] {
+export async function getNext10(): Promise<Event[]> {
+  const supabase = createClient()
+  const { data: events, error } = await supabase
+    .from('events')
+    .select('*')
+    .order('starts_on', { ascending: true })
+    .limit(10)
+
+  if (error) {
+    console.error('Error fetching events:', error)
+    return []
+  }
+
   const now = new Date();
-  
-  return mockEvents
-    .filter(event => new Date(event.starts_on) >= now)
-    .sort((a, b) => new Date(a.starts_on).getTime() - new Date(b.starts_on).getTime())
-    .slice(0, 10);
+  return events.filter(event => new Date(event.starts_on) >= now);
 }
 
 export function getAllStudents(): Student[] {
