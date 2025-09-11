@@ -27,28 +27,12 @@ import {
   Business as BusinessIcon,
   Notifications as NotificationsIcon,
 } from "@mui/icons-material";
+import { Tables } from "@/lib/types_db";
 import { useProfile } from "@/hooks/useProfile";
+import { useNotifications } from "@/hooks/useNotifications";
+import { useAuth } from "@/contexts/AuthContext";
 
-const dummyNotifications = [
-  {
-    id: 1,
-    icon: <BusinessIcon />,
-    primary: "株式会社TechCorpからスカウトが届きました",
-    secondary: "2時間前",
-  },
-  {
-    id: 2,
-    icon: <EmailIcon />,
-    primary: "株式会社Innovateからメッセージがあります",
-    secondary: "昨日",
-  },
-  {
-    id: 3,
-    icon: <NotificationsIcon />,
-    primary: "新しいスキル「AI」が追加されました",
-    secondary: "3日前",
-  },
-];
+type Notification = Tables<"notifications">;
 
 const dummyApplicationStatus: {
   id: number;
@@ -94,6 +78,22 @@ const getStatusChipColor = (status: "Reviewing" | "Accepted" | "Rejected") => {
 export default function Dashboard() {
   const router = useRouter();
   const { profile } = useProfile();
+  const { notifications, markAsRead } = useNotifications();
+  const { signOut } = useAuth();
+
+  const handleNotificationClick = async (notification: Notification) => {
+    if (!notification.is_read) {
+      await markAsRead(notification.id);
+    }
+    if (notification.link) {
+      router.push(notification.link);
+    }
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+    router.replace("/login");
+  };
 
   return (
     <Box sx={{ flexGrow: 1, p: 3, backgroundColor: "#f4f6f8" }}>
@@ -154,10 +154,18 @@ export default function Dashboard() {
                     企業を探す
                   </Button>
                 )}
-                <Button variant="outlined" startIcon={<EmailIcon />}>
+                <Button
+                  variant="outlined"
+                  href="/chat"
+                  startIcon={<EmailIcon />}
+                >
                   メッセージを確認
                 </Button>
-                <Button variant="outlined" startIcon={<LogoutIcon />}>
+                <Button
+                  variant="outlined"
+                  onClick={handleLogout}
+                  startIcon={<LogoutIcon />}
+                >
                   ログアウト
                 </Button>
               </Stack>
@@ -207,31 +215,59 @@ export default function Dashboard() {
               <Typography variant="h6" gutterBottom>
                 通知
               </Typography>
-              <List sx={{ width: "100%", bgcolor: "background.paper", p: 0 }}>
-                {dummyNotifications.map((notification, index) => (
-                  <Box key={notification.id}>
-                    <ListItem disablePadding>
-                      <ListItemButton
-                        onClick={() =>
-                          router.push(`/notifications/${notification.id}`)
-                        }
-                      >
-                        <ListItemAvatar>
-                          <Avatar sx={{ bgcolor: "secondary.main" }}>
-                            {notification.icon}
-                          </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={notification.primary}
-                          secondary={notification.secondary}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                    {index < dummyNotifications.length - 1 && (
-                      <Divider variant="inset" component="li" />
-                    )}
-                  </Box>
-                ))}
+              <List
+                sx={{
+                  width: "100%",
+                  bgcolor: "background.paper",
+                  p: 0,
+                  maxHeight: 400,
+                  overflowY: "auto",
+                }}
+              >
+                {notifications && notifications.length > 0 ? (
+                  notifications.map((notification, index) => (
+                    <Box key={notification.id}>
+                      <ListItem disablePadding>
+                        <ListItemButton
+                          onClick={() => handleNotificationClick(notification)}
+                          sx={{
+                            backgroundColor: notification.is_read
+                              ? "transparent"
+                              : "#f0f8ff",
+                            alignItems: "flex-start",
+                          }}
+                        >
+                          <ListItemAvatar>
+                            <Avatar
+                              sx={{ bgcolor: "secondary.main" }}
+                              src={notification.icon_url || undefined}
+                            >
+                              <NotificationsIcon />
+                            </Avatar>
+                          </ListItemAvatar>
+                          <ListItemText
+                            primary={notification.title}
+                            secondary={new Date(
+                              notification.created_at || ""
+                            ).toLocaleString("ja-JP")}
+                            primaryTypographyProps={{
+                              fontWeight: notification.is_read
+                                ? "normal"
+                                : "bold",
+                            }}
+                          />
+                        </ListItemButton>
+                      </ListItem>
+                      {index < notifications.length - 1 && (
+                        <Divider variant="inset" component="li" />
+                      )}
+                    </Box>
+                  ))
+                ) : (
+                  <ListItem>
+                    <ListItemText primary="新しい通知はありません" />
+                  </ListItem>
+                )}
               </List>
             </CardContent>
           </Card>
