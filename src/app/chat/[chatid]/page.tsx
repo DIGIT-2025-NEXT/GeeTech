@@ -7,8 +7,9 @@ import React from 'react';
 import {getStudentById,getCompanyById,getchatById} from '@/lib/mock';
 import { useAuth } from '@/contexts/AuthContext';
 
-export default function Chat({ params }: { params: { chatid: string } }) {
-    const chatlogs = getchatById(params.chatid);
+export default function Chat({ params }: { params: Promise<{ chatid: string }> }) {
+    const { chatid } = React.use(params);
+    const chatlogs = getchatById(chatid);
     const { user, loading } = useAuth();
     const userid = user?.id ?? '';
     if (loading) {
