@@ -13,6 +13,7 @@ import {
   useTheme,
   Box,
   Stack,
+  Badge,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -25,13 +26,21 @@ import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
 import ExploreIcon from "@mui/icons-material/Explore";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/hooks/useProfile";
 
 export default function Header() {
   const router = useRouter();
   const { user, signOut, loading } = useAuth();
+  const {
+    loading: profileLoading,
+    error: profileError,
+    profile,
+  } = useProfile();
+
   // userStatusとuserNameは将来的にはContextやDBから取得することを想定
-  const userStatus = "student" as "unauthenticated" | "student" | "company";
-  const userName = "山田太郎";
+  const userStatus =
+    profile?.profile_type === "company" ? "company" : "student";
+  const userName = profile?.username;
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -76,7 +85,7 @@ export default function Header() {
           color="inherit"
           startIcon={<ExploreIcon />}
           sx={commonButtonSx}
-          onClick={() => router.push("/company")}
+          onClick={() => router.push("/students")}
         >
           <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
             企業を探す
@@ -87,7 +96,7 @@ export default function Header() {
           color="inherit"
           startIcon={<ExploreIcon />}
           sx={commonButtonSx}
-          onClick={() => router.push("/students")}
+          onClick={() => router.push("/company")}
         >
           <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
             学生を探す
@@ -96,7 +105,16 @@ export default function Header() {
       )}
       <Button
         color="inherit"
-        startIcon={<DashboardIcon />}
+        startIcon={
+          <Badge
+            badgeContent={0} //TODO
+            color="info"
+            overlap="circular"
+            anchorOrigin={{ vertical: "top", horizontal: "right" }}
+          >
+            <DashboardIcon />
+          </Badge>
+        }
         sx={commonButtonSx}
         onClick={() => router.push("/dashboard")}
       >
@@ -161,7 +179,10 @@ export default function Header() {
           component="div"
           sx={{ flexGrow: 1, fontFamily: "var(--audiowide)" }}
         >
-          <Link href="/" style={{ textDecoration: "none", color: "inherit" }}>
+          <Link
+            href="/students"
+            style={{ textDecoration: "none", color: "inherit" }}
+          >
             {title}
           </Link>
         </Typography>
