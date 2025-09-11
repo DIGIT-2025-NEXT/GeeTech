@@ -1,4 +1,4 @@
-// app/company/page.tsx - 学生一覧ページ（MUI版・改良版）
+// app/company/page.tsx - 企業一覧ページ（MUI版・改良版）
 'use client';
 
 import {
@@ -41,142 +41,79 @@ import {
   ExpandLess as ExpandLessIcon
 } from '@mui/icons-material';
 // import Link from 'next/link'; // 不要になったためコメントアウト
-import { getAllStudents, findChatByStudentId, type Student } from '@/lib/mock';
+import { getAllCompanies, type Company } from '@/lib/mock';
 import { useState, useEffect } from 'react';
-import { SkillIcon } from '@/app/_components/SkillIcon';
+// SkillIcon is no longer needed as company features are not tied to specific icons
+//  
 
 export default function CompanyPage() {
-  const [students, setStudents] = useState<Student[]>([]);
-  const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [universityFilter, setUniversityFilter] = useState('');
-  const [skillFilter, setSkillFilter] = useState('');
+  const [industryFilter, setIndustryFilter] = useState('');
+  const [featureFilter, setFeatureFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [filterExpanded, setFilterExpanded] = useState(false);
   const [displayCount, setDisplayCount] = useState(5);
 
   useEffect(() => {
-    // シミュレートされたローディング
-    const timer = setTimeout(() => {
-      const allStudents = getAllStudents();
-      setStudents(allStudents);
-      setFilteredStudents(allStudents);
+    const fetchCompanies = async () => {
+      setLoading(true);
+      const allCompanies = await getAllCompanies();
+      setCompanies(allCompanies);
+      setFilteredCompanies(allCompanies);
       setLoading(false);
-    }, 500);
-
-    return () => clearTimeout(timer);
+    };
+    fetchCompanies();
   }, []);
 
   useEffect(() => {
-    let filtered = students;
+    let filtered = companies;
 
     // 検索フィルター
     if (searchQuery) {
-      filtered = filtered.filter(student =>
-        student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        student.bio.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        student.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()))
+      filtered = filtered.filter(company =>
+        company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        company.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        company.features?.some(feature => feature.toLowerCase().includes(searchQuery.toLowerCase()))
       );
     }
 
-    // 大学フィルター
-    if (universityFilter) {
-      filtered = filtered.filter(student => student.university.includes(universityFilter));
+    // 業界フィルター
+    if (industryFilter) {
+      filtered = filtered.filter(company => company.industry.includes(industryFilter));
     }
 
-    // スキルフィルター
-    if (skillFilter) {
-      filtered = filtered.filter(student =>
-        student.skills.some(skill => skill.toLowerCase().includes(skillFilter.toLowerCase()))
+    // 特徴フィルター
+    if (featureFilter) {
+      filtered = filtered.filter(company =>
+        company.features?.some(feature => feature.toLowerCase().includes(featureFilter.toLowerCase()))
       );
     }
 
-    setFilteredStudents(filtered);
+    setFilteredCompanies(filtered);
     setDisplayCount(5);
-  }, [searchQuery, universityFilter, skillFilter, students]);
+  }, [searchQuery, industryFilter, featureFilter, companies]);
 
-  const toggleFavorite = (studentId: string) => {
+
+  const toggleFavorite = (companyId: string) => {
     setFavorites(prev => {
       const newFavorites = new Set(prev);
-      if (newFavorites.has(studentId)) {
-        newFavorites.delete(studentId);
+      if (newFavorites.has(companyId)) {
+        newFavorites.delete(companyId);
       } else {
-        newFavorites.add(studentId);
+        newFavorites.add(companyId);
       }
       return newFavorites;
     });
   };
 
 
-  const universities = Array.from(new Set(students.map(s => s.university.split(' ')[0])));
+  const industries = Array.from(new Set(companies.map(c => c.industry)));
   
-  // SkillIcon.tsxで利用可能なスキル一覧（表示名で定義）
-  const availableSkills = [
-    'HTML/CSS', 'JavaScript', 'TypeScript', 'React', 'Vue.js', 'Angular', 'Next.js', 'Nuxt.js', 'Svelte',
-    'Node.js', 'Express', 'Python', 'Django', 'Flask', 'Go', 'Ruby on Rails', 'PHP', 'Laravel',
-    'Java', 'Spring', 'Swift', 'Kotlin', 'AWS', 'Google Cloud', 'Azure', 'Docker', 'Kubernetes', 'Terraform',
-    'PostgreSQL', 'MySQL', 'MongoDB', 'Redis', 'Prisma', 'C++', 'C#', 'Rust', 'Unity', 'Unreal Engine',
-    'TensorFlow', 'PyTorch', 'GraphQL', 'Supabase', 'Firebase', 'Git', 'Figma', 'Storybook', 'Jest', 'Flutter'
-  ];
-
-  // スキル名からアイコン名へのマッピング
-  const getSkillIconName = (skillName: string): string | null => {
-    const skillToIconMap: { [key: string]: string } = {
-      'HTML/CSS': 'html5',
-      'JavaScript': 'javascript',
-      'TypeScript': 'typescript',
-      'React': 'react',
-      'Vue.js': 'vuejs',
-      'Angular': 'angular',
-      'Next.js': 'nextjs',
-      'Nuxt.js': 'nuxtjs',
-      'Svelte': 'svelte',
-      'Node.js': 'nodejs',
-      'Express': 'express',
-      'Python': 'python',
-      'Django': 'django',
-      'Flask': 'flask',
-      'Go': 'go',
-      'Ruby on Rails': 'rubyonrails',
-      'PHP': 'php',
-      'Laravel': 'laravel',
-      'Java': 'java',
-      'Spring': 'spring',
-      'Swift': 'swift',
-      'Kotlin': 'kotlin',
-      'AWS': 'aws',
-      'Google Cloud': 'googlecloud',
-      'Azure': 'azure',
-      'Docker': 'docker',
-      'Kubernetes': 'kubernetes',
-      'Terraform': 'terraform',
-      'PostgreSQL': 'postgresql',
-      'MySQL': 'mysql',
-      'MongoDB': 'mongodb',
-      'Redis': 'redis',
-      'Prisma': 'prisma',
-      'C++': 'cplusplus',
-      'C#': 'csharp',
-      'Rust': 'rust',
-      'Unity': 'unity',
-      'Unreal Engine': 'unrealengine',
-      'TensorFlow': 'tensorflow',
-      'PyTorch': 'pytorch',
-      'GraphQL': 'graphql',
-      'Supabase': 'supabase',
-      'Firebase': 'firebase',
-      'Git': 'git',
-      'Figma': 'figma',
-      'Storybook': 'storybook',
-      'Jest': 'jest',
-      'Flutter': 'flutter'
-    };
-    return skillToIconMap[skillName] || null;
-  };
-  
-  // フィルター用のスキル一覧（プロフィール設定で選択可能なスキルのみ）
-  const allSkills = availableSkills;
+  // Features are dynamic, so we'll collect them from the fetched companies
+  const allFeatures = Array.from(new Set(companies.flatMap(c => c.features || [])));
 
   if (loading) {
     return <LoadingSkeleton />;
@@ -193,49 +130,49 @@ export default function CompanyPage() {
           >
             ホーム
           </Typography>
-          <Typography color="text.primary">学生一覧</Typography>
+          <Typography color="text.primary">企業一覧</Typography>
         </Breadcrumbs>
 
         <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-          才能あふれる学生たち
+          革新的な企業たち
         </Typography>
         <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
-          未来を創る、挑戦がここから始まる。
+          未来を創造するパートナーを見つけよう。
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          北九州市の大学で学ぶ、情熱ある学生たちとつながりましょう。
+          北九州市を拠点に活躍する、情熱ある企業とつながりましょう。
         </Typography>
       </Box>
 
       {/* 統計情報 */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid size={{ xs: 12, sm: 4 }}>
+        <Grid item xs={12} sm={4}>
           <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 2 }}>
             <Typography variant="h4" color="primary.main" sx={{ fontWeight: 'bold' }}>
-              {students.length}
+              {companies.length}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
-              登録学生数
+              登録企業数
             </Typography>
           </Paper>
         </Grid>
-        <Grid size={{ xs: 12, sm: 4 }}>
+        <Grid item xs={12} sm={4}>
           <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 2 }}>
             <Typography variant="h4" color="success.main" sx={{ fontWeight: 'bold' }}>
-              {universities.length}
+              {industries.length}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
-              参加大学数
+              参加業界数
             </Typography>
           </Paper>
         </Grid>
-        <Grid size={{ xs: 12, sm: 4 }}>
+        <Grid item xs={12} sm={4}>
           <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 2 }}>
             <Typography variant="h4" color="warning.main" sx={{ fontWeight: 'bold' }}>
-              {allSkills.length}
+              {allFeatures.length}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
-              スキル種類
+              特徴種類
             </Typography>
           </Paper>
         </Grid>
@@ -262,10 +199,10 @@ export default function CompanyPage() {
 
         <Collapse in={filterExpanded}>
           <Grid container spacing={2} sx={{ mb: 2 }}>
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                placeholder="学生名、スキル、自己紹介で検索..."
+                placeholder="企業名、説明、特徴で検索..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 InputProps={{
@@ -277,32 +214,32 @@ export default function CompanyPage() {
                 }}
               />
             </Grid>
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid item xs={12} md={3}>
               <FormControl fullWidth>
-                <InputLabel>大学で絞り込み</InputLabel>
+                <InputLabel>業界で絞り込み</InputLabel>
                 <Select
-                  value={universityFilter}
-                  label="大学で絞り込み"
-                  onChange={(e) => setUniversityFilter(e.target.value)}
+                  value={industryFilter}
+                  label="業界で絞り込み"
+                  onChange={(e) => setIndustryFilter(e.target.value)}
                 >
                   <MenuItem value="">すべて</MenuItem>
-                  {universities.map((uni) => (
-                    <MenuItem key={uni} value={uni}>{uni}</MenuItem>
+                  {industries.map((industry) => (
+                    <MenuItem key={industry} value={industry}>{industry}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Grid>
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid item xs={12} md={3}>
               <FormControl fullWidth>
-                <InputLabel>スキルで絞り込み</InputLabel>
+                <InputLabel>特徴で絞り込み</InputLabel>
                 <Select
-                  value={skillFilter}
-                  label="スキルで絞り込み"
-                  onChange={(e) => setSkillFilter(e.target.value)}
+                  value={featureFilter}
+                  label="特徴で絞り込み"
+                  onChange={(e) => setFeatureFilter(e.target.value)}
                 >
                   <MenuItem value="">すべて</MenuItem>
-                  {allSkills.map((skill) => (
-                    <MenuItem key={skill} value={skill}>{skill}</MenuItem>
+                  {allFeatures.map((feature) => (
+                    <MenuItem key={feature} value={feature}>{feature}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -311,15 +248,15 @@ export default function CompanyPage() {
 
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="body2" color="text.secondary">
-              {filteredStudents.length}件の学生が見つかりました
+              {filteredCompanies.length}件の企業が見つかりました
             </Typography>
             <Button
               variant="outlined"
               size="small"
               onClick={() => {
                 setSearchQuery('');
-                setUniversityFilter('');
-                setSkillFilter('');
+                setIndustryFilter('');
+                setFeatureFilter('');
               }}
             >
               フィルターをリセット
@@ -328,10 +265,10 @@ export default function CompanyPage() {
         </Collapse>
       </Paper>
 
-      {/* 学生一覧 */}
+      {/* 企業一覧 */}
       <Grid container spacing={3}>
-        {filteredStudents.slice(0, displayCount).map((student, index) => (
-          <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={student.id}>
+        {filteredCompanies.slice(0, displayCount).map((company, index) => (
+          <Grid item xs={12} sm={6} lg={4} key={company.id}>
             <Fade in={true} timeout={300 + index * 100}>
               <Card 
                 sx={{ 
@@ -358,9 +295,9 @@ export default function CompanyPage() {
                     '&:hover': { bgcolor: 'grey.100' }
                   }}
                   size="small"
-                  onClick={() => toggleFavorite(student.id)}
+                  onClick={() => toggleFavorite(company.id)}
                 >
-                  {favorites.has(student.id) ? 
+                  {favorites.has(company.id) ? 
                     <FavoriteIcon color="error" /> : 
                     <FavoriteBorderIcon />
                   }
@@ -369,37 +306,48 @@ export default function CompanyPage() {
                 <CardContent sx={{ flexGrow: 1, p: 3 }}>
                   {/* プロフィール部分 */}
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                    <Avatar 
-                      sx={{ 
-                        width: 50, 
-                        height: 50, 
-                        mr: 2,
-                        bgcolor: 'primary.main',
-                        fontSize: '1.8rem',
-                        border: '3px solid',
-                        borderColor: 'primary.light'
-                      }}
-                    >
-                      {student.name.charAt(0)}
-                    </Avatar>
+                    {company.logo ? (
+                      <Avatar 
+                        src={company.logo}
+                        alt={company.name}
+                        sx={{ 
+                          width: 50, 
+                          height: 50, 
+                          mr: 2,
+                          border: '3px solid',
+                          borderColor: 'primary.light'
+                        }}
+                      />
+                    ) : (
+                      <Avatar 
+                        sx={{ 
+                          width: 50, 
+                          height: 50, 
+                          mr: 2,
+                          bgcolor: 'primary.main',
+                          fontSize: '1.8rem',
+                          border: '3px solid',
+                          borderColor: 'primary.light'
+                        }}
+                      >
+                        {company.name.charAt(0)}
+                      </Avatar>
+                    )}
                     <Box sx={{ flexGrow: 1 }}>
                       <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold', mb: 0.5 }}>
-                        {student.name}
+                        {company.name}
                       </Typography>
                       <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                        <SchoolIcon sx={{ fontSize: 16, mr: 0.5, color: 'text.secondary' }} />
+                        <WorkIcon sx={{ fontSize: 16, mr: 0.5, color: 'text.secondary' }} />
                         <Typography variant="body2" color="text.secondary">
-                          {student.university.length > 20 ? 
-                            student.university.substring(0, 20) + '...' : 
-                            student.university
-                          }
+                          {company.industry}
                         </Typography>
                       </Box>
                       <Rating value={4.5} precision={0.5} size="small" readOnly />
                     </Box>
                   </Box>
 
-                  {/* 自己紹介 */}
+                  {/* 説明 */}
                   <Typography 
                     variant="body2" 
                     color="text.secondary" 
@@ -414,49 +362,37 @@ export default function CompanyPage() {
                       minHeight: '48px' // 最小の高さを設定して揃える
                     }}
                   >
-                    {student.bio}
+                    {company.description}
                   </Typography>
 
-                  {/* スキルタグ */}
+                  {/* 特徴タグ */}
                   <Box sx={{ mb: 3 }}>
                     <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', color: 'text.secondary' }}>
-                      主なスキル
+                      主な特徴
                     </Typography>
                     <Stack direction="row" spacing={0.5} flexWrap="wrap">
                       {(() => {
-                        // プロフィール設定で利用可能なスキルのみフィルタリング
-                        const validSkills = student.skills.filter(skill => 
-                          availableSkills.includes(skill)
-                        );
-                        const displaySkills = validSkills.slice(0, 4);
-                        const remainingCount = validSkills.length - 4;
+                        const displayFeatures = (company.features || []).slice(0, 4);
+                        const remainingCount = (company.features || []).length - 4;
                         
                         return (
                           <>
-                            {displaySkills.map((skill, index) => {
-                              const iconName = getSkillIconName(skill);
-                              return (
-                                <Chip
-                                  key={index}
-                                  icon={iconName ? <SkillIcon iconName={iconName} /> : undefined}
-                                  label={skill}
-                                  size="small"
-                                  variant="filled"
-                                  sx={{ 
-                                    fontSize: '0.75rem',
-                                    mb: 0.5,
-                                    bgcolor: '#f5f5f5',
-                                    color: '#333',
-                                    fontWeight: 500,
-                                    border: '1px solid #e0e0e0',
-                                    '& .MuiChip-icon': {
-                                      fontSize: '16px',
-                                      marginLeft: '4px'
-                                    }
-                                  }}
-                                />
-                              );
-                            })}
+                            {displayFeatures.map((feature, index) => (
+                              <Chip
+                                key={index}
+                                label={feature}
+                                size="small"
+                                variant="filled"
+                                sx={{ 
+                                  fontSize: '0.75rem',
+                                  mb: 0.5,
+                                  bgcolor: '#f5f5f5',
+                                  color: '#333',
+                                  fontWeight: 500,
+                                  border: '1px solid #e0e0e0',
+                                }}
+                              />
+                            ))}
                             {remainingCount > 0 && (
                               <Chip
                                 label={`+${remainingCount}`}
@@ -478,10 +414,10 @@ export default function CompanyPage() {
                   <Box sx={{ display: 'flex', gap: 1, justifyContent: 'space-between' }}>
                     <Button
                       onClick={() => {
-                        window.location.href = `/student/${student.id}`;
+                        window.location.href = `/company/${company.id}`;
                       }}
                       variant="contained"
-                      startIcon={<PersonIcon />}
+                      startIcon={<WorkIcon />}
                       size="small"
                       sx={{ 
                         flex: 1,
@@ -495,15 +431,7 @@ export default function CompanyPage() {
                     <IconButton 
                       color="primary"
                       onClick={() => {
-                        // 学生IDからチャットを検索
-                        const existingChat = findChatByStudentId(student.id);
-                        if (existingChat) {
-                          // 既存のチャットがあれば直接そのチャットページに遷移
-                          window.location.href = `/chat/${existingChat.id}`;
-                        } else {
-                          // 既存のチャットがなければチャット一覧ページに遷移
-                          window.location.href = '/chat';
-                        }
+                        alert(`チャット機能は準備中です。`);
                       }}
                       sx={{ 
                         border: '2px solid',
@@ -520,7 +448,7 @@ export default function CompanyPage() {
                     <IconButton 
                       color="success"
                       onClick={() => {
-                        alert(`${student.name}さんの採用検討機能は準備中です。`);
+                        alert(`${company.name}への応募機能は準備中です。`);
                       }}
                       sx={{ 
                         border: '2px solid',
@@ -532,7 +460,7 @@ export default function CompanyPage() {
                       }}
                       size="small"
                     >
-                      <WorkIcon />
+                      <PersonIcon />
                     </IconButton>
                   </Box>
                 </CardContent>
@@ -543,9 +471,9 @@ export default function CompanyPage() {
       </Grid>
 
       {/* もっと見る/折りたたむボタン */}
-      {filteredStudents.length > 5 && (
+      {filteredCompanies.length > 5 && (
         <Box sx={{ textAlign: 'center', mt: 4, display: 'flex', gap: 2, justifyContent: 'center' }}>
-          {filteredStudents.length > displayCount && (
+          {filteredCompanies.length > displayCount && (
             <Button
               variant="outlined"
               size="large"
@@ -583,11 +511,11 @@ export default function CompanyPage() {
       )}
 
       {/* 空の状態 */}
-      {filteredStudents.length === 0 && !loading && (
+      {filteredCompanies.length === 0 && !loading && (
         <Box sx={{ textAlign: 'center', py: 8 }}>
-          <PersonIcon sx={{ fontSize: 100, color: 'text.secondary', mb: 2 }} />
+          <WorkIcon sx={{ fontSize: 100, color: 'text.secondary', mb: 2 }} />
           <Typography variant="h5" color="text.secondary" gutterBottom>
-            条件に合う学生が見つかりませんでした
+            条件に合う企業が見つかりませんでした
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
             検索条件を変更して、もう一度お試しください。
@@ -596,8 +524,8 @@ export default function CompanyPage() {
             variant="outlined"
             onClick={() => {
               setSearchQuery('');
-              setUniversityFilter('');
-              setSkillFilter('');
+              setIndustryFilter('');
+              setFeatureFilter('');
             }}
           >
             フィルターをリセット
@@ -654,7 +582,7 @@ function LoadingSkeleton() {
       
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {[1, 2, 3].map((i) => (
-          <Grid size={{ xs: 12, sm: 4 }} key={i}>
+          <Grid item xs={12} sm={4} key={i}>
             <Skeleton variant="rectangular" height={100} sx={{ borderRadius: 2 }} />
           </Grid>
         ))}
@@ -664,7 +592,7 @@ function LoadingSkeleton() {
       
       <Grid container spacing={3}>
         {[1, 2, 3, 4, 5, 6].map((i) => (
-          <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={i}>
+          <Grid item xs={12} sm={6} lg={4} key={i}>
             <Card sx={{ height: 420 }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
