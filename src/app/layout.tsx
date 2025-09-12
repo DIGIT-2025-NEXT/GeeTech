@@ -3,7 +3,7 @@ import { Geist, Geist_Mono, Noto_Sans_JP, Audiowide } from "next/font/google";
 import "./globals.css";
 import Provider from "./_components/Provider";
 import MUIThemeProvider from "./_components/MUIThemeProvider";
-import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
+
 import { AuthProvider } from "@/contexts/AuthContext";
 import SupabaseProvider from "./_components/SupabaseProvider";
 import { NotificationProvider } from "@/contexts/NotificationContext";
@@ -47,8 +47,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${notoSansJp.variable} ${audiowide.variable} font-sans antialiased`}
       >
-        <AppRouterCacheProvider>
-          <SupabaseProvider>
+        <SupabaseProvider>
             <AuthProvider>
               <NotificationProvider>
                 <MUIThemeProvider>
@@ -57,7 +56,6 @@ export default function RootLayout({
               </NotificationProvider>
             </AuthProvider>
           </SupabaseProvider>
-        </AppRouterCacheProvider>
       </body>
     </html>
   );

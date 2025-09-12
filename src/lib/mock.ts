@@ -178,6 +178,50 @@ export function getAllStudents(): Student[] {
   return mockStudents;
 }
 
+// Mock company data
+const mockCompanies: Company[] = [
+  {
+    id: "1",
+    name: "株式会社A",
+    industry: "IT",
+    description: "Webサービス開発",
+    features: ["リモートワーク可", "フレックスタイム制"],
+    logo: "/logo-a.png",
+    projects: [],
+    partcipantsid: [],
+    adoptedid: [],
+    Rejectedid: [],
+  },
+  {
+    id: "2",
+    name: "株式会社B",
+    industry: "製造業",
+    description: "精密機器製造",
+    features: ["研修制度充実"],
+    logo: "/logo-b.png",
+    projects: [],
+    partcipantsid: [],
+    adoptedid: [],
+    Rejectedid: [],
+  },
+  {
+    id: "3",
+    name: "株式会社C",
+    industry: "環境",
+    description: "再生可能エネルギー事業",
+    features: ["社会貢献", "最新技術"],
+    logo: "/logo-c.png",
+    projects: [],
+    partcipantsid: [],
+    adoptedid: [],
+    Rejectedid: [],
+  },
+];
+
+export function getCompanyById(id: string): Company | undefined {
+  return mockCompanies.find(company => company.id === id);
+}
+
 // Mock project data
 const mockProjects: Project[] = [
   {
@@ -554,7 +598,7 @@ export async function getAllCompanies(): Promise<Company[]> {
   }
 
   // Ensure the fetched data matches the Company type
-  return data.map((company: any) => ({
+  return data.map((company: Company) => ({
     id: company.id,
     name: company.name,
     industry: company.industry,
