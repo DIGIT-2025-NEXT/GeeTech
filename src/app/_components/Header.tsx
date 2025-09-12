@@ -73,7 +73,11 @@ export default function Header() {
 
   const handleProfile = () => {
     handleUserMenuClose();
-    router.push("/profile");
+    if (userStatus === "company") {
+      router.push("/company/profile");
+    } else {
+      router.push("/profile");
+    }
   };
 
   const handleLogout = async () => {

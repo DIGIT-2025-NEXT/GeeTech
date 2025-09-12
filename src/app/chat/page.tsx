@@ -3,6 +3,7 @@
 
 import { Box, Button, Card, CardContent, Container, Stack, Typography, Breadcrumbs} from '@mui/material';
 import Link from 'next/link';
+import { type Chat } from '@/lib/mock';
 import { useState, useEffect } from "react";
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -41,6 +42,21 @@ export default function Chat() {
       fetchChatRooms();
     }
   }, [user, loading]);
+
+  // チャットルームのポーリング更新
+  useEffect(() => {
+    if (!user || !userType) return;
+
+    // 4秒ごとにチャットルーム一覧を更新
+    const intervalId = setInterval(() => {
+      console.log(`Polling for chat rooms updates (${userType})`);
+      fetchChatRooms();
+    }, 4000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [user, userType]);
 
   const fetchChatRooms = async () => {
     setLoadingRooms(true);
@@ -125,10 +141,10 @@ export default function Chat() {
           <Card key={room.id}>
             <CardContent>
               <Typography variant='h6'>
-                {userType === 'student' ? room.company.name : room.students.name}
+                {userType === 'student' ? room.company?.name || '企業名不明' : room.students?.name || '学生名不明'}
               </Typography>
               <Typography variant='subtitle2' color='text.secondary'>
-                {userType === 'student' ? room.company.industry : room.students.university}
+                {userType === 'student' ? room.company?.industry || '業界不明' : room.students?.university || '大学不明'}
               </Typography>
               {room.lastMessage && (
                 <Typography sx={{ mt: 1, mb: 2 }}>
