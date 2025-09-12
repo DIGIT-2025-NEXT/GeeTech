@@ -32,18 +32,15 @@ import {
   Work as WorkIcon,
   Search as SearchIcon,
   Filter as FilterIcon,
-  TrendingUp as TrendingUpIcon,
   FavoriteBorder as FavoriteBorderIcon,
   Favorite as FavoriteIcon,
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon
 } from '@mui/icons-material';
 import Link from 'next/link';
-import { getAllCompanies, getAllProjects, type Company } from '@/lib/mock';
+import { getAllCompanies, getAllProjects, type Company, type Project } from '@/lib/mock';
 import { useState, useEffect } from 'react';
 import { IndustryIcon } from '@/app/_components/IndustryIcon';
-import AdoptButton from './adopt';
-import RejectButton from './Reject';
 
 export default function StudentsPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -60,8 +57,10 @@ export default function StudentsPage() {
     // シミュレートされたローディング
     const timer = setTimeout(async () => {
       const allCompanies = await getAllCompanies();
+      const allProjects = await getAllProjects();
       setCompanies(allCompanies);
       setFilteredCompanies(allCompanies);
+      setProjects(allProjects);
       setLoading(false);
     }, 500);
 
@@ -110,7 +109,7 @@ export default function StudentsPage() {
 
   const industries = Array.from(new Set(companies.map(c => c.industry)));
   const features = Array.from(new Set(companies.flatMap(c => c.features || [])));
-  const projects = getAllProjects();
+  const [projects, setProjects] = useState<Project[]>([]);
 
   if (loading) {
     return <LoadingSkeleton />;
