@@ -3,7 +3,7 @@
 
 import { Box, Button, Card, CardContent, Container, Stack, Typography, Breadcrumbs} from '@mui/material';
 import Link from 'next/link';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from '@/contexts/AuthContext';
 
 interface ChatRoom {
@@ -36,19 +36,56 @@ export default function Chat() {
   const [loadingRooms, setLoadingRooms] = useState(false);
   const { user, loading } = useAuth();
 
-  useEffect(() => {
-    if (user && !loading) {
-      fetchChatRooms();
-    }
-  }, [user, loading]);
-
-  const fetchChatRooms = async () => {
+  const fetchChatRooms = useCallback(async () => {
     setLoadingRooms(true);
     try {
       const response = await fetch('/api/chat/rooms');
       if (response.ok) {
         const data = await response.json();
-        setRooms(data.rooms || []);
+        const newRooms = data.rooms || [];
+        
+        // 既存のroomsと比較して、変更がある場合のみ更新
+        setRooms(prevRooms => {
+          // 配列の長さが異なるか、ID順でソートして比較
+          if (prevRooms.length !== newRooms.length) {
+            return newRooms;
+          }
+          
+          const prevSorted = [...prevRooms].sort((a, b) => a.id.localeCompare(b.id));
+          const newSorted = [...newRooms].sort((a, b) => a.id.localeCompare(b.id));
+          
+          // IDリストの比較
+          const prevIds = prevSorted.map(room => room.id).join(',');
+          const newIds = newSorted.map(room => room.id).join(',');
+          
+          if (prevIds !== newIds) {
+            return newRooms;
+          }
+          
+          // 各roomの最新メッセージ内容をチェック
+          for (let i = 0; i < prevSorted.length; i++) {
+            const prevRoom = prevSorted[i];
+            const newRoom = newSorted[i];
+            
+            // 最新メッセージの比較
+            if (!prevRoom.lastMessage && newRoom.lastMessage) {
+              return newRooms;
+            }
+            if (prevRoom.lastMessage && !newRoom.lastMessage) {
+              return newRooms;
+            }
+            if (prevRoom.lastMessage && newRoom.lastMessage) {
+              if (prevRoom.lastMessage.message !== newRoom.lastMessage.message ||
+                  prevRoom.lastMessage.created_at !== newRoom.lastMessage.created_at) {
+                return newRooms;
+              }
+            }
+          }
+          
+          // 変更がない場合は既存の状態を維持
+          return prevRooms;
+        });
+        
         setUserType(data.userType);
       } else {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
@@ -60,7 +97,67 @@ export default function Chat() {
       console.error('Error fetching chat rooms:', error);
     }
     setLoadingRooms(false);
-  };
+  }, []);
+
+  useEffect(() => {
+    if (user && !loading) {
+      fetchChatRooms();
+    }
+  }, [user, loading, fetchChatRooms]);
+
+  // リアルタイム更新の設定
+  useEffect(() => {
+    if (!user || loading) return;
+
+    const setupRealtimeSubscription = async () => {
+      const { createClient } = await import('@/lib/supabase/client');
+      const supabase = createClient();
+
+      // チャットメッセージのリアルタイム購読（新しいメッセージで部屋リストを更新）
+      const messageSubscription = supabase
+        .channel('chat-messages-global')
+        .on(
+          'postgres_changes',
+          {
+            event: '*', // INSERT, UPDATE, DELETE全てを監視
+            schema: 'public',
+            table: 'chat_messages'
+          },
+          () => {
+            // メッセージに変更があった場合、チャット一覧を更新
+            fetchChatRooms();
+          }
+        )
+        .subscribe();
+
+      // チャットルームのリアルタイム購読
+      const roomSubscription = supabase
+        .channel('chat-rooms-global')
+        .on(
+          'postgres_changes',
+          {
+            event: '*', // INSERT, UPDATE, DELETE全てを監視
+            schema: 'public',
+            table: 'chat_rooms'
+          },
+          () => {
+            // ルームに変更があった場合、チャット一覧を更新
+            fetchChatRooms();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        messageSubscription.unsubscribe();
+        roomSubscription.unsubscribe();
+      };
+    };
+
+    const unsubscribe = setupRealtimeSubscription();
+    return () => {
+      unsubscribe.then(cleanup => cleanup?.());
+    };
+  }, [user, loading, fetchChatRooms]);
 
   if (loading || loadingRooms) {
     return (

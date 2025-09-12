@@ -185,10 +185,18 @@ export default function Chat({ params }: { params: Promise<{ chatid: string }> }
 
             if (response.ok) {
                 const data = await response.json();
-                setChatData(prev => ({
-                    ...prev!,
-                    messages: [...prev!.messages, data.message]
-                }));
+                setChatData(prev => {
+                    if (!prev) return prev;
+                    
+                    // 既に存在するメッセージかチェック（重複防止）
+                    const messageExists = prev.messages.some(msg => msg.id === data.message.id);
+                    if (messageExists) return prev;
+                    
+                    return {
+                        ...prev,
+                        messages: [...prev.messages, data.message]
+                    };
+                });
                 setNewMessage('');
             } else {
                 console.error('Failed to send message');
