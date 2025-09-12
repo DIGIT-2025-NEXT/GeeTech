@@ -220,45 +220,7 @@ export async function getAllStudents(): Promise<Student[]> {
   }));
 }
 
-// Mock company data
-const mockCompanies: Company[] = [
-  {
-    id: "1",
-    name: "株式会社A",
-    industry: "IT",
-    description: "Webサービス開発",
-    features: ["リモートワーク可", "フレックスタイム制"],
-    logo: "/logo-a.png",
-    projects: [],
-    partcipantsid: [],
-    adoptedid: [],
-    Rejectedid: [],
-  },
-  {
-    id: "2",
-    name: "株式会社B",
-    industry: "製造業",
-    description: "精密機器製造",
-    features: ["研修制度充実"],
-    logo: "/logo-b.png",
-    projects: [],
-    partcipantsid: [],
-    adoptedid: [],
-    Rejectedid: [],
-  },
-  {
-    id: "3",
-    name: "株式会社C",
-    industry: "環境",
-    description: "再生可能エネルギー事業",
-    features: ["社会貢献", "最新技術"],
-    logo: "/logo-c.png",
-    projects: [],
-    partcipantsid: [],
-    adoptedid: [],
-    Rejectedid: [],
-  },
-];
+// Note: Company data is now managed in Supabase database
 
 export async function getCompanyById(id: string): Promise<Company | undefined> {
   const supabase = createClient();
@@ -289,10 +251,7 @@ export async function getCompanyById(id: string): Promise<Company | undefined> {
   };
 }
 
-// Fallback for synchronous access (for backwards compatibility)
-export function getCompanyByIdSync(id: string): Company | undefined {
-  return mockCompanies.find(company => company.id === id);
-}
+// Note: getCompanyByIdSync removed - use async getCompanyById instead
 
 export const mockChats: Chat[] = [
   {
@@ -744,41 +703,4 @@ export function findChatByStudentId(studentId: string): Chat | undefined {
   return mockChats.find(chat => chat.studentid === studentId);
 }
 
-export function addAdoptedid(companyid: string,studentid: string){
-  const company = mockCompanies.find(company => company.id === companyid);
-  if (!company) return;
-  if (!company.adoptedid) company.adoptedid = [];
-  if (!company.adoptedid.includes(studentid)) company.adoptedid.push(studentid);
-}
-
-export function removeAdoptedid(companyid: string,studentid: string){
-  const company = mockCompanies.find(company => company.id === companyid);
-  if (!company) return;
-  company.adoptedid = (company.adoptedid || []).filter(id => id !== studentid);
-}
-
-export function addRejectedid(companyid: string,studentid: string){
-  const company = mockCompanies.find(company => company.id === companyid);
-  if (!company) return;
-  if (!company.Rejectedid) company.Rejectedid = [];
-  if (!company.Rejectedid.includes(studentid)) company.Rejectedid.push(studentid);
-}
-
-export function removerejectedid(companyid: string,studentid: string){
-  const company = mockCompanies.find(company => company.id === companyid);
-  if (!company) return;
-  company.Rejectedid = (company.Rejectedid || []).filter(id => id !== studentid);
-}
-
-export function addParticipartedid(companyid: string,studentid: string){
-  const company = mockCompanies.find(company => company.id === companyid);
-  if (!company) return;
-  if (!company.partcipantsid) company.partcipantsid = [];
-  if (!company.partcipantsid.includes(studentid)) company.partcipantsid.push(studentid);
-}
-
-export function removeParticipartedid(companyid: string,studentid: string){
-  const company = mockCompanies.find(company => company.id === companyid);
-  if (!company) return;
-  company.partcipantsid = (company.partcipantsid || []).filter(id => id !== studentid);
-}
+// Note: Company manipulation functions removed - these should be handled via Supabase database operations

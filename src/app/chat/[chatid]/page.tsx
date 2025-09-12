@@ -4,7 +4,7 @@
 import { Box, Button, Container, Stack, TextField, Typography, Card, CardContent} from '@mui/material';
 import Link from 'next/link';
 import React from 'react';
-import {getStudentById,getCompanyByIdSync,getchatById} from '@/lib/mock';
+import {getStudentById,getchatById} from '@/lib/mock';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface ChatMessage {

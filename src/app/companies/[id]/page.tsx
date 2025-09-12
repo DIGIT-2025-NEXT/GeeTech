@@ -26,7 +26,7 @@ import {
   Assignment as AssignmentIcon
 } from '@mui/icons-material';
 import Link from 'next/link';
-import { getCompanyById, getProjectsByCompanyId, Company, Project } from '@/lib/mock';
+import { getProjectsByCompanyId, Company, Project } from '@/lib/mock';
 import { createClient } from '@/lib/supabase/client';
 import { notFound } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';

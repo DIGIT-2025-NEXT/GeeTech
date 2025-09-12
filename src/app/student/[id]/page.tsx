@@ -25,7 +25,7 @@ import {
   Phone as PhoneIcon,
   LinkedIn as LinkedInIcon,
 } from '@mui/icons-material';
-import { getStudentById, findChatByStudentId, type Student } from '@/lib/mock';
+import { findChatByStudentId, type Student } from '@/lib/mock';
 import { createClient } from '@/lib/supabase/client';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
