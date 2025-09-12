@@ -41,6 +41,9 @@ import Link from 'next/link';
 import { getAllCompanies, getAllProjects, type Company, type Project } from '@/lib/mock';
 import { useState, useEffect } from 'react';
 import { IndustryIcon } from '@/app/_components/IndustryIcon';
+import { useAuth } from '@/contexts/AuthContext';
+import AdoptButton from './adopt';
+import RejectButton from './Reject';
 
 export default function StudentsPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -52,6 +55,10 @@ export default function StudentsPage() {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [filterExpanded, setFilterExpanded] = useState(false);
   const [displayCount, setDisplayCount] = useState(5);
+  const [creatingChat, setCreatingChat] = useState<string | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
+  
+  const { user } = useAuth();
 
   useEffect(() => {
     // シミュレートされたローディング
@@ -107,9 +114,52 @@ export default function StudentsPage() {
     });
   };
 
+  const createChatRoom = async (companyId: string) => {
+    if (!user) {
+      alert('チャット機能を利用するにはログインが必要です。');
+      return;
+    }
+
+    setCreatingChat(companyId);
+    
+    try {
+      const response = await fetch('/api/chat/room/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          studentId: user.id,
+          companyId: companyId,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const roomId = data.room.id;
+        
+        if (data.existed) {
+          // 既存のチャットルームに移動
+          window.location.href = `/chat/${roomId}`;
+        } else {
+          // 新しく作成されたチャットルームに移動
+          window.location.href = `/chat/${roomId}`;
+        }
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to create chat room:', errorData);
+        alert('チャットルームの作成に失敗しました。もう一度お試しください。');
+      }
+    } catch (error) {
+      console.error('Error creating chat room:', error);
+      alert('チャットルームの作成中にエラーが発生しました。');
+    } finally {
+      setCreatingChat(null);
+    }
+  };
+
   const industries = Array.from(new Set(companies.map(c => c.industry)));
   const features = Array.from(new Set(companies.flatMap(c => c.features || [])));
-  const [projects, setProjects] = useState<Project[]>([]);
 
   if (loading) {
     return <LoadingSkeleton />;
@@ -400,6 +450,8 @@ export default function StudentsPage() {
                     </Button>
                     <IconButton 
                       color="primary"
+                      onClick={() => createChatRoom(company.id)}
+                      disabled={creatingChat === company.id}
                       sx={{ 
                         border: '1.5px solid',
                         borderColor: 'primary.main',
@@ -412,7 +464,27 @@ export default function StudentsPage() {
                       }}
                       size="small"
                     >
-                      <ChatIcon sx={{ fontSize: 16 }} />
+                      {creatingChat === company.id ? (
+                        <Box sx={{ width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Box
+                            sx={{
+                              width: 12,
+                              height: 12,
+                              border: '2px solid',
+                              borderColor: 'primary.main',
+                              borderTopColor: 'transparent',
+                              borderRadius: '50%',
+                              animation: 'spin 1s linear infinite',
+                              '@keyframes spin': {
+                                '0%': { transform: 'rotate(0deg)' },
+                                '100%': { transform: 'rotate(360deg)' }
+                              }
+                            }}
+                          />
+                        </Box>
+                      ) : (
+                        <ChatIcon sx={{ fontSize: 16 }} />
+                      )}
                     </IconButton>
                     <IconButton 
                       color="success"
