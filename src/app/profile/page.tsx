@@ -49,9 +49,9 @@ export default function ProfilePage() {
     }
 
     console.log(profile?.profile_type);
-    // 企業アカウントの場合、プロフィールページではなく企業情報ページにリダイレクト
+    // 企業アカウントの場合、企業プロフィールページにリダイレクト
     if (profile?.profile_type === "company") {
-      router.push("/company");
+      router.push("/company/profile");
     }
   }, [loading, user, profile, router]);
   const error = profileError || skillsError;

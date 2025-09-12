@@ -81,25 +81,39 @@ export default function Chat({ params }: { params: Promise<{ chatid: string }> }
 
     const fetchChatData = React.useCallback(async () => {
         setLoadingChat(true);
+        console.log(`Fetching chat data for chatid: ${chatid}, user: ${user?.id}`);
         try {
             const response = await fetch(`/api/chat/messages/${chatid}`);
+            console.log(`Initial fetch response status: ${response.status}`);
+            
             if (response.ok) {
                 const data = await response.json();
+                console.log('Initial fetch data:', {
+                    messagesCount: data.messages?.length || 0,
+                    roomStudentId: data.room?.student_id,
+                    roomCompanyId: data.room?.company_id,
+                    currentUserId: user?.id
+                });
+                
                 setChatData(data);
                 
                 // ユーザータイプを判定
                 if (data.room.student_id === user?.id) {
+                    console.log('User type determined: student');
                     setUserType('student');
                 } else {
+                    console.log('User type determined: company');
                     setUserType('company');
                 }
 
                 // 学生と会社の情報を取得
                 await fetchUserInfo(data.room.student_id, data.room.company_id);
             } else if (response.status === 404) {
+                console.log('Chat room not found (404)');
                 setChatData(null);
             } else {
-                console.error('Failed to fetch chat data');
+                const errorText = await response.text();
+                console.error('Failed to fetch chat data:', response.status, errorText);
             }
         } catch (error) {
             console.error('Error fetching chat data:', error);
@@ -107,58 +121,91 @@ export default function Chat({ params }: { params: Promise<{ chatid: string }> }
         setLoadingChat(false);
     }, [chatid, user?.id, fetchUserInfo]);
 
+    // 破損したSupabaseクッキーをクリアする関数
+    const clearSupabaseCookies = React.useCallback(() => {
+        if (typeof window !== 'undefined') {
+            const cookiesToClear = [
+                'sb-access-token',
+                'sb-refresh-token', 
+                'supabase-auth-token',
+                'sb-auth-token'
+            ];
+            
+            cookiesToClear.forEach(cookieName => {
+                document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+            });
+        }
+    }, []);
+
     React.useEffect(() => {
         if (chatid && user && !loading) {
             fetchChatData();
         }
     }, [chatid, user, loading, fetchChatData]);
 
-    // リアルタイム更新の設定
+    // シンプルなポーリングによるリアルタイム更新
     React.useEffect(() => {
-        if (!chatData) return;
+        if (!chatData || !chatid) return;
 
-        const setupRealtimeSubscription = async () => {
-            const { createClient } = await import('@/lib/supabase/client');
-            const supabase = createClient();
-
-            // チャットメッセージのリアルタイム購読
-            const subscription = supabase
-                .channel(`chat-${chatid}`)
-                .on(
-                    'postgres_changes',
-                    {
-                        event: 'INSERT',
-                        schema: 'public',
-                        table: 'chat_messages',
-                        filter: `room_id=eq.${chatid}`
-                    },
-                    (payload) => {
-                        const newMessage = payload.new as ChatMessage;
-                        setChatData(prev => {
-                            if (!prev) return prev;
-                            // 既に存在するメッセージかチェック
-                            const messageExists = prev.messages.some(msg => msg.id === newMessage.id);
-                            if (messageExists) return prev;
-                            
-                            return {
-                                ...prev,
-                                messages: [...prev.messages, newMessage]
-                            };
-                        });
+        console.log(`Setting up polling updates for room: ${chatid} (${userType})`);
+        
+        const pollForNewMessages = async () => {
+            try {
+                console.log(`Polling for ${userType} in room ${chatid} - making request...`);
+                const response = await fetch(`/api/chat/messages/${chatid}`, {
+                    headers: {
+                        'Cache-Control': 'no-cache',
                     }
-                )
-                .subscribe();
-
-            return () => {
-                subscription.unsubscribe();
-            };
+                });
+                
+                console.log(`Polling response for ${userType}: ${response.status}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log(`Polling data for ${userType}:`, {
+                        messagesCount: data.messages?.length || 0,
+                        room: data.room ? 'present' : 'missing'
+                    });
+                    
+                    setChatData(prev => {
+                        if (!prev) {
+                            console.log(`No previous data for ${userType}, setting new data`);
+                            return data;
+                        }
+                        
+                        // メッセージ数または最後のメッセージのIDをチェック
+                        const hasNewMessages = 
+                            data.messages.length !== prev.messages.length ||
+                            (data.messages.length > 0 && prev.messages.length > 0 &&
+                             data.messages[data.messages.length - 1].id !== prev.messages[prev.messages.length - 1].id);
+                        
+                        if (hasNewMessages) {
+                            console.log(`New messages detected via polling for ${userType}:`, {
+                                oldLength: prev.messages.length,
+                                newLength: data.messages.length
+                            });
+                            return data;
+                        }
+                        console.log(`No new messages for ${userType}`);
+                        return prev;
+                    });
+                } else {
+                    const errorText = await response.text();
+                    console.error(`Polling error ${response.status} for ${userType}:`, errorText);
+                }
+            } catch (error) {
+                console.error(`Error polling for new messages (${userType}):`, error);
+            }
         };
 
-        const unsubscribe = setupRealtimeSubscription();
+        // 2秒ごとにポーリング
+        const pollInterval = setInterval(pollForNewMessages, 2000);
+
         return () => {
-            unsubscribe.then(cleanup => cleanup?.());
+            console.log(`Stopping polling for ${userType}`);
+            clearInterval(pollInterval);
         };
-    }, [chatData, chatid]);
+    }, [chatData, chatid, userType]);
 
     // メッセージが更新されたときに自動スクロール
     React.useEffect(() => {
@@ -186,10 +233,7 @@ export default function Chat({ params }: { params: Promise<{ chatid: string }> }
 
             if (response.ok) {
                 const data = await response.json();
-                setChatData(prev => ({
-                    ...prev!,
-                    messages: [...prev!.messages, data.message]
-                }));
+                // SSEでメッセージが自動的に追加されるので、送信成功時はメッセージをクリアするだけ
                 setNewMessage('');
             } else {
                 console.error('Failed to send message');
