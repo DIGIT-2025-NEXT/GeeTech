@@ -343,7 +343,7 @@ export default function CompanyPage() {
                           {company.industry}
                         </Typography>
                       </Box>
-                      <Rating value={4.5} precision={0.5} size="small" readOnly />
+                      <Rating value={Math.min(student.skills.length * 0.5, 5)} precision={0.5} size="small" readOnly />
                     </Box>
                   </Box>
 

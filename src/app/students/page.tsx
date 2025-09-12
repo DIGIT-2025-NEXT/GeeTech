@@ -42,7 +42,7 @@ import {
   ExpandLess as ExpandLessIcon
 } from '@mui/icons-material';
 import Link from 'next/link';
-import { getAllCompanies, type Company } from '@/lib/mock';
+import { getAllCompanies, getAllProjects, type Company } from '@/lib/mock';
 import { useState, useEffect } from 'react';
 import { IndustryIcon } from '@/app/_components/IndustryIcon';
 
@@ -111,6 +111,7 @@ export default function StudentsPage() {
 
   const industries = Array.from(new Set(companies.map(c => c.industry)));
   const features = Array.from(new Set(companies.flatMap(c => c.features || [])));
+  const projects = getAllProjects();
 
   if (loading) {
     return <LoadingSkeleton />;
@@ -163,7 +164,7 @@ export default function StudentsPage() {
         <Grid size={{ xs: 12, sm: 4 }}>
           <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 2 }}>
             <Typography variant="h4" color="warning.main" sx={{ fontWeight: 'bold' }}>
-              12+
+              {projects.length}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
               募集案件数
@@ -323,7 +324,6 @@ export default function StudentsPage() {
                           {company.industry}
                         </Typography>
                       </Box>
-                      <Rating value={4.5} precision={0.5} size="small" readOnly />
                     </Box>
                   </Box>
 
