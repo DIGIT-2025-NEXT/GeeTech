@@ -39,12 +39,9 @@ import {
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { getAllCompanies, getAllProjects, type Company, type Project } from '@/lib/mock';
-import { createClient } from '@/lib/supabase/client';
 import { useState, useEffect } from 'react';
 import { IndustryIcon } from '@/app/_components/IndustryIcon';
 import { useAuth } from '@/contexts/AuthContext';
-import AdoptButton from './adopt';
-import RejectButton from './Reject';
 
 export default function StudentsPage() {
   const [companies, setCompanies] = useState<Company[]>([]);

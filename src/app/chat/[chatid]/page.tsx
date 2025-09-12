@@ -161,21 +161,21 @@ export default function Chat({ params }: { params: Promise<{ chatid: string }> }
         setLoadingChat(false);
     }, [chatid, user?.id, fetchUserInfo]);
 
-    // 破損したSupabaseクッキーをクリアする関数
-    const clearSupabaseCookies = React.useCallback(() => {
-        if (typeof window !== 'undefined') {
-            const cookiesToClear = [
-                'sb-access-token',
-                'sb-refresh-token', 
-                'supabase-auth-token',
-                'sb-auth-token'
-            ];
-            
-            cookiesToClear.forEach(cookieName => {
-                document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
-            });
-        }
-    }, []);
+    // 破損したSupabaseクッキーをクリアする関数（未使用のため削除予定）
+    // const clearSupabaseCookies = React.useCallback(() => {
+    //     if (typeof window !== 'undefined') {
+    //         const cookiesToClear = [
+    //             'sb-access-token',
+    //             'sb-refresh-token', 
+    //             'supabase-auth-token',
+    //             'sb-auth-token'
+    //         ];
+    //         
+    //         cookiesToClear.forEach(cookieName => {
+    //             document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+    //         });
+    //     }
+    // }, []);
 
     React.useEffect(() => {
         if (chatid && user && !loading) {
@@ -272,7 +272,6 @@ export default function Chat({ params }: { params: Promise<{ chatid: string }> }
             });
 
             if (response.ok) {
-                const data = await response.json();
                 // SSEでメッセージが自動的に追加されるので、送信成功時はメッセージをクリアするだけ
                 setNewMessage('');
             } else {
@@ -352,7 +351,7 @@ export default function Chat({ params }: { params: Promise<{ chatid: string }> }
             </Box>
             <Box sx={{ flex:1, overflowY: "auto", p:2}}>
                 <Stack spacing={2}>
-                    {chatData.messages.map((message: any, index: number) => {
+                    {chatData.messages.map((message: ChatMessage, index: number) => {
                         const isMyMessage = message.sender_type === userType;
                         const senderName = message.sender_type === 'student' ? studentInfo?.name : companyInfo?.name;
                         

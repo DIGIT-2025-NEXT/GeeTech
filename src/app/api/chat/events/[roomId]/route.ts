@@ -63,7 +63,7 @@ export async function GET(
     'Access-Control-Allow-Headers': 'Cache-Control',
   }
 
-  let encoder = new TextEncoder()
+  const encoder = new TextEncoder()
   let controller: ReadableStreamDefaultController<Uint8Array>
 
   const stream = new ReadableStream({
@@ -101,7 +101,7 @@ export async function GET(
             clearInterval(keepAlive)
             try {
               controller.close()
-            } catch (error) {
+            } catch {
               // Already closed
             }
           })

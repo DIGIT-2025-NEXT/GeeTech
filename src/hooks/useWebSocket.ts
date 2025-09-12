@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 export interface WebSocketMessage {
   type: 'chat_message' | 'user_join' | 'user_leave';
-  data: any;
+  data: unknown;
   roomId?: string;
   timestamp: number;
 }
@@ -15,12 +15,12 @@ export function useWebSocket(roomId: string | null) {
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 5;
 
-  const connect = () => {
+  const connect = React.useCallback(() => {
     if (!roomId || wsRef.current?.readyState === WebSocket.OPEN) return;
 
     try {
       // 開発環境ではlocalhost、本番環境では適切なWSURLを使用
-      const wsUrl = `ws://localhost:3001/chat/${roomId}`;
+      // const wsUrl = `ws://localhost:3001/chat/${roomId}`;
       
       // WebSocketの代わりにServer-Sent Events (SSE)を使用
       // WebSocketサーバーがない場合でもリアルタイム更新が可能
@@ -55,20 +55,20 @@ export function useWebSocket(roomId: string | null) {
       };
 
       // EventSourceをWebSocketの代わりに保存
-      (wsRef as any).current = eventSource;
+      (wsRef.current as unknown) = eventSource;
       
     } catch (error) {
       console.error('Failed to create SSE connection:', error);
       setIsConnected(false);
     }
-  };
+  }, [roomId]);
 
   const disconnect = () => {
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
     }
     
-    const connection = wsRef.current as any;
+    const connection = wsRef.current as EventSource | null;
     if (connection) {
       if (connection instanceof EventSource) {
         connection.close();
@@ -100,7 +100,7 @@ export function useWebSocket(roomId: string | null) {
     return () => {
       disconnect();
     };
-  }, [roomId]);
+  }, [roomId, connect]);
 
   return {
     isConnected,
