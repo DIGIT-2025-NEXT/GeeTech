@@ -25,6 +25,7 @@ import {
   Divider,
   Skeleton,
   Collapse,
+  CircularProgress,
 } from "@mui/material";
 import {
   Person as PersonIcon,
@@ -41,6 +42,8 @@ import {
 } from "@mui/icons-material";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useProfile } from "@/hooks/useProfile";
+import { useRouter } from "next/navigation";
 
 // 学生の型定義
 type Student = {
@@ -53,6 +56,9 @@ type Student = {
 };
 
 export default function StudentPage() {
+  const router = useRouter();
+  const { user, profile, loading: profileLoading } = useProfile();
+  
   const [students, setStudents] = useState<Student[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -63,7 +69,40 @@ export default function StudentPage() {
   const [filterExpanded, setFilterExpanded] = useState(false);
   const [displayCount, setDisplayCount] = useState(6);
 
+  // アクセス制御をuseEffect内で実装
   useEffect(() => {
+    // プロファイル情報のローディング中は何もしない
+    if (profileLoading) return;
+
+    // 未認証の場合はログインページにリダイレクト
+    if (!user) {
+      console.log('🚫 No user, redirecting to login');
+      router.replace('/login');
+      return;
+    }
+
+    // プロファイルが存在しない場合はプロファイル作成ページにリダイレクト
+    if (!profile) {
+      console.log('🚫 No profile, redirecting to profile creation');
+      router.replace('/profile/create');
+      return;
+    }
+
+    // profile_typeが"company"以外の場合はアクセス拒否
+    if (profile.profile_type !== 'company') {
+      console.log('🚫 Access denied for profile_type:', profile.profile_type, '- redirecting to unauthorized');
+      router.replace('/unauthorized');
+      return;
+    }
+
+    console.log('✅ Access granted for company user');
+  }, [user, profile, profileLoading, router]);
+
+  // 学生データを取得
+  useEffect(() => {
+    // プロファイルローディング中またはアクセス権限がない場合は何もしない
+    if (profileLoading || !user || !profile || profile.profile_type !== 'company') return;
+    
     const fetchStudents = async () => {
       setLoading(true);
       const supabase = createClient();
@@ -81,7 +120,7 @@ export default function StudentPage() {
       setLoading(false);
     };
     fetchStudents();
-  }, []);
+  }, [profileLoading, user, profile]); // プロファイル情報が確定してから実行
 
   useEffect(() => {
     let filtered = students;
@@ -129,6 +168,16 @@ export default function StudentPage() {
     new Set(students.flatMap((s) => s.skills || []))
   );
 
+  // プロファイルローディング中はローディング画面を表示
+  if (profileLoading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
+        <CircularProgress size={60} />
+      </Box>
+    );
+  }
+
+  // データローディング中もローディング画面を表示
   if (loading) {
     return <LoadingSkeleton />;
   }

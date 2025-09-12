@@ -37,8 +37,10 @@ import {
   Work as WorkIcon,
   Check as CheckIcon,
 } from "@mui/icons-material";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { step1Schema, step2Schema } from "@/lib/schema/companyApplication";
+import { useProfile } from "@/hooks/useProfile";
+import { useRouter } from "next/navigation";
 
 const steps = ["基本情報", "詳細情報", "確認"];
 
@@ -70,6 +72,9 @@ const employeeRanges = [
 ];
 
 export default function CompanyRegisterPage() {
+  const router = useRouter();
+  const { user, profile, loading: profileLoading } = useProfile();
+  
   const [activeStep, setActiveStep] = useState(0);
   const [companyData, setCompanyData] = useState({
     // 基本情報
@@ -92,6 +97,35 @@ export default function CompanyRegisterPage() {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // アクセス制御をuseEffect内で実装
+  useEffect(() => {
+    // プロファイル情報のローディング中は何もしない
+    if (profileLoading) return;
+
+    // 未認証の場合はログインページにリダイレクト
+    if (!user) {
+      console.log('🚫 No user, redirecting to login');
+      router.replace('/login');
+      return;
+    }
+
+    // プロファイルが存在しない場合はプロファイル作成ページにリダイレクト
+    if (!profile) {
+      console.log('🚫 No profile, redirecting to profile creation');
+      router.replace('/profile/create');
+      return;
+    }
+
+    // profile_typeが"company"以外の場合はアクセス拒否
+    if (profile.profile_type !== 'company') {
+      console.log('🚫 Access denied for profile_type:', profile.profile_type, '- redirecting to unauthorized');
+      router.replace('/unauthorized');
+      return;
+    }
+
+    console.log('✅ Access granted for company user');
+  }, [user, profile, profileLoading, router]);
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setCompanyData((prev) => ({
@@ -588,6 +622,17 @@ export default function CompanyRegisterPage() {
         return null;
     }
   };
+
+  // プロファイルローディング中はローディング画面を表示
+  if (profileLoading) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 8 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "400px" }}>
+          <CircularProgress size={60} />
+        </Box>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
