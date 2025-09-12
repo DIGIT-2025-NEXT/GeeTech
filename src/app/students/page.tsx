@@ -32,14 +32,13 @@ import {
   Work as WorkIcon,
   Search as SearchIcon,
   Filter as FilterIcon,
-  TrendingUp as TrendingUpIcon,
   FavoriteBorder as FavoriteBorderIcon,
   Favorite as FavoriteIcon,
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon
 } from '@mui/icons-material';
 import Link from 'next/link';
-import { getAllCompanies, getAllProjects, type Company } from '@/lib/mock';
+import { getAllCompanies, getAllProjects, type Company, type Project } from '@/lib/mock';
 import { useState, useEffect } from 'react';
 import { IndustryIcon } from '@/app/_components/IndustryIcon';
 import { useAuth } from '@/contexts/AuthContext';
@@ -57,6 +56,7 @@ export default function StudentsPage() {
   const [filterExpanded, setFilterExpanded] = useState(false);
   const [displayCount, setDisplayCount] = useState(5);
   const [creatingChat, setCreatingChat] = useState<string | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
   
   const { user } = useAuth();
 
@@ -64,8 +64,10 @@ export default function StudentsPage() {
     // シミュレートされたローディング
     const timer = setTimeout(async () => {
       const allCompanies = await getAllCompanies();
+      const allProjects = await getAllProjects();
       setCompanies(allCompanies);
       setFilteredCompanies(allCompanies);
+      setProjects(allProjects);
       setLoading(false);
     }, 500);
 
@@ -158,7 +160,6 @@ export default function StudentsPage() {
 
   const industries = Array.from(new Set(companies.map(c => c.industry)));
   const features = Array.from(new Set(companies.flatMap(c => c.features || [])));
-  const projects = getAllProjects();
 
   if (loading) {
     return <LoadingSkeleton />;
