@@ -39,6 +39,7 @@ import {
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { getAllCompanies, getAllProjects, type Company, type Project } from '@/lib/mock';
+import { createClient } from '@/lib/supabase/client';
 import { useState, useEffect } from 'react';
 import { IndustryIcon } from '@/app/_components/IndustryIcon';
 import { useAuth } from '@/contexts/AuthContext';
@@ -61,17 +62,17 @@ export default function StudentsPage() {
   const { user } = useAuth();
 
   useEffect(() => {
-    // シミュレートされたローディング
-    const timer = setTimeout(async () => {
+    const fetchData = async () => {
+      setLoading(true);
       const allCompanies = await getAllCompanies();
       const allProjects = await getAllProjects();
       setCompanies(allCompanies);
       setFilteredCompanies(allCompanies);
       setProjects(allProjects);
       setLoading(false);
-    }, 500);
-
-    return () => clearTimeout(timer);
+    };
+    
+    fetchData();
   }, []);
 
   useEffect(() => {

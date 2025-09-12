@@ -28,6 +28,7 @@ import {
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { getCompanyById, getProjectsByCompanyId, Company, Project } from '@/lib/mock';
+import { createClient } from '@/lib/supabase/client';
 import { notFound } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -45,20 +46,55 @@ export default function CompanyDetailPage({ params }: Props) {
   useEffect(() => {
     params.then(async ({ companyId }) => {
       console.log('Company page: Fetching data for companyId:', companyId);
-      const companyData = getCompanyById(companyId);
-      const projectsData = await getProjectsByCompanyId(companyId);
       
-      console.log('Company page: Company data:', companyData);
-      console.log('Company page: Projects data:', projectsData);
+      const supabase = createClient();
       
-      if (!companyData) {
-        console.error('Company page: Company not found for ID:', companyId);
+      try {
+        // Supabaseから企業データを取得
+        const { data: companyData, error: companyError } = await supabase
+          .from('company')
+          .select('*')
+          .eq('id', companyId)
+          .single();
+          
+        if (companyError) {
+          console.error('Error fetching company:', companyError);
+          notFound();
+          return;
+        }
+        
+        if (!companyData) {
+          console.error('Company page: Company not found for ID:', companyId);
+          notFound();
+          return;
+        }
+        
+        // Company型に変換
+        const company: Company = {
+          id: companyData.id,
+          name: companyData.name,
+          industry: companyData.industry,
+          description: companyData.description,
+          features: companyData.features || [],
+          logo: companyData.logo || '',
+          projects: companyData.projects || [],
+          partcipantsid: companyData.partcipantsid || [],
+          adoptedid: companyData.adoptedid || [],
+          Rejectedid: companyData.Rejectedid || [],
+        };
+        
+        // プロジェクトデータも取得（現時点ではモックデータをフォールバック）
+        const projectsData = await getProjectsByCompanyId(companyId);
+        
+        console.log('Company page: Company data:', company);
+        console.log('Company page: Projects data:', projectsData);
+        
+        setCompany(company);
+        setProjects(projectsData);
+      } catch (error) {
+        console.error('Error fetching company data:', error);
         notFound();
-        return;
       }
-      
-      setCompany(companyData);
-      setProjects(projectsData);
     });
   }, [params]);
 
