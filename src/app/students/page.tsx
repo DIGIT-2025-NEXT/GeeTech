@@ -60,8 +60,10 @@ export default function StudentsPage() {
     // シミュレートされたローディング
     const timer = setTimeout(async () => {
       const allCompanies = await getAllCompanies();
+      const allProjects = await getAllProjects();
       setCompanies(allCompanies);
       setFilteredCompanies(allCompanies);
+      setProjects(allProjects);
       setLoading(false);
     }, 500);
 
@@ -110,7 +112,7 @@ export default function StudentsPage() {
 
   const industries = Array.from(new Set(companies.map(c => c.industry)));
   const features = Array.from(new Set(companies.flatMap(c => c.features || [])));
-  const projects = getAllProjects();
+  const [projects, setProjects] = useState<any[]>([]);
 
   if (loading) {
     return <LoadingSkeleton />;
