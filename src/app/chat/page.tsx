@@ -62,7 +62,7 @@ export default function Chat() {
     }
   }, [user, loading, fetchChatRooms]);
 
-  // ポーリングによる定期更新（WebSocketを使ったリアルタイム更新の代替）
+  // リアルタイム更新の設定
   useEffect(() => {
     if (!user || !userType) return;
 
