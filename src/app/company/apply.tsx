@@ -32,14 +32,14 @@ export default function ApplyButton({ companyid: companyid }: Props){
             return;
         }
         const { data: current } = await supabase
-                .from('company_participants_data')
+                .from('company')
                 .select('*')
                 .eq('id', companyid)
                 .single();
-        setcompanyname(current.name);
-        const appliedIds: string[] = current?.applyed_id || [];
-        const adoptedIds: string[] = current?.adopted_id || [];
-        const rejectedIds: string[] = current?.rejected_id || [];
+        setcompanyname(current?.name);
+        const appliedIds: string[] = current?.participants_id || [];
+        const adoptedIds: string[] = current?.adoptedid || [];
+        const rejectedIds: string[] = current?.rejectedid || [];
         if (appliedIds?.includes(STUDENT_ID)) {
             setSnackMsg(`${companyname}にすでに応募しています`);
             setSnackOpen(true);
@@ -52,10 +52,10 @@ export default function ApplyButton({ companyid: companyid }: Props){
         } else {
             //supabaseでのやつを実装
 
-            const newArray = [...(current?.applyed_id || []), STUDENT_ID];
+            const newArray = [...(current?.participants_id || []), STUDENT_ID];
             const { data, error } = await supabase
-                .from('company_participants_data')
-                .update({ applyed_id: newArray })
+                .from('company')
+                .update({ participants_id: newArray })
                 .eq('id', companyid);
             if(error){
                 setSnackMsg(`応募に失敗しました`);
