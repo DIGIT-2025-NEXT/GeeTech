@@ -45,6 +45,8 @@ import Link from 'next/link';
 import { getAllCompanies, getAllProjects, type Company } from '@/lib/mock';
 import { useState, useEffect } from 'react';
 import { IndustryIcon } from '@/app/_components/IndustryIcon';
+import AdoptButton from './adopt';
+import RejectButton from './Reject';
 
 export default function StudentsPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -59,8 +61,8 @@ export default function StudentsPage() {
 
   useEffect(() => {
     // シミュレートされたローディング
-    const timer = setTimeout(() => {
-      const allCompanies = getAllCompanies();
+    const timer = setTimeout(async () => {
+      const allCompanies = await getAllCompanies();
       setCompanies(allCompanies);
       setFilteredCompanies(allCompanies);
       setLoading(false);
@@ -119,6 +121,8 @@ export default function StudentsPage() {
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
+      <AdoptButton studentid="4918c9e0-18f3-4fe6-b339-0375cf1a851a"></AdoptButton>
+      <RejectButton studentid="4918c9e0-18f3-4fe6-b339-0375cf1a851a"></RejectButton>
       {/* ヘッダーセクション */}
       <Box sx={{ mb: 4 }}>
         <Breadcrumbs sx={{ mb: 2 }}>
@@ -141,7 +145,7 @@ export default function StudentsPage() {
 
       {/* 統計情報 */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid size={{ xs: 12, sm: 4 }}>
+        <Grid item xs={12} sm={4}>
           <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 2 }}>
             <Typography variant="h4" color="primary.main" sx={{ fontWeight: 'bold' }}>
               {companies.length}
@@ -151,7 +155,7 @@ export default function StudentsPage() {
             </Typography>
           </Paper>
         </Grid>
-        <Grid size={{ xs: 12, sm: 4 }}>
+        <Grid item xs={12} sm={4}>
           <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 2 }}>
             <Typography variant="h4" color="success.main" sx={{ fontWeight: 'bold' }}>
               {industries.length}
@@ -161,7 +165,7 @@ export default function StudentsPage() {
             </Typography>
           </Paper>
         </Grid>
-        <Grid size={{ xs: 12, sm: 4 }}>
+        <Grid item xs={12} sm={4}>
           <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 2 }}>
             <Typography variant="h4" color="warning.main" sx={{ fontWeight: 'bold' }}>
               {projects.length}
@@ -194,7 +198,7 @@ export default function StudentsPage() {
 
         <Collapse in={filterExpanded}>
           <Grid container spacing={2} sx={{ mb: 2 }}>
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
                 placeholder="企業名、業界、説明で検索..."
@@ -209,7 +213,7 @@ export default function StudentsPage() {
                 }}
               />
             </Grid>
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid item xs={12} md={3}>
               <FormControl fullWidth>
                 <InputLabel>業界で絞り込み</InputLabel>
                 <Select
@@ -224,7 +228,7 @@ export default function StudentsPage() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid item xs={12} md={3}>
               <FormControl fullWidth>
                 <InputLabel>特徴で絞り込み</InputLabel>
                 <Select
@@ -263,7 +267,7 @@ export default function StudentsPage() {
       {/* 企業一覧 */}
       <Grid container spacing={3}>
         {filteredCompanies.slice(0, displayCount).map((company, index) => (
-          <Grid size={{ xs: 12, sm: 6, md: 4 }} key={company.id}>
+          <Grid item xs={12} sm={6} md={4} key={company.id}>
             <Fade in={true} timeout={300 + index * 100}>
               <Card 
                 sx={{ 
@@ -552,7 +556,7 @@ function LoadingSkeleton() {
       
       <Grid container spacing={2} sx={{ mb: 4 }}>
         {[1, 2, 3, 4].map((i) => (
-          <Grid size={{ xs: 6, sm: 3 }} key={i}>
+          <Grid item xs={6} sm={3} key={i}>
             <Skeleton variant="rectangular" height={80} />
           </Grid>
         ))}
@@ -562,7 +566,7 @@ function LoadingSkeleton() {
       
       <Grid container spacing={3}>
         {[1, 2, 3, 4, 5, 6].map((i) => (
-          <Grid size={{ xs: 12, sm: 6, md: 4 }} key={i}>
+          <Grid item xs={12} sm={6} md={4} key={i}>
             <Card sx={{ height: 300 }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>

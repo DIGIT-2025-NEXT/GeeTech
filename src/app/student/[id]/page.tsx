@@ -15,8 +15,8 @@ import {
   Stack,
   Rating,
   Divider,
-  Grid,
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import {
   Person as PersonIcon,
   School as SchoolIcon,
@@ -31,6 +31,9 @@ import { getStudentById, findChatByStudentId, type Student } from '@/lib/mock';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { SkillIcon } from '@/app/_components/SkillIcon';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const GridWorkaround = Grid as any;
 
 export default function StudentDetailPage() {
   const params = useParams();
@@ -301,8 +304,8 @@ export default function StudentDetailPage() {
             >
               採用を検討
             </Button>
-          </Grid>
-        </Grid>
+          </GridWorkaround>
+        </GridWorkaround>
       </Paper>
 
       {/* 連絡先情報 */}
