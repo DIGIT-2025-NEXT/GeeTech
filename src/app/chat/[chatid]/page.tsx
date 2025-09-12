@@ -5,6 +5,7 @@ import { Box, Button, Container, Stack, TextField, Typography, Card, CardContent
 import Link from 'next/link';
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useWebSocket } from '@/hooks/useWebSocket';
 
 interface ChatMessage {
   id: string;
@@ -40,6 +41,7 @@ export default function Chat({ params }: { params: Promise<{ chatid: string }> }
     const messagesEndRef = React.useRef<HTMLDivElement>(null);
     
     const { user, loading } = useAuth();
+    const { lastMessage } = useWebSocket(chatid);
     
     React.useEffect(() => {
         params.then(({ chatid }) => setChatid(chatid));
@@ -183,69 +185,23 @@ export default function Chat({ params }: { params: Promise<{ chatid: string }> }
         }
     }, [chatid, user, loading, fetchChatData]);
 
-    // シンプルなポーリングによるリアルタイム更新
+    // WebSocketからのメッセージを処理
     React.useEffect(() => {
-        if (!chatData || !chatid) return;
-
-        console.log(`Setting up polling updates for room: ${chatid} (${userType})`);
-        
-        const pollForNewMessages = async () => {
-            try {
-                console.log(`Polling for ${userType} in room ${chatid} - making request...`);
-                const response = await fetch(`/api/chat/messages/${chatid}`, {
-                    headers: {
-                        'Cache-Control': 'no-cache',
-                    }
-                });
+        if (lastMessage && lastMessage.type === 'chat_message' && chatData) {
+            const newMessage = lastMessage.data as ChatMessage;
+            setChatData(prev => {
+                if (!prev) return prev;
+                // 既に存在するメッセージかチェック
+                const messageExists = prev.messages.some(msg => msg.id === newMessage.id);
+                if (messageExists) return prev;
                 
-                console.log(`Polling response for ${userType}: ${response.status}`);
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log(`Polling data for ${userType}:`, {
-                        messagesCount: data.messages?.length || 0,
-                        room: data.room ? 'present' : 'missing'
-                    });
-                    
-                    setChatData(prev => {
-                        if (!prev) {
-                            console.log(`No previous data for ${userType}, setting new data`);
-                            return data;
-                        }
-                        
-                        // メッセージ数または最後のメッセージのIDをチェック
-                        const hasNewMessages = 
-                            data.messages.length !== prev.messages.length ||
-                            (data.messages.length > 0 && prev.messages.length > 0 &&
-                             data.messages[data.messages.length - 1].id !== prev.messages[prev.messages.length - 1].id);
-                        
-                        if (hasNewMessages) {
-                            console.log(`New messages detected via polling for ${userType}:`, {
-                                oldLength: prev.messages.length,
-                                newLength: data.messages.length
-                            });
-                            return data;
-                        }
-                        console.log(`No new messages for ${userType}`);
-                        return prev;
-                    });
-                } else {
-                    const errorText = await response.text();
-                    console.error(`Polling error ${response.status} for ${userType}:`, errorText);
-                }
-            } catch (error) {
-                console.error(`Error polling for new messages (${userType}):`, error);
-            }
-        };
-
-        // 2秒ごとにポーリング
-        const pollInterval = setInterval(pollForNewMessages, 2000);
-
-        return () => {
-            console.log(`Stopping polling for ${userType}`);
-            clearInterval(pollInterval);
-        };
-    }, [chatData, chatid, userType]);
+                return {
+                    ...prev,
+                    messages: [...prev.messages, newMessage]
+                };
+            });
+        }
+    }, [lastMessage, chatData]);
 
     // メッセージが更新されたときに自動スクロール
     React.useEffect(() => {
