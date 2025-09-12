@@ -56,7 +56,7 @@ export const IndustryIcon: React.FC<IndustryIconProps> = ({
     bgColor: "#f5f5f5"
   };
 
-  const iconElement = React.cloneElement(config.icon, {
+  const iconElement = React.cloneElement(config.icon as React.ReactElement<{ sx?: object }>, {
     sx: {
       fontSize: size,
       color: config.color,
