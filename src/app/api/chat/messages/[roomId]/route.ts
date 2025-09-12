@@ -93,6 +93,13 @@ export async function GET(
       )
     }
 
+    console.log('Returning chat data:', {
+      roomId: room.id,
+      studentId: room.student_id,
+      companyId: room.company_id,
+      messagesCount: messages?.length || 0
+    });
+
     return NextResponse.json({ 
       room: room,
       messages: messages || [] 

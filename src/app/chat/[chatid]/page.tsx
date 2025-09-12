@@ -47,34 +47,75 @@ export default function Chat({ params }: { params: Promise<{ chatid: string }> }
 
     const fetchUserInfo = React.useCallback(async (studentId: string, companyId: string) => {
         try {
-            // Supabaseから直接情報を取得する（一時的な実装）
-            // 実際にはAPIを作成することを推奨
+            console.log('=== FETCHING USER INFO VIA API ===');
+            console.log('Student ID from chat_rooms:', studentId);
+            console.log('Company ID from chat_rooms:', companyId);
+            
+            // サーバーサイドAPIを経由して学生情報を取得（RLS回避）
+            console.log('Fetching student info via API...');
+            const studentResponse = await fetch(`/api/users/${studentId}`);
+            console.log('Student API response status:', studentResponse.status);
+            
+            let studentName = '学生';
+            let university = '大学未設定';
+            
+            if (studentResponse.ok) {
+                const studentData = await studentResponse.json();
+                console.log('Student API data:', studentData);
+                
+                if (studentData.name && studentData.name !== '学生') {
+                    studentName = studentData.name;
+                    console.log('✓ Got student name from API:', studentName);
+                } else {
+                    studentName = `学生 (ID: ${studentId.substring(0, 8)})`;
+                    console.log('✓ Using API fallback name:', studentName);
+                }
+                
+                if (studentData.university && studentData.university !== '大学未設定') {
+                    university = studentData.university;
+                    console.log('✓ Got university from API:', university);
+                }
+            } else {
+                console.log('✗ Student API failed, using fallback');
+                studentName = `学生 (ID: ${studentId.substring(0, 8)})`;
+            }
+            
+            // 会社情報を直接取得（権限があるはず）
+            console.log('Fetching company info...');
             const { createClient } = await import('@/lib/supabase/client');
             const supabase = createClient();
             
-            // 学生情報を取得
-            const { data: studentData } = await supabase
-                .from('students')
-                .select('name, university')
-                .eq('id', studentId)
-                .single();
-            
-            if (studentData) {
-                setStudentInfo({ name: studentData.name, university: studentData.university });
-            }
-
-            // 会社情報を取得
-            const { data: companyData } = await supabase
+            const { data: companyData, error: companyError } = await supabase
                 .from('company')
                 .select('name, industry')
                 .eq('id', companyId)
                 .single();
             
-            if (companyData) {
-                setCompanyInfo({ name: companyData.name, industry: companyData.industry });
+            console.log('Company query result:', { data: companyData, error: companyError });
+            
+            if (companyData && !companyError) {
+                setCompanyInfo({ 
+                    name: companyData.name || '企業名不明', 
+                    industry: companyData.industry || '業界不明' 
+                });
+                console.log('✓ Set company info:', companyData.name);
             }
+            
+            console.log('=== FINAL RESULT ===');
+            console.log('Student name:', studentName);
+            console.log('University:', university);
+            
+            setStudentInfo({ 
+                name: studentName, 
+                university: university 
+            });
+            
         } catch (error) {
-            console.error('Error fetching user info:', error);
+            console.error('=== ERROR IN fetchUserInfo ===', error);
+            setStudentInfo({ 
+                name: `学生 (ID: ${studentId.substring(0, 8)})`, 
+                university: '大学未設定' 
+            });
         }
     }, []);
 
@@ -288,50 +329,90 @@ export default function Chat({ params }: { params: Promise<{ chatid: string }> }
     const otherPartyDetail = userType === 'student' ? companyInfo?.industry : studentInfo?.university;
 
     return (
-        <Container maxWidth="xl" sx={{ display: "flex", flexDirection: "column",height: "85vh"}}>
-        <Box sx={{py:4}}><Link href="/chat">←チャット一覧に戻る</Link></Box>
-        <Typography variant='h5'>{otherPartyName}</Typography>
-            <Box sx={{ flex:1,overflowY: "auto",p:2}}>
-                <Stack spacing={1}>
-                    {chatData.messages.map((message: any, index: number) =>
-                    message.sender_type === "student" ? (
-                    <Stack key={index} sx={{alignSelf: "flex-end"}}>
-                        <Typography sx={{fontSize:16}}>{studentInfo?.name}</Typography>
-                        <Card sx={{p:1,maxWidth: 600, width: "fit-content",bgcolor:"aqua"}}>
-                            <Typography>{message.message}</Typography>
-                        </Card>
-                        <Typography variant="overline" color="text.secondary">
-                            {new Date(message.created_at).toLocaleString("ja-JP")}
-                        </Typography>
-                    </Stack>
-                    ):(
-                    <Stack key={index} sx={{alignSelf: "flex-start"}}>
-                        <Typography sx={{fontSize:16}}>{companyInfo?.name}</Typography>
-                        <Card sx={{p:1,maxWidth: 600, width: "fit-content",bgcolor:"white"}}>
-                            <Typography>{message.message}</Typography>
-                        </Card>
-                        <Typography variant="overline" color="text.secondary">
-                            {new Date(message.created_at).toLocaleString("ja-JP")}
-                        </Typography>
-                    </Stack>
-                    ))}
+        <Container maxWidth="xl" sx={{ display: "flex", flexDirection: "column", height: "85vh"}}>
+            <Box sx={{py: 2}}>
+                <Link href="/chat" style={{ textDecoration: 'none', color: 'inherit' }}>
+                    ←チャット一覧に戻る
+                </Link>
+            </Box>
+            <Box sx={{ 
+                p: 2, 
+                borderBottom: "1px solid #ddd", 
+                bgcolor: "background.paper",
+                boxShadow: 1
+            }}>
+                <Typography variant='h5' sx={{ fontWeight: 'bold' }}>
+                    {otherPartyName || '読み込み中...'}
+                </Typography>
+                {otherPartyDetail && (
+                    <Typography variant='subtitle2' color='text.secondary' sx={{ mt: 0.5 }}>
+                        {otherPartyDetail}
+                    </Typography>
+                )}
+            </Box>
+            <Box sx={{ flex:1, overflowY: "auto", p:2}}>
+                <Stack spacing={2}>
+                    {chatData.messages.map((message: any, index: number) => {
+                        const isMyMessage = message.sender_type === userType;
+                        const senderName = message.sender_type === 'student' ? studentInfo?.name : companyInfo?.name;
+                        
+                        return (
+                            <Stack key={index} sx={{alignSelf: isMyMessage ? "flex-end" : "flex-start"}}>
+                                <Typography sx={{fontSize: 14, mb: 0.5, textAlign: isMyMessage ? 'right' : 'left'}}>
+                                    {isMyMessage ? 'あなた' : senderName || '読み込み中...'}
+                                </Typography>
+                                <Card sx={{
+                                    p: 2, 
+                                    maxWidth: 600, 
+                                    width: "fit-content",
+                                    bgcolor: isMyMessage ? "primary.main" : "grey.100",
+                                    color: isMyMessage ? "white" : "text.primary",
+                                    borderRadius: 2,
+                                    boxShadow: 1
+                                }}>
+                                    <Typography>{message.message}</Typography>
+                                </Card>
+                                <Typography variant="caption" color="text.secondary" sx={{textAlign: isMyMessage ? 'right' : 'left', mt: 0.5}}>
+                                    {new Date(message.created_at).toLocaleString("ja-JP")}
+                                </Typography>
+                            </Stack>
+                        );
+                    })}
                     <div ref={messagesEndRef} />
                 </Stack>
             </Box>
-            <Box sx={{p: 2, borderTop: "1px solid #ddd", display: "flex", gap: 1}}>
+            <Box sx={{
+                p: 2, 
+                borderTop: "1px solid #ddd", 
+                display: "flex", 
+                gap: 2,
+                bgcolor: "background.paper",
+                boxShadow: "0 -1px 3px rgba(0,0,0,0.1)"
+            }}>
                 <TextField 
                     fullWidth 
-                    placeholder='メッセージを入力' 
+                    placeholder='メッセージを入力してください' 
                     variant='outlined'
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyDown={handleKeyPress}
                     disabled={sending}
+                    size="small"
+                    sx={{
+                        '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                        }
+                    }}
                 />
                 <Button 
                     variant='contained'
                     onClick={sendMessage}
                     disabled={!newMessage.trim() || sending}
+                    sx={{
+                        borderRadius: 2,
+                        minWidth: 80,
+                        height: 40
+                    }}
                 >
                     {sending ? '送信中...' : '送信'}
                 </Button>
