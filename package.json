@@ -6,7 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start -p 3007",
-    "lint": "eslint"
+    "lint": "eslint",
+    "dev:vue": "cd GeeTech-ProductHP && npm run serve",
+    "dev:both": "concurrently \"npm run dev\" \"npm run dev:vue\"",
+    "start:vue": "cd GeeTech-ProductHP && npm run start",
+    "start:both": "concurrently \"npm run start\" \"npm run start:vue\"",
+    "build:vue": "cd GeeTech-ProductHP && npm run build",
+    "build:both": "npm run build && npm run build:vue"
   },
   "dependencies": {
     "@devicon/react": "^0.0.3",
@@ -39,6 +45,7 @@
     "@types/node": "^20.19.13",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19",
+    "concurrently": "^8.2.2",
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
     "supabase": "^2.39.2",
