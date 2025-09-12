@@ -269,13 +269,13 @@ export default function CompanyPage() {
       </Paper>
 
       {/* 企業一覧 */}
-      <Grid container spacing={3}>
+      <Grid container spacing={4}>
         {filteredCompanies.slice(0, displayCount).map((company, index) => (
           <Grid item xs={12} sm={6} lg={4} key={company.id}>
             <Fade in={true} timeout={300 + index * 100}>
               <Card 
                 sx={{ 
-                  height: '420px', // 固定の高さを設定
+                  height: '350px', // カードの高さを小さく変更
                   display: 'flex',
                   flexDirection: 'column',
                   transition: 'all 0.3s ease-in-out',
@@ -306,30 +306,30 @@ export default function CompanyPage() {
                   }
                 </IconButton>
 
-                <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                <CardContent sx={{ flexGrow: 1, p: 2.5 }}>
                   {/* プロフィール部分 */}
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     {company.logo ? (
                       <Avatar 
                         src={company.logo}
                         alt={company.name}
                         sx={{ 
-                          width: 50, 
-                          height: 50, 
+                          width: 40, 
+                          height: 40, 
                           mr: 2,
-                          border: '3px solid',
+                          border: '2px solid',
                           borderColor: 'primary.light'
                         }}
                       />
                     ) : (
                       <Avatar 
                         sx={{ 
-                          width: 50, 
-                          height: 50, 
+                          width: 40, 
+                          height: 40, 
                           mr: 2,
                           bgcolor: 'primary.main',
-                          fontSize: '1.8rem',
-                          border: '3px solid',
+                          fontSize: '1.5rem',
+                          border: '2px solid',
                           borderColor: 'primary.light'
                         }}
                       >
@@ -355,21 +355,21 @@ export default function CompanyPage() {
                     variant="body2" 
                     color="text.secondary" 
                     sx={{ 
-                      mb: 3,
+                      mb: 2,
                       display: '-webkit-box',
                       WebkitLineClamp: 2,
                       WebkitBoxOrient: 'vertical',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
-                      lineHeight: 1.6,
-                      minHeight: '48px' // 最小の高さを設定して揃える
+                      lineHeight: 1.5,
+                      minHeight: '40px' // 最小の高さを設定して揃える
                     }}
                   >
                     {company.description}
                   </Typography>
 
                   {/* 特徴タグ */}
-                  <Box sx={{ mb: 3 }}>
+                  <Box sx={{ mb: 2 }}>
                     <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', color: 'text.secondary' }}>
                       主な特徴
                     </Typography>
@@ -597,10 +597,10 @@ function LoadingSkeleton() {
       <Grid container spacing={3}>
         {[1, 2, 3, 4, 5, 6].map((i) => (
           <Grid item xs={12} sm={6} lg={4} key={i}>
-            <Card sx={{ height: 420 }}>
+            <Card sx={{ height: 350 }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Skeleton variant="circular" width={60} height={60} sx={{ mr: 2 }} />
+                  <Skeleton variant="circular" width={40} height={40} sx={{ mr: 2 }} />
                   <Box sx={{ flexGrow: 1 }}>
                     <Skeleton variant="text" width="80%" />
                     <Skeleton variant="text" width="60%" />
