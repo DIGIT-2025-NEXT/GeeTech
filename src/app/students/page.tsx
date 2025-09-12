@@ -504,43 +504,6 @@ export default function StudentsPage() {
         </Box>
       )}
 
-      {/* CTAセクション */}
-      <Paper 
-        elevation={4} 
-        sx={{ 
-          mt: 6, 
-          textAlign: 'center', 
-          p: 4, 
-          background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-          color: 'white'
-        }}
-      >
-        <TrendingUpIcon sx={{ fontSize: 60, mb: 2 }} />
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold' }}>
-          あなたも学生として参加しませんか？
-        </Typography>
-        <Typography variant="h6" sx={{ mb: 3, opacity: 0.9 }}>
-          地元企業との出会いが、あなたのキャリアを加速させます。
-        </Typography>
-        <Button 
-          variant="contained" 
-          size="large"
-          sx={{ 
-            textTransform: 'none',
-            borderRadius: 3,
-            px: 4,
-            py: 1.5,
-            bgcolor: 'white',
-            color: 'primary.main',
-            fontWeight: 'bold',
-            '&:hover': {
-              bgcolor: 'grey.100'
-            }
-          }}
-        >
-          学生登録はこちら
-        </Button>
-      </Paper>
     </Container>
   );
 }
