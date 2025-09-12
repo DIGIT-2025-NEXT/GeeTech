@@ -128,7 +128,7 @@ export default function CompanyRegisterPage() {
       case 0:
         return (
           <Grid container spacing={3}>
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid xs={12} md={6}>
               <TextField
                 fullWidth
                 label="企業名"
@@ -142,7 +142,7 @@ export default function CompanyRegisterPage() {
                 }}
               />
             </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid xs={12} md={6}>
               <TextField
                 fullWidth
                 label="代表者名"
@@ -156,7 +156,7 @@ export default function CompanyRegisterPage() {
                 }}
               />
             </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid xs={12} md={6}>
               <TextField
                 fullWidth
                 label="メールアドレス"
@@ -171,7 +171,7 @@ export default function CompanyRegisterPage() {
                 }}
               />
             </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid xs={12} md={6}>
               <TextField
                 fullWidth
                 label="電話番号"
@@ -185,7 +185,7 @@ export default function CompanyRegisterPage() {
                 }}
               />
             </Grid>
-            <Grid size={{ xs: 12 }}>
+            <Grid xs={12}>
               <TextField
                 fullWidth
                 label="ウェブサイト"
@@ -203,7 +203,7 @@ export default function CompanyRegisterPage() {
       case 1:
         return (
           <Grid container spacing={3}>
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid xs={12} md={6}>
               <FormControl fullWidth required error={!!errors.industry}>
                 <InputLabel>業界</InputLabel>
                 <Select
@@ -219,7 +219,7 @@ export default function CompanyRegisterPage() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid xs={12} md={6}>
               <FormControl fullWidth required error={!!errors.employeeCount}>
                 <InputLabel>従業員数</InputLabel>
                 <Select
@@ -235,7 +235,7 @@ export default function CompanyRegisterPage() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid xs={12} md={6}>
               <TextField
                 fullWidth
                 label="設立年"
@@ -245,7 +245,7 @@ export default function CompanyRegisterPage() {
                 inputProps={{ min: 1900, max: new Date().getFullYear() }}
               />
             </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid xs={12} md={6}>
               <TextField
                 fullWidth
                 label="資本金（万円）"
@@ -255,7 +255,7 @@ export default function CompanyRegisterPage() {
                 inputProps={{ min: 0 }}
               />
             </Grid>
-            <Grid size={{ xs: 12 }}>
+            <Grid xs={12}>
               <TextField
                 fullWidth
                 label="所在地"
@@ -269,7 +269,7 @@ export default function CompanyRegisterPage() {
                 }}
               />
             </Grid>
-            <Grid size={{ xs: 12 }}>
+            <Grid xs={12}>
               <TextField
                 fullWidth
                 label="企業説明"
@@ -283,7 +283,7 @@ export default function CompanyRegisterPage() {
                 placeholder="当社は..."
               />
             </Grid>
-            <Grid size={{ xs: 12 }}>
+            <Grid xs={12}>
               <TextField
                 fullWidth
                 label="事業内容"
@@ -306,7 +306,7 @@ export default function CompanyRegisterPage() {
             </Alert>
 
             <Grid container spacing={3}>
-              <Grid size={{ xs: 12 }}>
+              <Grid xs={12}>
                 <Paper elevation={1} sx={{ p: 3, mb: 2 }}>
                   <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
                     <BusinessIcon sx={{ mr: 1 }} />
@@ -314,24 +314,24 @@ export default function CompanyRegisterPage() {
                   </Typography>
                   <Divider sx={{ mb: 2 }} />
                   <Grid container spacing={2}>
-                    <Grid size={{ xs: 12, sm: 6 }}>
+                    <Grid xs={12} sm={6}>
                       <Typography variant="body2" color="text.secondary">企業名</Typography>
                       <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{companyData.companyName}</Typography>
                     </Grid>
-                    <Grid size={{ xs: 12, sm: 6 }}>
+                    <Grid xs={12} sm={6}>
                       <Typography variant="body2" color="text.secondary">代表者名</Typography>
                       <Typography variant="body1">{companyData.representativeName}</Typography>
                     </Grid>
-                    <Grid size={{ xs: 12, sm: 6 }}>
+                    <Grid xs={12} sm={6}>
                       <Typography variant="body2" color="text.secondary">メールアドレス</Typography>
                       <Typography variant="body1">{companyData.email}</Typography>
                     </Grid>
-                    <Grid size={{ xs: 12, sm: 6 }}>
+                    <Grid xs={12} sm={6}>
                       <Typography variant="body2" color="text.secondary">電話番号</Typography>
                       <Typography variant="body1">{companyData.phone}</Typography>
                     </Grid>
                     {companyData.website && (
-                      <Grid size={{ xs: 12 }}>
+                      <Grid xs={12}>
                         <Typography variant="body2" color="text.secondary">ウェブサイト</Typography>
                         <Typography variant="body1">{companyData.website}</Typography>
                       </Grid>
@@ -340,7 +340,7 @@ export default function CompanyRegisterPage() {
                 </Paper>
               </Grid>
 
-              <Grid size={{ xs: 12 }}>
+              <Grid xs={12}>
                 <Paper elevation={1} sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
                     <WorkIcon sx={{ mr: 1 }} />
@@ -348,36 +348,36 @@ export default function CompanyRegisterPage() {
                   </Typography>
                   <Divider sx={{ mb: 2 }} />
                   <Grid container spacing={2}>
-                    <Grid size={{ xs: 12, sm: 6 }}>
+                    <Grid xs={12} sm={6}>
                       <Typography variant="body2" color="text.secondary">業界</Typography>
                       <Chip label={companyData.industry} color="primary" variant="outlined" />
                     </Grid>
-                    <Grid size={{ xs: 12, sm: 6 }}>
+                    <Grid xs={12} sm={6}>
                       <Typography variant="body2" color="text.secondary">従業員数</Typography>
                       <Typography variant="body1">{companyData.employeeCount}</Typography>
                     </Grid>
                     {companyData.establishedYear && (
-                      <Grid size={{ xs: 12, sm: 6 }}>
+                      <Grid xs={12} sm={6}>
                         <Typography variant="body2" color="text.secondary">設立年</Typography>
                         <Typography variant="body1">{companyData.establishedYear}年</Typography>
                       </Grid>
                     )}
                     {companyData.capital && (
-                      <Grid size={{ xs: 12, sm: 6 }}>
+                      <Grid xs={12} sm={6}>
                         <Typography variant="body2" color="text.secondary">資本金</Typography>
                         <Typography variant="body1">{companyData.capital}万円</Typography>
                       </Grid>
                     )}
-                    <Grid size={{ xs: 12 }}>
+                    <Grid xs={12}>
                       <Typography variant="body2" color="text.secondary">所在地</Typography>
                       <Typography variant="body1">{companyData.address}</Typography>
                     </Grid>
-                    <Grid size={{ xs: 12 }}>
+                    <Grid xs={12}>
                       <Typography variant="body2" color="text.secondary">企業説明</Typography>
                       <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>{companyData.description}</Typography>
                     </Grid>
                     {companyData.businessContent && (
-                      <Grid size={{ xs: 12 }}>
+                      <Grid xs={12}>
                         <Typography variant="body2" color="text.secondary">事業内容</Typography>
                         <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>{companyData.businessContent}</Typography>
                       </Grid>

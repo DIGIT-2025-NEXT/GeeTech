@@ -258,7 +258,7 @@ export default function StudentDetailPage() {
           アクション
         </Typography>
         <Grid container spacing={2}>
-          <Grid size={{ xs: 12, sm: 6 }}>
+          <Grid xs={12} sm={6}>
             <Button
               fullWidth
               variant="contained"
@@ -285,7 +285,7 @@ export default function StudentDetailPage() {
               メッセージを送る
             </Button>
           </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
+          <Grid xs={12} sm={6}>
             <Button
               fullWidth
               variant="outlined"
@@ -304,8 +304,8 @@ export default function StudentDetailPage() {
             >
               採用を検討
             </Button>
-          </GridWorkaround>
-        </GridWorkaround>
+          </Grid>
+        </Grid>
       </Paper>
 
       {/* 連絡先情報 */}

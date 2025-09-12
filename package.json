@@ -12,8 +12,9 @@
     "@devicon/react": "^0.0.3",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@mui/icons-material": "^5.18.0",
-    "@mui/material": "^5.18.0",
+    "@mui/icons-material": "5.18.0",
+    "@mui/material": "5.18.0",
+    "@mui/system": "5.18.0",
     "@mui/x-data-grid": "^5.17.26",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/auth-helpers-react": "^0.5.0",
@@ -24,6 +25,13 @@
     "next": "^15.5.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
+  },
+  "overrides": {
+    "@mui/material": "5.18.0",
+    "@mui/system": "5.18.0",
+    "@mui/icons-material": "5.18.0",
+    "@mui/utils": "5.17.1",
+    "@mui/types": "7.2.15"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
