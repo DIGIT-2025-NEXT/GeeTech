@@ -1,11 +1,8 @@
 // lib/mock.ts - Mock data for events and students
+import { createClient } from './supabase/client'
+import type { Tables } from './types_db'
 
-export interface Event {
-  id: string;
-  title: string;
-  starts_on: string;
-  venue?: string;
-}
+export type Event = Tables<'events'>;
 
 export interface Student {
   id: string;
@@ -48,81 +45,6 @@ export interface ChatLog{
   studentid: string;
   chatlog: ChatLog[];
  }
-// Mock event data
-const mockEvents: Event[] = [
-  {
-    id: "1",
-    title: "React勉強会",
-    starts_on: "2025-09-10T19:00:00Z",
-    venue: "オンライン"
-  },
-  {
-    id: "2", 
-    title: "TypeScript入門セミナー",
-    starts_on: "2025-09-15T14:00:00Z",
-    venue: "東京会場"
-  },
-  {
-    id: "3",
-    title: "Web開発ハンズオン",
-    starts_on: "2025-09-20T10:00:00Z",
-    venue: "大阪会場"
-  },
-  {
-    id: "4",
-    title: "デザインシステム構築講座",
-    starts_on: "2025-09-25T16:00:00Z",
-    venue: "オンライン"
-  },
-  {
-    id: "5",
-    title: "Next.js実践講座",
-    starts_on: "2025-10-01T13:00:00Z",
-    venue: "名古屋会場"
-  },
-  {
-    id: "6",
-    title: "アクセシビリティ改善ワークショップ",
-    starts_on: "2025-10-05T15:00:00Z",
-    venue: "オンライン"
-  },
-  {
-    id: "7",
-    title: "パフォーマンス最適化セミナー",
-    starts_on: "2025-10-10T11:00:00Z",
-    venue: "福岡会場"
-  },
-  {
-    id: "8",
-    title: "CI/CD導入実践",
-    starts_on: "2025-10-15T14:30:00Z",
-    venue: "オンライン"
-  },
-  {
-    id: "9",
-    title: "モバイルファースト開発",
-    starts_on: "2025-10-20T10:00:00Z",
-    venue: "仙台会場"
-  },
-  {
-    id: "10",
-    title: "GraphQL API設計",
-    starts_on: "2025-10-25T16:00:00Z",
-    venue: "オンライン"
-  },
-  {
-    id: "11",
-    title: "Dockerコンテナ化入門",
-    starts_on: "2025-11-01T13:00:00Z",
-    venue: "札幌会場"
-  },
-  {
-    id: "12",
-    title: "セキュリティベストプラクティス",
-    starts_on: "2025-11-05T15:30:00Z",
-    venue: "オンライン"
-  }
-];
 
 // Mock student data
 const mockStudents: Student[] = [
@@ -234,142 +156,26 @@ const mockStudents: Student[] = [
 ];
 
 
-export function getNext10(): Event[] {
+export async function getNext10(): Promise<Event[]> {
+  const supabase = createClient()
+  const { data: events, error } = await supabase
+    .from('events')
+    .select('*')
+    .order('starts_on', { ascending: true })
+    .limit(10)
+
+  if (error) {
+    console.error('Error fetching events:', error)
+    return []
+  }
+
   const now = new Date();
-  
-  return mockEvents
-    .filter(event => new Date(event.starts_on) >= now)
-    .sort((a, b) => new Date(a.starts_on).getTime() - new Date(b.starts_on).getTime())
-    .slice(0, 10);
+  return events.filter(event => new Date(event.starts_on) >= now);
 }
 
 export function getAllStudents(): Student[] {
   return mockStudents;
 }
-
-// Mock company data
-const mockCompanies: Company[] = [
-  {
-    id: "1",
-    name: "株式会社 未来創造",
-    industry: "AI・地域活性化",
-    description: "私たちはAI技術を駆使して、北九州市の地域課題解決に取り組むスタートアップです。あなたの若い力で、未来の北九州を一緒に創りませんか？",
-    features: ["リモートワーク可", "オンライン面談OK", "フレックス制度"],
-    partcipantsid: ["1", "4", "5"]
-  },
-  {
-    id: "2", 
-    name: "TechForward Inc.",
-    industry: "製造業向けSaaS",
-    description: "製造業のDXを推進するための革新的なSaaSを開発しています。世界に通用するプロダクト開発に興味がある学生を募集しています。",
-    features: ["オンライン面談OK", "住宅手当あり", "研修制度充実"],
-    partcipantsid: ["2", "3"]
-  },
-  {
-    id: "3",
-    name: "Kitakyushu Labs",
-    industry: "環境エネルギー", 
-    description: "持続可能な社会を目指し、再生可能エネルギーに関する研究開発を行っています。環境問題に情熱を持つ仲間を探しています。",
-    features: ["リモートワーク可", "社会貢献活動参加", "学会発表支援"],
-    partcipantsid: []
-  },
-  {
-    id: "4",
-    name: "株式会社グルメディスカバリー",
-    industry: "フードテック",
-    description: "地元の隠れた名店と食を愛する人々をつなぐ新しいプラットフォームを開発中。食べることが好きな人大歓迎！",
-    features: ["食事補助", "オンライン面談OK", "カジュアル面談可"],
-    partcipantsid: ["1", "2", "3", "4"]
-  },
-  {
-    id: "5",
-    name: "NextGen Solutions",
-    industry: "ヘルスケアIT",
-    description: "医療現場のデジタル化を推進し、患者さんと医療従事者の双方にメリットをもたらすソリューションを開発しています。",
-    features: ["フレックス制度", "研修制度充実", "リモートワーク可"],
-    partcipantsid: []
-  },
-  {
-    id: "6",
-    name: "株式会社イノベートラボ",
-    industry: "EdTech",
-    description: "教育とテクノロジーの融合で、新しい学習体験を創造します。学習者一人ひとりに最適化された教育プラットフォームを開発中です。",
-    features: ["リモートワーク可", "学習支援制度", "オンライン面談OK"],
-    partcipantsid: ["1", "3"]
-  },
-  {
-    id: "7",
-    name: "データマイニング株式会社",
-    industry: "ビッグデータ・AI",
-    description: "企業のビッグデータ活用を支援し、データドリブンな意思決定を実現するAIソリューションを提供しています。",
-    features: ["最新技術習得支援", "フレックス制度", "研修制度充実"],
-    partcipantsid: ["4", "9"]
-  },
-  {
-    id: "8",
-    name: "株式会社スマートシティ九州",
-    industry: "IoT・スマートシティ",
-    description: "IoT技術を活用したスマートシティの実現に向けて、センサーネットワークと都市データの活用プラットフォームを開発しています。",
-    features: ["社会貢献活動参加", "技術力向上支援", "オンライン面談OK"],
-    partcipantsid: ["2", "5"]
-  },
-  {
-    id: "9",
-    name: "株式会社クリエイティブデザイン",
-    industry: "デザイン・UI/UX",
-    description: "ユーザー体験を重視したWebサービスやアプリのデザインを手がけ、クライアントのブランド価値向上に貢献しています。",
-    features: ["クリエイティブ環境", "デザインツール支給", "フレックス制度"],
-    partcipantsid: ["1", "6"]
-  },
-  {
-    id: "10",
-    name: "株式会社ブロックチェーンラボ",
-    industry: "ブロックチェーン・Web3",
-    description: "ブロックチェーン技術を活用した分散型アプリケーションの開発と、Web3時代の新しいビジネスモデルの創造に取り組んでいます。",
-    features: ["最先端技術", "リモートワーク可", "技術書購入支援"],
-    partcipantsid: ["11"]
-  },
-  {
-    id: "11",
-    name: "株式会社ロボティクス北九州",
-    industry: "ロボティクス・自動化",
-    description: "産業用ロボットの開発と工場自動化システムの構築を通じて、製造業の生産性向上と働き方改革を支援しています。",
-    features: ["技術力向上支援", "研修制度充実", "住宅手当あり"],
-    partcipantsid: ["14"]
-  },
-  {
-    id: "12",
-    name: "株式会社サステナブルエナジー",
-    industry: "再生可能エネルギー・蓄電",
-    description: "太陽光発電と蓄電池システムの開発・運用を通じて、持続可能なエネルギー社会の実現を目指しています。",
-    features: ["環境貢献", "技術研究支援", "フレックス制度"],
-    partcipantsid: ["10", "15"]
-  },
-  {
-    id: "13",
-    name: "株式会社バイオテックイノベーション",
-    industry: "バイオテクノロジー",
-    description: "バイオテクノロジーを活用した新薬開発支援と医療機器の研究開発を行い、人々の健康と生活の質向上に貢献しています。",
-    features: ["研究環境充実", "学会発表支援", "オンライン面談OK"],
-    partcipantsid: ["8", "12"]
-  },
-  {
-    id: "14",
-    name: "株式会社デジタルマーケティングプロ",
-    industry: "デジタルマーケティング",
-    description: "AI を活用したマーケティング自動化ツールの開発と、企業のデジタル変革を支援するコンサルティングサービスを提供しています。",
-    features: ["マーケティングスキル習得", "データ分析環境", "リモートワーク可"],
-    partcipantsid: ["7", "13"]
-  },
-  {
-    id: "15",
-    name: "株式会社次世代モビリティ",
-    industry: "モビリティ・自動運転",
-    description: "自動運転技術の研究開発と次世代モビリティサービスの構築を通じて、未来の交通社会をデザインしています。",
-    features: ["最新技術研究", "技術力向上支援", "社会貢献活動参加"],
-    partcipantsid: []
-  }
-];
 
 // Mock project data
 const mockProjects: Project[] = [
@@ -682,7 +488,7 @@ export const mockChats: Chat[] = [
       { speaker: "company", chattext: "クラウドサービスのUI改善を依頼できますか？", chattime: "2025-09-07 09:00" },
       { speaker: "student", chattext: "はい、ダッシュボード設計を得意としています。", chattime: "2025-09-07 09:05" },
       { speaker: "company", chattext: "管理者用と一般ユーザー用に分けたいです。", chattime: "2025-09-07 09:10" },
-      { speaker: "student", chattext: "権限ごとにUIを最適化して提案します。", chattime: "2025-09-07 09:15" }
+      { speaker: "student", chattext: "権限ごとにUIを最適化して提案します。", chattime: "2025-09-07 15:15" }
     ]
   },
   {
@@ -737,12 +543,28 @@ export function getStudentById(id: string): Student | undefined {
   return mockStudents.find(student => student.id === id);
 }
 
-export function getAllCompanies(): Company[] {
-  return mockCompanies;
-}
+export async function getAllCompanies(): Promise<Company[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase.from('company').select('*');
 
-export function getCompanyById(id: string): Company | undefined {
-  return mockCompanies.find(company => company.id === id);
+  if (error) {
+    console.error('Error fetching companies:', error);
+    return [];
+  }
+
+  // Ensure the fetched data matches the Company type
+  return data.map((company: any) => ({
+    id: company.id,
+    name: company.name,
+    industry: company.industry,
+    description: company.description,
+    features: company.features || [],
+    logo: company.logo || '',
+    projects: company.projects || [],
+    partcipantsid: company.partcipantsid || [],
+    adoptedid: company.adoptedid || [],
+    Rejectedid: company.Rejectedid || [], // Use Rejectedid as per the interface
+  }));
 }
 
 export function getProjectsByCompanyId(companyId: string): Project[] {

@@ -3,17 +3,27 @@
 import { useAuth } from '@/contexts/AuthContext'
 import { Container, Paper, Typography, Button, Box, Avatar, Divider } from '@mui/material'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { getNext10, Event } from '@/lib/mock' // Import Event type and getNext10
 
 export default function EventsPage() {
   const { user, signOut, loading } = useAuth()
   const router = useRouter()
+  const [events, setEvents] = useState<Event[]>([]) // State to store events
 
   useEffect(() => {
     if (!loading && !user) {
       router.replace('/login')
     }
   }, [user, loading, router])
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      const fetchedEvents = await getNext10()
+      setEvents(fetchedEvents)
+    }
+    fetchEvents()
+  }, []) // Fetch events on component mount
 
   if (loading) {
     return (
@@ -36,49 +46,28 @@ export default function EventsPage() {
     <Container maxWidth="md" sx={{ py: 6 }}>
       <Paper elevation={3} sx={{ p: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom align="center">
-          ダッシュボード
+          イベント一覧
         </Typography>
 
-        <Box display="flex" flexDirection="column" alignItems="center" sx={{ mb: 4 }}>
-          <Avatar
-            src={user.user_metadata?.avatar_url}
-            sx={{ width: 80, height: 80, mb: 2 }}
-          >
-            {user.email?.charAt(0).toUpperCase()}
-          </Avatar>
-          
-          <Typography variant="h6" gutterBottom>
-            ようこそ、{user.user_metadata?.full_name || user.email}さん
-          </Typography>
-        </Box>
-
-        <Divider sx={{ mb: 3 }} />
-
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            ユーザー情報
-          </Typography>
-          
-          <Box sx={{ pl: 2 }}>
-            <Typography variant="body1" paragraph>
-              <strong>メールアドレス:</strong> {user.email}
-            </Typography>
-            
-            <Typography variant="body1" paragraph>
-              <strong>ユーザーID:</strong> {user.id}
-            </Typography>
-            
-            <Typography variant="body1" paragraph>
-              <strong>登録日時:</strong> {new Date(user.created_at).toLocaleString('ja-JP')}
-            </Typography>
-            
-            {user.last_sign_in_at && (
-              <Typography variant="body1" paragraph>
-                <strong>最終ログイン:</strong> {new Date(user.last_sign_in_at).toLocaleString('ja-JP')}
-              </Typography>
-            )}
+        {events.length === 0 ? (
+          <Typography align="center">イベントがありません。</Typography>
+        ) : (
+          <Box>
+            {events.map((event) => (
+              <Box key={event.id} sx={{ mb: 3, p: 2, border: '1px solid #e0e0e0', borderRadius: '8px' }}>
+                <Typography variant="h6">{event.title}</Typography>
+                <Typography variant="body2" color="textSecondary">
+                  日時: {new Date(event.starts_on).toLocaleString('ja-JP')}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  場所: {event.venue || '未定'}
+                </Typography>
+              </Box>
+            ))}
           </Box>
-        </Box>
+        )}
+
+        <Divider sx={{ my: 3 }} />
 
         <Box textAlign="center">
           <Button
