@@ -3,8 +3,7 @@
 
 import { Box, Button, Card, CardContent, Container, Stack, Typography, Breadcrumbs} from '@mui/material';
 import Link from 'next/link';
-import { type Chat } from '@/lib/mock';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from '@/contexts/AuthContext';
 
 interface ChatRoom {
@@ -37,28 +36,7 @@ export default function Chat() {
   const [loadingRooms, setLoadingRooms] = useState(false);
   const { user, loading } = useAuth();
 
-  useEffect(() => {
-    if (user && !loading) {
-      fetchChatRooms();
-    }
-  }, [user, loading]);
-
-  // チャットルームのポーリング更新
-  useEffect(() => {
-    if (!user || !userType) return;
-
-    // 4秒ごとにチャットルーム一覧を更新
-    const intervalId = setInterval(() => {
-      console.log(`Polling for chat rooms updates (${userType})`);
-      fetchChatRooms();
-    }, 4000);
-
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [user, userType]);
-
-  const fetchChatRooms = async () => {
+  const fetchChatRooms = useCallback(async () => {
     setLoadingRooms(true);
     try {
       const response = await fetch('/api/chat/rooms');
@@ -76,7 +54,28 @@ export default function Chat() {
       console.error('Error fetching chat rooms:', error);
     }
     setLoadingRooms(false);
-  };
+  }, []);
+
+  useEffect(() => {
+    if (user && !loading) {
+      fetchChatRooms();
+    }
+  }, [user, loading, fetchChatRooms]);
+
+  // チャットルームのポーリング更新
+  useEffect(() => {
+    if (!user || !userType) return;
+
+    // 4秒ごとにチャットルーム一覧を更新
+    const intervalId = setInterval(() => {
+      console.log(`Polling for chat rooms updates (${userType})`);
+      fetchChatRooms();
+    }, 4000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [user, userType, fetchChatRooms]);
 
   if (loading || loadingRooms) {
     return (
@@ -141,10 +140,10 @@ export default function Chat() {
           <Card key={room.id}>
             <CardContent>
               <Typography variant='h6'>
-                {userType === 'student' ? room.company?.name || '企業名不明' : room.students?.name || '学生名不明'}
+                {userType === 'student' ? room.company.name : room.students.name}
               </Typography>
               <Typography variant='subtitle2' color='text.secondary'>
-                {userType === 'student' ? room.company?.industry || '業界不明' : room.students?.university || '大学不明'}
+                {userType === 'student' ? room.company.industry : room.students.university}
               </Typography>
               {room.lastMessage && (
                 <Typography sx={{ mt: 1, mb: 2 }}>
