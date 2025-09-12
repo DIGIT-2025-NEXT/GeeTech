@@ -1,11 +1,8 @@
 // lib/mock.ts - Mock data for events and students
+import { createClient } from './supabase/client'
+import type { Tables } from './types_db'
 
-export interface Event {
-  id: string;
-  title: string;
-  starts_on: string;
-  venue?: string;
-}
+export type Event = Tables<'events'>;
 
 export interface Student {
   id: string;
@@ -48,334 +45,12 @@ export interface ChatLog{
   studentid: string;
   chatlog: ChatLog[];
  }
-// Mock event data
-const mockEvents: Event[] = [
+
+// Fallback mock data for projects (until Supabase table is created)
+const mockProjectsFallback: Project[] = [
   {
     id: "1",
-    title: "React勉強会",
-    starts_on: "2025-09-10T19:00:00Z",
-    venue: "オンライン"
-  },
-  {
-    id: "2", 
-    title: "TypeScript入門セミナー",
-    starts_on: "2025-09-15T14:00:00Z",
-    venue: "東京会場"
-  },
-  {
-    id: "3",
-    title: "Web開発ハンズオン",
-    starts_on: "2025-09-20T10:00:00Z",
-    venue: "大阪会場"
-  },
-  {
-    id: "4",
-    title: "デザインシステム構築講座",
-    starts_on: "2025-09-25T16:00:00Z",
-    venue: "オンライン"
-  },
-  {
-    id: "5",
-    title: "Next.js実践講座",
-    starts_on: "2025-10-01T13:00:00Z",
-    venue: "名古屋会場"
-  },
-  {
-    id: "6",
-    title: "アクセシビリティ改善ワークショップ",
-    starts_on: "2025-10-05T15:00:00Z",
-    venue: "オンライン"
-  },
-  {
-    id: "7",
-    title: "パフォーマンス最適化セミナー",
-    starts_on: "2025-10-10T11:00:00Z",
-    venue: "福岡会場"
-  },
-  {
-    id: "8",
-    title: "CI/CD導入実践",
-    starts_on: "2025-10-15T14:30:00Z",
-    venue: "オンライン"
-  },
-  {
-    id: "9",
-    title: "モバイルファースト開発",
-    starts_on: "2025-10-20T10:00:00Z",
-    venue: "仙台会場"
-  },
-  {
-    id: "10",
-    title: "GraphQL API設計",
-    starts_on: "2025-10-25T16:00:00Z",
-    venue: "オンライン"
-  },
-  {
-    id: "11",
-    title: "Dockerコンテナ化入門",
-    starts_on: "2025-11-01T13:00:00Z",
-    venue: "札幌会場"
-  },
-  {
-    id: "12",
-    title: "セキュリティベストプラクティス",
-    starts_on: "2025-11-05T15:30:00Z",
-    venue: "オンライン"
-  }
-];
-
-// Mock student data
-const mockStudents: Student[] = [
-  {
-    id: "1",
-    name: "山田 花子",
-    university: "九州工業大学 情報工学部",
-    bio: "Web開発とUI/UXデザインに興味があります。ユーザーに愛されるサービスを作る経験を積みたいです。",
-    skills: ["HTML/CSS", "JavaScript", "Figma", "React"]
-  },
-  {
-    id: "2", 
-    name: "田中 太郎",
-    university: "北九州市立大学 経済学部",
-    bio: "マーケティングとデータ分析を学んでいます。スタートアップのグロース戦略に貢献したいです。",
-    skills: ["マーケティングリサーチ", "データ分析", "SNS運用"]
-  },
-  {
-    id: "3",
-    name: "鈴木 一郎", 
-    university: "産業医科大学 医学部",
-    bio: "医療分野の課題をテクノロジーで解決することに情熱を持っています。ヘルスケア関連の事業に携わりたいです。",
-    skills: ["医療知識", "研究", "課題発見能力"]
-  },
-  {
-    id: "4",
-    name: "佐藤 美咲",
-    university: "九州工業大学 情報工学部",
-    bio: "AI・機械学習に興味があり、社会課題解決に技術を活用したいと考えています。",
-    skills: ["Python", "機械学習", "データサイエンス", "TensorFlow"]
-  },
-  {
-    id: "5",
-    name: "中村 健太",
-    university: "北九州市立大学 国際環境工学部",
-    bio: "環境問題に関心があり、持続可能な社会の実現に貢献したいです。",
-    skills: ["環境工学", "プロジェクト管理", "データ分析"]
-  },
-  {
-    id: "6",
-    name: "高橋 彩香",
-    university: "九州工業大学 情報工学部",
-    bio: "VRとARの技術開発に興味があり、新しい体験を作り出すことに挑戦したいです。",
-    skills: ["Unity", "C#", "VR/AR開発", "3Dモデリング"]
-  },
-  {
-    id: "7",
-    name: "渡辺 拓真",
-    university: "北九州市立大学 経済学部",
-    bio: "デジタルマーケティングとデータ分析を学んでいます。EC事業の成長戦略に興味があります。",
-    skills: ["Google Analytics", "SEO", "SNSマーケティング", "データ分析"]
-  },
-  {
-    id: "8",
-    name: "松本 優子",
-    university: "産業医科大学 医学部",
-    bio: "医療DXの推進に関心があり、患者さんの体験向上に貢献したいと考えています。",
-    skills: ["医療知識", "UI/UX基礎", "プロセス改善", "データ分析"]
-  },
-  {
-    id: "9",
-    name: "森田 慎一",
-    university: "九州工業大学 情報工学部",
-    bio: "IoTとスマートシティの実現に向けて、センサーデータの活用に取り組んでいます。",
-    skills: ["IoT", "Python", "センサーネットワーク", "データ可視化"]
-  },
-  {
-    id: "10",
-    name: "小川 恵美",
-    university: "北九州市立大学 国際環境工学部",
-    bio: "サステナブルなビジネスモデルの構築に興味があり、循環経済の実現に貢献したいです。",
-    skills: ["環境経済学", "プロジェクト企画", "プレゼンテーション", "英語"]
-  },
-  {
-    id: "11",
-    name: "加藤 雄介",
-    university: "九州工業大学 情報工学部",
-    bio: "ブロックチェーン技術を活用した新しいサービス開発に挑戦したいと考えています。",
-    skills: ["Solidity", "Web3.js", "JavaScript", "暗号化技術"]
-  },
-  {
-    id: "12",
-    name: "岡田 亜衣",
-    university: "産業医科大学 医学部",
-    bio: "医療現場でのAI活用に興味があり、診断支援システムの開発に携わりたいです。",
-    skills: ["医療統計", "機械学習基礎", "研究", "データ解釈"]
-  },
-  {
-    id: "13",
-    name: "石井 翔太",
-    university: "北九州市立大学 経済学部",
-    bio: "地域創生とスタートアップエコシステムの構築に関心があります。",
-    skills: ["ビジネス企画", "市場調査", "プレゼンテーション", "チームワーク"]
-  },
-  {
-    id: "14",
-    name: "村上 美里",
-    university: "九州工業大学 情報工学部",
-    bio: "AIとロボティクスの融合技術に興味があり、人と機械の協働を実現したいです。",
-    skills: ["ROS", "Python", "機械学習", "制御工学"]
-  },
-  {
-    id: "15",
-    name: "長谷川 健二",
-    university: "北九州市立大学 国際環境工学部",
-    bio: "再生可能エネルギーの効率化と蓄電技術の開発に取り組みたいと考えています。",
-    skills: ["電気工学", "バッテリー技術", "シミュレーション", "実験設計"]
-  }
-];
-
-
-export function getNext10(): Event[] {
-  const now = new Date();
-  
-  return mockEvents
-    .filter(event => new Date(event.starts_on) >= now)
-    .sort((a, b) => new Date(a.starts_on).getTime() - new Date(b.starts_on).getTime())
-    .slice(0, 10);
-}
-
-export function getAllStudents(): Student[] {
-  return mockStudents;
-}
-
-// Mock company data
-const mockCompanies: Company[] = [
-  {
-    id: "1",
-    name: "株式会社 未来創造",
-    industry: "AI・地域活性化",
-    description: "私たちはAI技術を駆使して、北九州市の地域課題解決に取り組むスタートアップです。あなたの若い力で、未来の北九州を一緒に創りませんか？",
-    features: ["リモートワーク可", "オンライン面談OK", "フレックス制度"],
-    partcipantsid: ["1", "4", "5"]
-  },
-  {
-    id: "2", 
-    name: "TechForward Inc.",
-    industry: "製造業向けSaaS",
-    description: "製造業のDXを推進するための革新的なSaaSを開発しています。世界に通用するプロダクト開発に興味がある学生を募集しています。",
-    features: ["オンライン面談OK", "住宅手当あり", "研修制度充実"],
-    partcipantsid: ["2", "3"]
-  },
-  {
-    id: "3",
-    name: "Kitakyushu Labs",
-    industry: "環境エネルギー", 
-    description: "持続可能な社会を目指し、再生可能エネルギーに関する研究開発を行っています。環境問題に情熱を持つ仲間を探しています。",
-    features: ["リモートワーク可", "社会貢献活動参加", "学会発表支援"],
-    partcipantsid: []
-  },
-  {
-    id: "4",
-    name: "株式会社グルメディスカバリー",
-    industry: "フードテック",
-    description: "地元の隠れた名店と食を愛する人々をつなぐ新しいプラットフォームを開発中。食べることが好きな人大歓迎！",
-    features: ["食事補助", "オンライン面談OK", "カジュアル面談可"],
-    partcipantsid: ["1", "2", "3", "4"]
-  },
-  {
-    id: "5",
-    name: "NextGen Solutions",
-    industry: "ヘルスケアIT",
-    description: "医療現場のデジタル化を推進し、患者さんと医療従事者の双方にメリットをもたらすソリューションを開発しています。",
-    features: ["フレックス制度", "研修制度充実", "リモートワーク可"],
-    partcipantsid: []
-  },
-  {
-    id: "6",
-    name: "株式会社イノベートラボ",
-    industry: "EdTech",
-    description: "教育とテクノロジーの融合で、新しい学習体験を創造します。学習者一人ひとりに最適化された教育プラットフォームを開発中です。",
-    features: ["リモートワーク可", "学習支援制度", "オンライン面談OK"],
-    partcipantsid: ["1", "3"]
-  },
-  {
-    id: "7",
-    name: "データマイニング株式会社",
-    industry: "ビッグデータ・AI",
-    description: "企業のビッグデータ活用を支援し、データドリブンな意思決定を実現するAIソリューションを提供しています。",
-    features: ["最新技術習得支援", "フレックス制度", "研修制度充実"],
-    partcipantsid: ["4", "9"]
-  },
-  {
-    id: "8",
-    name: "株式会社スマートシティ九州",
-    industry: "IoT・スマートシティ",
-    description: "IoT技術を活用したスマートシティの実現に向けて、センサーネットワークと都市データの活用プラットフォームを開発しています。",
-    features: ["社会貢献活動参加", "技術力向上支援", "オンライン面談OK"],
-    partcipantsid: ["2", "5"]
-  },
-  {
-    id: "9",
-    name: "株式会社クリエイティブデザイン",
-    industry: "デザイン・UI/UX",
-    description: "ユーザー体験を重視したWebサービスやアプリのデザインを手がけ、クライアントのブランド価値向上に貢献しています。",
-    features: ["クリエイティブ環境", "デザインツール支給", "フレックス制度"],
-    partcipantsid: ["1", "6"]
-  },
-  {
-    id: "10",
-    name: "株式会社ブロックチェーンラボ",
-    industry: "ブロックチェーン・Web3",
-    description: "ブロックチェーン技術を活用した分散型アプリケーションの開発と、Web3時代の新しいビジネスモデルの創造に取り組んでいます。",
-    features: ["最先端技術", "リモートワーク可", "技術書購入支援"],
-    partcipantsid: ["11"]
-  },
-  {
-    id: "11",
-    name: "株式会社ロボティクス北九州",
-    industry: "ロボティクス・自動化",
-    description: "産業用ロボットの開発と工場自動化システムの構築を通じて、製造業の生産性向上と働き方改革を支援しています。",
-    features: ["技術力向上支援", "研修制度充実", "住宅手当あり"],
-    partcipantsid: ["14"]
-  },
-  {
-    id: "12",
-    name: "株式会社サステナブルエナジー",
-    industry: "再生可能エネルギー・蓄電",
-    description: "太陽光発電と蓄電池システムの開発・運用を通じて、持続可能なエネルギー社会の実現を目指しています。",
-    features: ["環境貢献", "技術研究支援", "フレックス制度"],
-    partcipantsid: ["10", "15"]
-  },
-  {
-    id: "13",
-    name: "株式会社バイオテックイノベーション",
-    industry: "バイオテクノロジー",
-    description: "バイオテクノロジーを活用した新薬開発支援と医療機器の研究開発を行い、人々の健康と生活の質向上に貢献しています。",
-    features: ["研究環境充実", "学会発表支援", "オンライン面談OK"],
-    partcipantsid: ["8", "12"]
-  },
-  {
-    id: "14",
-    name: "株式会社デジタルマーケティングプロ",
-    industry: "デジタルマーケティング",
-    description: "AI を活用したマーケティング自動化ツールの開発と、企業のデジタル変革を支援するコンサルティングサービスを提供しています。",
-    features: ["マーケティングスキル習得", "データ分析環境", "リモートワーク可"],
-    partcipantsid: ["7", "13"]
-  },
-  {
-    id: "15",
-    name: "株式会社次世代モビリティ",
-    industry: "モビリティ・自動運転",
-    description: "自動運転技術の研究開発と次世代モビリティサービスの構築を通じて、未来の交通社会をデザインしています。",
-    features: ["最新技術研究", "技術力向上支援", "社会貢献活動参加"],
-    partcipantsid: []
-  }
-];
-
-// Mock project data
-const mockProjects: Project[] = [
-  {
-    id: "1",
-    companyId: "1",
+    companyId: "1", 
     title: "地域密着型マーケティングアシスタント",
     description: "SNS運用、イベント企画などを通じて、私たちのサービスを地域に広めるお手伝いをしてください。実践的なマーケティングスキルが身につきます。",
     skills: ["マーケティング", "SNS運用", "企画"],
@@ -384,20 +59,211 @@ const mockProjects: Project[] = [
   {
     id: "2",
     companyId: "2",
-    title: "UI/UXデザインインターン",
+    title: "UI/UXデザインインターン", 
     description: "製造業向けSaaSのユーザーインターフェース改善に取り組んでいただきます。実際のプロダクトに携われる貴重な経験です。",
     skills: ["UI/UX", "Figma", "プロトタイピング"],
     status: "active"
   },
   {
-    id: "3", 
+    id: "3",
     companyId: "3",
     title: "環境データ分析プロジェクト",
-    description: "再生可能エネルギーの効率化に向けたデータ分析業務。Pythonを使った実践的なデータサイエンス経験が積めます。",
+    description: "再生可能エネルギーの効率化に向けたデータ分析業務。Pythonを使った実践的なデータサイエンス経験が積めます。", 
     skills: ["Python", "データ分析", "環境工学"],
     status: "active"
   }
 ];
+
+
+// Mock student data
+const mockStudents: Student[] = [
+  {
+    id: "1",
+    name: "山田 花子",
+    university: "九州工業大学 情報工学部",
+    bio: "Web開発とUI/UXデザインに興味があります。ユーザーに愛されるサービスを作る経験を積みたいです。",
+    skills: ["HTML/CSS", "JavaScript", "Figma", "React", "TypeScript", "Vue.js"] // 6個 → 3.0星
+  },
+  {
+    id: "2", 
+    name: "田中 太郎",
+    university: "北九州市立大学 経済学部",
+    bio: "マーケティングとデータ分析を学んでいます。スタートアップのグロース戦略に貢献したいです。",
+    skills: ["マーケティングリサーチ", "データ分析", "SNS運用"] // 3個 → 1.5星
+  },
+  {
+    id: "3",
+    name: "鈴木 一郎", 
+    university: "産業医科大学 医学部",
+    bio: "医療分野の課題をテクノロジーで解決することに情熱を持っています。ヘルスケア関連の事業に携わりたいです。",
+    skills: ["医療知識", "研究", "課題発見能力", "医療統計", "データ解釈"] // 5個 → 2.5星
+  },
+  {
+    id: "4",
+    name: "佐藤 美咲",
+    university: "九州工業大学 情報工学部",
+    bio: "AI・機械学習に興味があり、社会課題解決に技術を活用したいと考えています。",
+    skills: ["Python", "機械学習"] // 2個 → 1.0星
+  },
+  {
+    id: "5",
+    name: "中村 健太",
+    university: "北九州市立大学 国際環境工学部",
+    bio: "環境問題に関心があり、持続可能な社会の実現に貢献したいです。",
+    skills: ["環境工学", "プロジェクト管理", "データ分析", "シミュレーション"] // 4個 → 2.0星
+  },
+  {
+    id: "6",
+    name: "高橋 彩香",
+    university: "九州工業大学 情報工学部",
+    bio: "VRとARの技術開発に興味があり、新しい体験を作り出すことに挑戦したいです。",
+    skills: ["Unity", "C#", "VR/AR開発", "3Dモデリング", "JavaScript", "Python", "Go"] // 7個 → 3.5星
+  },
+  {
+    id: "7",
+    name: "渡辺 拓真",
+    university: "北九州市立大学 経済学部",
+    bio: "デジタルマーケティングとデータ分析を学んでいます。EC事業の成長戦略に興味があります。",
+    skills: ["Google Analytics", "SEO", "SNSマーケティング", "データ分析", "Python"] // 5個 → 2.5星
+  },
+  {
+    id: "8",
+    name: "松本 優子",
+    university: "産業医科大学 医学部",
+    bio: "医療DXの推進に関心があり、患者さんの体験向上に貢献したいと考えています。",
+    skills: ["医療知識"] // 1個 → 0.5星
+  },
+  {
+    id: "9",
+    name: "森田 慎一",
+    university: "九州工業大学 情報工学部",
+    bio: "IoTとスマートシティの実現に向けて、センサーデータの活用に取り組んでいます。",
+    skills: ["IoT", "Python", "センサーネットワーク", "データ可視化", "JavaScript", "AWS", "Docker", "PostgreSQL"] // 8個 → 4.0星
+  },
+  {
+    id: "10",
+    name: "小川 恵美",
+    university: "北九州市立大学 国際環境工学部",
+    bio: "サステナブルなビジネスモデルの構築に興味があり、循環経済の実現に貢献したいです。",
+    skills: ["環境経済学", "プロジェクト企画", "プレゼンテーション", "英語"] // 4個 → 2.0星
+  },
+  {
+    id: "11",
+    name: "加藤 雄介",
+    university: "九州工業大学 情報工学部",
+    bio: "ブロックチェーン技術を活用した新しいサービス開発に挑戦したいと考えています。",
+    skills: ["Solidity", "Web3.js", "JavaScript", "暗号化技術", "Node.js", "TypeScript", "React", "Python", "Go"] // 9個 → 4.5星
+  },
+  {
+    id: "12",
+    name: "岡田 亜衣",
+    university: "産業医科大学 医学部",
+    bio: "医療現場でのAI活用に興味があり、診断支援システムの開発に携わりたいです。",
+    skills: ["医療統計", "機械学習基礎"] // 2個 → 1.0星
+  },
+  {
+    id: "13",
+    name: "石井 翔太",
+    university: "北九州市立大学 経済学部",
+    bio: "地域創生とスタートアップエコシステムの構築に関心があります。",
+    skills: ["ビジネス企画", "市場調査", "プレゼンテーション", "チームワーク", "データ分析"] // 5個 → 2.5星
+  },
+  {
+    id: "14",
+    name: "村上 美里",
+    university: "九州工業大学 情報工学部",
+    bio: "AIとロボティクスの融合技術に興味があり、人と機械の協働を実現したいです。",
+    skills: ["ROS", "Python", "機械学習", "制御工学", "C++", "TensorFlow", "Docker", "AWS", "JavaScript", "TypeScript"] // 10個 → 5.0星
+  },
+  {
+    id: "15",
+    name: "長谷川 健二",
+    university: "北九州市立大学 国際環境工学部",
+    bio: "再生可能エネルギーの効率化と蓄電技術の開発に取り組みたいと考えています。",
+    skills: ["電気工学", "バッテリー技術", "シミュレーション", "実験設計", "Python", "MATLAB"] // 6個 → 3.0星
+  }
+];
+
+
+export async function getNext10(): Promise<Event[]> {
+  const supabase = createClient()
+  const { data: events, error } = await supabase
+    .from('events')
+    .select('*')
+    .order('starts_on', { ascending: true })
+    .limit(10)
+
+  if (error) {
+    console.error('Error fetching events:', error)
+    return []
+  }
+
+  const now = new Date();
+  return events.filter(event => new Date(event.starts_on) >= now);
+}
+
+export async function getAllStudents(): Promise<Student[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase.from('students').select('id, name, university, bio, skills, avatar');
+  if (error) {
+    console.error('Error fetching students:', error);
+    return [];
+  }
+  // skillsがstringの場合は配列に変換
+  return (data || []).map((student: Tables<'students'>) => ({
+    id: student.id,
+    name: student.name,
+    university: student.university,
+    bio: student.bio,
+    skills: Array.isArray(student.skills) ? student.skills : (student.skills ? student.skills.split(',') : []),
+    avatar: student.avatar || undefined,
+  }));
+}
+
+// Mock company data
+const mockCompanies: Company[] = [
+  {
+    id: "1",
+    name: "株式会社A",
+    industry: "IT",
+    description: "Webサービス開発",
+    features: ["リモートワーク可", "フレックスタイム制"],
+    logo: "/logo-a.png",
+    projects: [],
+    partcipantsid: [],
+    adoptedid: [],
+    Rejectedid: [],
+  },
+  {
+    id: "2",
+    name: "株式会社B",
+    industry: "製造業",
+    description: "精密機器製造",
+    features: ["研修制度充実"],
+    logo: "/logo-b.png",
+    projects: [],
+    partcipantsid: [],
+    adoptedid: [],
+    Rejectedid: [],
+  },
+  {
+    id: "3",
+    name: "株式会社C",
+    industry: "環境",
+    description: "再生可能エネルギー事業",
+    features: ["社会貢献", "最新技術"],
+    logo: "/logo-c.png",
+    projects: [],
+    partcipantsid: [],
+    adoptedid: [],
+    Rejectedid: [],
+  },
+];
+
+export function getCompanyById(id: string): Company | undefined {
+  return mockCompanies.find(company => company.id === id);
+}
+
 export const mockChats: Chat[] = [
   {
     id: "chat-1",
@@ -682,7 +548,7 @@ export const mockChats: Chat[] = [
       { speaker: "company", chattext: "クラウドサービスのUI改善を依頼できますか？", chattime: "2025-09-07 09:00" },
       { speaker: "student", chattext: "はい、ダッシュボード設計を得意としています。", chattime: "2025-09-07 09:05" },
       { speaker: "company", chattext: "管理者用と一般ユーザー用に分けたいです。", chattime: "2025-09-07 09:10" },
-      { speaker: "student", chattext: "権限ごとにUIを最適化して提案します。", chattime: "2025-09-07 09:15" }
+      { speaker: "student", chattext: "権限ごとにUIを最適化して提案します。", chattime: "2025-09-07 15:15" }
     ]
   },
   {
@@ -737,20 +603,40 @@ export function getStudentById(id: string): Student | undefined {
   return mockStudents.find(student => student.id === id);
 }
 
-export function getAllCompanies(): Company[] {
-  return mockCompanies;
+export async function getAllCompanies(): Promise<Company[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase.from('company').select('*');
+
+  if (error) {
+    console.error('Error fetching companies:', error);
+    return [];
+  }
+
+  // Ensure the fetched data matches the Company type
+  return data.map((company: Company) => ({
+    id: company.id,
+    name: company.name,
+    industry: company.industry,
+    description: company.description,
+    features: company.features || [],
+    logo: company.logo || '',
+    projects: company.projects || [],
+    partcipantsid: company.partcipantsid || [],
+    adoptedid: company.adoptedid || [],
+    Rejectedid: company.Rejectedid || [], // Use Rejectedid as per the interface
+  }));
 }
 
-export function getCompanyById(id: string): Company | undefined {
-  return mockCompanies.find(company => company.id === id);
+export async function getProjectsByCompanyId(companyId: string): Promise<Project[]> {
+  // Return mock data as fallback since we don't have proper UUID company IDs yet
+  console.log('Using fallback mock data for projects');
+  return mockProjectsFallback.filter(project => project.companyId === companyId);
 }
 
-export function getProjectsByCompanyId(companyId: string): Project[] {
-  return mockProjects.filter(project => project.companyId === companyId);
-}
-
-export function getAllProjects(): Project[] {
-  return mockProjects;
+export async function getAllProjects(): Promise<Project[]> {
+  // Return mock data as fallback since we don't have proper UUID company IDs yet
+  console.log('Using fallback mock data for all projects');
+  return mockProjectsFallback;
 }
 export function getAllChat(): Chat[] {
   return mockChats;

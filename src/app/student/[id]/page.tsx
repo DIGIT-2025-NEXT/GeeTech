@@ -9,16 +9,14 @@ import {
   Chip,
   Button,
   Box,
-  IconButton,
   Paper,
   Breadcrumbs,
   Stack,
   Rating,
   Divider,
-  Grid,
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import {
-  Person as PersonIcon,
   School as SchoolIcon,
   Chat as ChatIcon,
   Work as WorkIcon,
@@ -31,6 +29,7 @@ import { getStudentById, findChatByStudentId, type Student } from '@/lib/mock';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { SkillIcon } from '@/app/_components/SkillIcon';
+
 
 export default function StudentDetailPage() {
   const params = useParams();
@@ -93,14 +92,6 @@ export default function StudentDetailPage() {
     return skillToIconMap[skillName] || null;
   };
 
-  // SkillIcon.tsxで利用可能なスキル一覧
-  const availableSkills = [
-    'HTML/CSS', 'JavaScript', 'TypeScript', 'React', 'Vue.js', 'Angular', 'Next.js', 'Nuxt.js', 'Svelte',
-    'Node.js', 'Express', 'Python', 'Django', 'Flask', 'Go', 'Ruby on Rails', 'PHP', 'Laravel',
-    'Java', 'Spring', 'Swift', 'Kotlin', 'AWS', 'Google Cloud', 'Azure', 'Docker', 'Kubernetes', 'Terraform',
-    'PostgreSQL', 'MySQL', 'MongoDB', 'Redis', 'Prisma', 'C++', 'C#', 'Rust', 'Unity', 'Unreal Engine',
-    'TensorFlow', 'PyTorch', 'GraphQL', 'Supabase', 'Firebase', 'Git', 'Figma', 'Storybook', 'Jest', 'Flutter'
-  ];
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -192,7 +183,7 @@ export default function StudentDetailPage() {
                   {student.university}
                 </Typography>
               </Box>
-              <Rating value={4.5} precision={0.5} readOnly />
+              <Rating value={Math.min(student.skills.length * 0.5, 5)} precision={0.5} readOnly />
             </Box>
           </Box>
 
@@ -221,37 +212,30 @@ export default function StudentDetailPage() {
             スキル
           </Typography>
           <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 3 }}>
-            {(() => {
-              // プロフィール設定で利用可能なスキルのみフィルタリング
-              const validSkills = student.skills.filter(skill => 
-                availableSkills.includes(skill)
+            {student.skills.map((skill, index) => {
+              const iconName = getSkillIconName(skill);
+              return (
+                <Chip
+                  key={index}
+                  icon={iconName ? <SkillIcon iconName={iconName} /> : undefined}
+                  label={skill}
+                  variant="filled"
+                  sx={{ 
+                    fontSize: '0.9rem',
+                    mb: 1,
+                    bgcolor: '#f5f5f5',
+                    color: '#333',
+                    fontWeight: 600,
+                    height: 36,
+                    border: '1px solid #e0e0e0',
+                    '& .MuiChip-icon': {
+                      fontSize: '18px',
+                      marginLeft: '6px'
+                    }
+                  }}
+                />
               );
-              
-              return validSkills.map((skill, index) => {
-                const iconName = getSkillIconName(skill);
-                return (
-                  <Chip
-                    key={index}
-                    icon={iconName ? <SkillIcon iconName={iconName} /> : undefined}
-                    label={skill}
-                    variant="filled"
-                    sx={{ 
-                      fontSize: '0.9rem',
-                      mb: 1,
-                      bgcolor: '#f5f5f5',
-                      color: '#333',
-                      fontWeight: 600,
-                      height: 36,
-                      border: '1px solid #e0e0e0',
-                      '& .MuiChip-icon': {
-                        fontSize: '18px',
-                        marginLeft: '6px'
-                      }
-                    }}
-                  />
-                );
-              });
-            })()}
+            })}
           </Stack>
         </CardContent>
       </Card>
@@ -262,7 +246,7 @@ export default function StudentDetailPage() {
           アクション
         </Typography>
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
+          <Grid xs={12} sm={6}>
             <Button
               fullWidth
               variant="contained"
@@ -289,7 +273,7 @@ export default function StudentDetailPage() {
               メッセージを送る
             </Button>
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid xs={12} sm={6}>
             <Button
               fullWidth
               variant="outlined"

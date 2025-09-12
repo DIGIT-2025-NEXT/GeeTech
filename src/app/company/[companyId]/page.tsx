@@ -43,12 +43,18 @@ export default function CompanyDetailPage({ params }: Props) {
   const fromPage = searchParams.get('from');
 
   useEffect(() => {
-    params.then(({ companyId }) => {
+    params.then(async ({ companyId }) => {
+      console.log('Company page: Fetching data for companyId:', companyId);
       const companyData = getCompanyById(companyId);
-      const projectsData = getProjectsByCompanyId(companyId);
+      const projectsData = await getProjectsByCompanyId(companyId);
+      
+      console.log('Company page: Company data:', companyData);
+      console.log('Company page: Projects data:', projectsData);
       
       if (!companyData) {
+        console.error('Company page: Company not found for ID:', companyId);
         notFound();
+        return;
       }
       
       setCompany(companyData);

@@ -22,29 +22,28 @@ import {
   Breadcrumbs,
   Fade,
   Stack,
-  Rating,
   Divider,
   Skeleton,
   Collapse
 } from '@mui/material';
 import {
-  Person as PersonIcon,
-  School as SchoolIcon,
   Business as BusinessIcon,
   Chat as ChatIcon,
   Work as WorkIcon,
   Search as SearchIcon,
   Filter as FilterIcon,
-  TrendingUp as TrendingUpIcon,
   FavoriteBorder as FavoriteBorderIcon,
   Favorite as FavoriteIcon,
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon
 } from '@mui/icons-material';
 import Link from 'next/link';
-import { getAllCompanies, type Company } from '@/lib/mock';
+import { getAllCompanies, getAllProjects, type Company, type Project } from '@/lib/mock';
 import { useState, useEffect } from 'react';
 import { IndustryIcon } from '@/app/_components/IndustryIcon';
+import { useAuth } from '@/contexts/AuthContext';
+import AdoptButton from './adopt';
+import RejectButton from './Reject';
 
 export default function StudentsPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -56,13 +55,19 @@ export default function StudentsPage() {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [filterExpanded, setFilterExpanded] = useState(false);
   const [displayCount, setDisplayCount] = useState(5);
+  const [creatingChat, setCreatingChat] = useState<string | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
+  
+  const { user } = useAuth();
 
   useEffect(() => {
     // シミュレートされたローディング
-    const timer = setTimeout(() => {
-      const allCompanies = getAllCompanies();
+    const timer = setTimeout(async () => {
+      const allCompanies = await getAllCompanies();
+      const allProjects = await getAllProjects();
       setCompanies(allCompanies);
       setFilteredCompanies(allCompanies);
+      setProjects(allProjects);
       setLoading(false);
     }, 500);
 
@@ -109,6 +114,50 @@ export default function StudentsPage() {
     });
   };
 
+  const createChatRoom = async (companyId: string) => {
+    if (!user) {
+      alert('チャット機能を利用するにはログインが必要です。');
+      return;
+    }
+
+    setCreatingChat(companyId);
+    
+    try {
+      const response = await fetch('/api/chat/room/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          studentId: user.id,
+          companyId: companyId,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const roomId = data.room.id;
+        
+        if (data.existed) {
+          // 既存のチャットルームに移動
+          window.location.href = `/chat/${roomId}`;
+        } else {
+          // 新しく作成されたチャットルームに移動
+          window.location.href = `/chat/${roomId}`;
+        }
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to create chat room:', errorData);
+        alert('チャットルームの作成に失敗しました。もう一度お試しください。');
+      }
+    } catch (error) {
+      console.error('Error creating chat room:', error);
+      alert('チャットルームの作成中にエラーが発生しました。');
+    } finally {
+      setCreatingChat(null);
+    }
+  };
+
   const industries = Array.from(new Set(companies.map(c => c.industry)));
   const features = Array.from(new Set(companies.flatMap(c => c.features || [])));
 
@@ -140,7 +189,7 @@ export default function StudentsPage() {
 
       {/* 統計情報 */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid size={{ xs: 12, sm: 4 }}>
+        <Grid item xs={12} sm={4}>
           <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 2 }}>
             <Typography variant="h4" color="primary.main" sx={{ fontWeight: 'bold' }}>
               {companies.length}
@@ -150,7 +199,7 @@ export default function StudentsPage() {
             </Typography>
           </Paper>
         </Grid>
-        <Grid size={{ xs: 12, sm: 4 }}>
+        <Grid item xs={12} sm={4}>
           <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 2 }}>
             <Typography variant="h4" color="success.main" sx={{ fontWeight: 'bold' }}>
               {industries.length}
@@ -160,10 +209,10 @@ export default function StudentsPage() {
             </Typography>
           </Paper>
         </Grid>
-        <Grid size={{ xs: 12, sm: 4 }}>
+        <Grid item xs={12} sm={4}>
           <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 2 }}>
             <Typography variant="h4" color="warning.main" sx={{ fontWeight: 'bold' }}>
-              12+
+              {projects.length}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
               募集案件数
@@ -193,7 +242,7 @@ export default function StudentsPage() {
 
         <Collapse in={filterExpanded}>
           <Grid container spacing={2} sx={{ mb: 2 }}>
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
                 placeholder="企業名、業界、説明で検索..."
@@ -208,7 +257,7 @@ export default function StudentsPage() {
                 }}
               />
             </Grid>
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid item xs={12} md={3}>
               <FormControl fullWidth>
                 <InputLabel>業界で絞り込み</InputLabel>
                 <Select
@@ -223,7 +272,7 @@ export default function StudentsPage() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid item xs={12} md={3}>
               <FormControl fullWidth>
                 <InputLabel>特徴で絞り込み</InputLabel>
                 <Select
@@ -262,7 +311,7 @@ export default function StudentsPage() {
       {/* 企業一覧 */}
       <Grid container spacing={3}>
         {filteredCompanies.slice(0, displayCount).map((company, index) => (
-          <Grid size={{ xs: 12, sm: 6, md: 4 }} key={company.id}>
+          <Grid item xs={12} sm={6} md={4} key={company.id}>
             <Fade in={true} timeout={300 + index * 100}>
               <Card 
                 sx={{ 
@@ -323,7 +372,6 @@ export default function StudentsPage() {
                           {company.industry}
                         </Typography>
                       </Box>
-                      <Rating value={4.5} precision={0.5} size="small" readOnly />
                     </Box>
                   </Box>
 
@@ -402,6 +450,8 @@ export default function StudentsPage() {
                     </Button>
                     <IconButton 
                       color="primary"
+                      onClick={() => createChatRoom(company.id)}
+                      disabled={creatingChat === company.id}
                       sx={{ 
                         border: '1.5px solid',
                         borderColor: 'primary.main',
@@ -414,7 +464,27 @@ export default function StudentsPage() {
                       }}
                       size="small"
                     >
-                      <ChatIcon sx={{ fontSize: 16 }} />
+                      {creatingChat === company.id ? (
+                        <Box sx={{ width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Box
+                            sx={{
+                              width: 12,
+                              height: 12,
+                              border: '2px solid',
+                              borderColor: 'primary.main',
+                              borderTopColor: 'transparent',
+                              borderRadius: '50%',
+                              animation: 'spin 1s linear infinite',
+                              '@keyframes spin': {
+                                '0%': { transform: 'rotate(0deg)' },
+                                '100%': { transform: 'rotate(360deg)' }
+                              }
+                            }}
+                          />
+                        </Box>
+                      ) : (
+                        <ChatIcon sx={{ fontSize: 16 }} />
+                      )}
                     </IconButton>
                     <IconButton 
                       color="success"
@@ -503,43 +573,6 @@ export default function StudentsPage() {
         </Box>
       )}
 
-      {/* CTAセクション */}
-      <Paper 
-        elevation={4} 
-        sx={{ 
-          mt: 6, 
-          textAlign: 'center', 
-          p: 4, 
-          background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-          color: 'white'
-        }}
-      >
-        <TrendingUpIcon sx={{ fontSize: 60, mb: 2 }} />
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold' }}>
-          あなたも学生として参加しませんか？
-        </Typography>
-        <Typography variant="h6" sx={{ mb: 3, opacity: 0.9 }}>
-          地元企業との出会いが、あなたのキャリアを加速させます。
-        </Typography>
-        <Button 
-          variant="contained" 
-          size="large"
-          sx={{ 
-            textTransform: 'none',
-            borderRadius: 3,
-            px: 4,
-            py: 1.5,
-            bgcolor: 'white',
-            color: 'primary.main',
-            fontWeight: 'bold',
-            '&:hover': {
-              bgcolor: 'grey.100'
-            }
-          }}
-        >
-          学生登録はこちら
-        </Button>
-      </Paper>
     </Container>
   );
 }
@@ -552,7 +585,7 @@ function LoadingSkeleton() {
       
       <Grid container spacing={2} sx={{ mb: 4 }}>
         {[1, 2, 3, 4].map((i) => (
-          <Grid size={{ xs: 6, sm: 3 }} key={i}>
+          <Grid item xs={6} sm={3} key={i}>
             <Skeleton variant="rectangular" height={80} />
           </Grid>
         ))}
@@ -562,7 +595,7 @@ function LoadingSkeleton() {
       
       <Grid container spacing={3}>
         {[1, 2, 3, 4, 5, 6].map((i) => (
-          <Grid size={{ xs: 12, sm: 6, md: 4 }} key={i}>
+          <Grid item xs={12} sm={6} md={4} key={i}>
             <Card sx={{ height: 300 }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>

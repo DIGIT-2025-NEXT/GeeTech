@@ -209,6 +209,33 @@ export type Database = {
           },
         ]
       }
+      students: {
+        Row: {
+          id: string;
+          name: string;
+          university: string;
+          bio: string;
+          skills: string[] | string;
+          avatar: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          university: string;
+          bio: string;
+          skills?: string[];
+          avatar?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          university?: string;
+          bio?: string;
+          skills?: string[];
+          avatar?: string;
+        };
+        Relationships: [];
+      };
     }
     Views: {
       [_ in never]: never

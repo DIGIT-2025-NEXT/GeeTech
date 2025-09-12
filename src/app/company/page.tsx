@@ -1,5 +1,5 @@
-// app/company/page.tsx - 学生一覧ページ（MUI版・改良版）
-'use client';
+// app/company/page.tsx - 学生一覧ページ
+"use client";
 
 import {
   Container,
@@ -22,82 +22,98 @@ import {
   Breadcrumbs,
   Fade,
   Stack,
-  Rating,
   Divider,
   Skeleton,
   Collapse,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Person as PersonIcon,
-  School as SchoolIcon,
   Chat as ChatIcon,
-  Work as WorkIcon,
   Search as SearchIcon,
   Filter as FilterIcon,
-  TrendingUp as TrendingUpIcon,
   FavoriteBorder as FavoriteBorderIcon,
   Favorite as FavoriteIcon,
   ExpandMore as ExpandMoreIcon,
-  ExpandLess as ExpandLessIcon
-} from '@mui/icons-material';
-// import Link from 'next/link'; // 不要になったためコメントアウト
-import { getAllStudents, findChatByStudentId, type Student } from '@/lib/mock';
-import { useState, useEffect } from 'react';
-import { SkillIcon } from '@/app/_components/SkillIcon';
+  ExpandLess as ExpandLessIcon,
+  School as SchoolIcon,
+  Business as BusinessIcon,
+  TrendingUp as TrendingUpIcon,
+} from "@mui/icons-material";
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 
-export default function CompanyPage() {
+// 学生の型定義
+type Student = {
+  id: string;
+  name: string;
+  university: string;
+  bio: string;
+  skills: string[];
+  avatar: string;
+};
+
+export default function StudentPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [universityFilter, setUniversityFilter] = useState('');
-  const [skillFilter, setSkillFilter] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [skillFilter, setSkillFilter] = useState("");
+  const [universityFilter, setUniversityFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [filterExpanded, setFilterExpanded] = useState(false);
-  const [displayCount, setDisplayCount] = useState(5);
+  const [displayCount, setDisplayCount] = useState(6);
 
   useEffect(() => {
-    // シミュレートされたローディング
-    const timer = setTimeout(() => {
-      const allStudents = getAllStudents();
-      setStudents(allStudents);
-      setFilteredStudents(allStudents);
-      setLoading(false);
-    }, 500);
+    const fetchStudents = async () => {
+      setLoading(true);
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("students")
+        .select("id, name, university, bio, skills, avatar");
 
-    return () => clearTimeout(timer);
+      if (error) {
+        console.error("Error fetching students:", error);
+        setStudents([]);
+      } else {
+        setStudents(data as Student[]);
+        setFilteredStudents(data as Student[]);
+      }
+      setLoading(false);
+    };
+    fetchStudents();
   }, []);
 
   useEffect(() => {
     let filtered = students;
 
-    // 検索フィルター
     if (searchQuery) {
-      filtered = filtered.filter(student =>
-        student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        student.bio.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        student.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()))
+      filtered = filtered.filter(
+        (student) =>
+          student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          student.bio.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
-    // 大学フィルター
     if (universityFilter) {
-      filtered = filtered.filter(student => student.university.includes(universityFilter));
+      filtered = filtered.filter(
+        (student) => student.university === universityFilter
+      );
     }
 
-    // スキルフィルター
     if (skillFilter) {
-      filtered = filtered.filter(student =>
-        student.skills.some(skill => skill.toLowerCase().includes(skillFilter.toLowerCase()))
+      filtered = filtered.filter((student) =>
+        student.skills?.some((skill) =>
+          skill.toLowerCase().includes(skillFilter.toLowerCase())
+        )
       );
     }
 
     setFilteredStudents(filtered);
-    setDisplayCount(5);
+    setDisplayCount(6);
   }, [searchQuery, universityFilter, skillFilter, students]);
 
   const toggleFavorite = (studentId: string) => {
-    setFavorites(prev => {
+    setFavorites((prev) => {
       const newFavorites = new Set(prev);
       if (newFavorites.has(studentId)) {
         newFavorites.delete(studentId);
@@ -108,75 +124,10 @@ export default function CompanyPage() {
     });
   };
 
-
-  const universities = Array.from(new Set(students.map(s => s.university.split(' ')[0])));
-  
-  // SkillIcon.tsxで利用可能なスキル一覧（表示名で定義）
-  const availableSkills = [
-    'HTML/CSS', 'JavaScript', 'TypeScript', 'React', 'Vue.js', 'Angular', 'Next.js', 'Nuxt.js', 'Svelte',
-    'Node.js', 'Express', 'Python', 'Django', 'Flask', 'Go', 'Ruby on Rails', 'PHP', 'Laravel',
-    'Java', 'Spring', 'Swift', 'Kotlin', 'AWS', 'Google Cloud', 'Azure', 'Docker', 'Kubernetes', 'Terraform',
-    'PostgreSQL', 'MySQL', 'MongoDB', 'Redis', 'Prisma', 'C++', 'C#', 'Rust', 'Unity', 'Unreal Engine',
-    'TensorFlow', 'PyTorch', 'GraphQL', 'Supabase', 'Firebase', 'Git', 'Figma', 'Storybook', 'Jest', 'Flutter'
-  ];
-
-  // スキル名からアイコン名へのマッピング
-  const getSkillIconName = (skillName: string): string | null => {
-    const skillToIconMap: { [key: string]: string } = {
-      'HTML/CSS': 'html5',
-      'JavaScript': 'javascript',
-      'TypeScript': 'typescript',
-      'React': 'react',
-      'Vue.js': 'vuejs',
-      'Angular': 'angular',
-      'Next.js': 'nextjs',
-      'Nuxt.js': 'nuxtjs',
-      'Svelte': 'svelte',
-      'Node.js': 'nodejs',
-      'Express': 'express',
-      'Python': 'python',
-      'Django': 'django',
-      'Flask': 'flask',
-      'Go': 'go',
-      'Ruby on Rails': 'rubyonrails',
-      'PHP': 'php',
-      'Laravel': 'laravel',
-      'Java': 'java',
-      'Spring': 'spring',
-      'Swift': 'swift',
-      'Kotlin': 'kotlin',
-      'AWS': 'aws',
-      'Google Cloud': 'googlecloud',
-      'Azure': 'azure',
-      'Docker': 'docker',
-      'Kubernetes': 'kubernetes',
-      'Terraform': 'terraform',
-      'PostgreSQL': 'postgresql',
-      'MySQL': 'mysql',
-      'MongoDB': 'mongodb',
-      'Redis': 'redis',
-      'Prisma': 'prisma',
-      'C++': 'cplusplus',
-      'C#': 'csharp',
-      'Rust': 'rust',
-      'Unity': 'unity',
-      'Unreal Engine': 'unrealengine',
-      'TensorFlow': 'tensorflow',
-      'PyTorch': 'pytorch',
-      'GraphQL': 'graphql',
-      'Supabase': 'supabase',
-      'Firebase': 'firebase',
-      'Git': 'git',
-      'Figma': 'figma',
-      'Storybook': 'storybook',
-      'Jest': 'jest',
-      'Flutter': 'flutter'
-    };
-    return skillToIconMap[skillName] || null;
-  };
-  
-  // フィルター用のスキル一覧（プロフィール設定で選択可能なスキルのみ）
-  const allSkills = availableSkills;
+  const universities = Array.from(new Set(students.map((s) => s.university)));
+  const allSkills = Array.from(
+    new Set(students.flatMap((s) => s.skills || []))
+  );
 
   if (loading) {
     return <LoadingSkeleton />;
@@ -184,88 +135,79 @@ export default function CompanyPage() {
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
-      {/* ヘッダーセクション */}
       <Box sx={{ mb: 4 }}>
         <Breadcrumbs sx={{ mb: 2 }}>
-          <Typography 
-            sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
-            onClick={() => window.location.href = '/'}
+          <Typography
+            sx={{
+              cursor: "pointer",
+              "&:hover": { textDecoration: "underline" },
+            }}
+            onClick={() => (window.location.href = "/")}
           >
             ホーム
           </Typography>
           <Typography color="text.primary">学生一覧</Typography>
         </Breadcrumbs>
-
-        <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-          才能あふれる学生たち
-        </Typography>
-        <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
-          未来を創る、挑戦がここから始まる。
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          北九州市の大学で学ぶ、情熱ある学生たちとつながりましょう。
-        </Typography>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+          <Box sx={{ flex: 1 }}>
+            <Typography
+              variant="h3"
+              component="h1"
+              gutterBottom
+              sx={{ fontWeight: "bold", color: "primary.main" }}
+            >
+              未来を担う才能たち
+            </Typography>
+            <Typography variant="h6" color="text.secondary">
+              あなたの会社を次のレベルへ導く、優秀な学生を見つけよう。
+            </Typography>
+          </Box>
+          <Button
+            variant="contained"
+            size="large"
+            onClick={() => window.location.href = '/company/register'}
+            startIcon={<BusinessIcon />}
+            sx={{
+              textTransform: "none",
+              borderRadius: 3,
+              px: 3,
+              py: 1.5,
+              fontWeight: "bold",
+              fontSize: "1rem",
+              ml: 3
+            }}
+          >
+            企業登録
+          </Button>
+        </Box>
       </Box>
 
-      {/* 統計情報 */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 2 }}>
-            <Typography variant="h4" color="primary.main" sx={{ fontWeight: 'bold' }}>
-              {students.length}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
-              登録学生数
-            </Typography>
-          </Paper>
-        </Grid>
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 2 }}>
-            <Typography variant="h4" color="success.main" sx={{ fontWeight: 'bold' }}>
-              {universities.length}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
-              参加大学数
-            </Typography>
-          </Paper>
-        </Grid>
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 2 }}>
-            <Typography variant="h4" color="warning.main" sx={{ fontWeight: 'bold' }}>
-              {allSkills.length}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
-              スキル種類
-            </Typography>
-          </Paper>
-        </Grid>
-      </Grid>
-
-      {/* 検索・フィルターセクション */}
       <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
         <Box
           sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            cursor: 'pointer',
-            mb: filterExpanded ? 2 : 0
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            cursor: "pointer",
+            mb: filterExpanded ? 2 : 0,
           }}
           onClick={() => setFilterExpanded(!filterExpanded)}
         >
-          <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
+          <Typography
+            variant="h6"
+            sx={{ display: "flex", alignItems: "center" }}
+          >
             <FilterIcon sx={{ mr: 1 }} />
             検索・フィルター
           </Typography>
           {filterExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
         </Box>
-
         <Collapse in={filterExpanded}>
           <Grid container spacing={2} sx={{ mb: 2 }}>
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                placeholder="学生名、スキル、自己紹介で検索..."
+                placeholder="名前、自己紹介で検索..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 InputProps={{
@@ -277,7 +219,7 @@ export default function CompanyPage() {
                 }}
               />
             </Grid>
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid item xs={12} md={3}>
               <FormControl fullWidth>
                 <InputLabel>大学で絞り込み</InputLabel>
                 <Select
@@ -287,12 +229,14 @@ export default function CompanyPage() {
                 >
                   <MenuItem value="">すべて</MenuItem>
                   {universities.map((uni) => (
-                    <MenuItem key={uni} value={uni}>{uni}</MenuItem>
+                    <MenuItem key={uni} value={uni}>
+                      {uni}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Grid>
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid item xs={12} md={3}>
               <FormControl fullWidth>
                 <InputLabel>スキルで絞り込み</InputLabel>
                 <Select
@@ -302,24 +246,31 @@ export default function CompanyPage() {
                 >
                   <MenuItem value="">すべて</MenuItem>
                   {allSkills.map((skill) => (
-                    <MenuItem key={skill} value={skill}>{skill}</MenuItem>
+                    <MenuItem key={skill} value={skill}>
+                      {skill}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Grid>
           </Grid>
-
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
             <Typography variant="body2" color="text.secondary">
-              {filteredStudents.length}件の学生が見つかりました
+              {filteredStudents.length}人の学生が見つかりました
             </Typography>
             <Button
               variant="outlined"
               size="small"
               onClick={() => {
-                setSearchQuery('');
-                setUniversityFilter('');
-                setSkillFilter('');
+                setSearchQuery("");
+                setUniversityFilter("");
+                setSkillFilter("");
               }}
             >
               フィルターをリセット
@@ -328,154 +279,138 @@ export default function CompanyPage() {
         </Collapse>
       </Paper>
 
-      {/* 学生一覧 */}
       <Grid container spacing={3}>
         {filteredStudents.slice(0, displayCount).map((student, index) => (
-          <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={student.id}>
+          <Grid item xs={12} sm={6} lg={4} key={student.id}>
             <Fade in={true} timeout={300 + index * 100}>
-              <Card 
-                sx={{ 
-                  height: '420px', // 固定の高さを設定
-                  display: 'flex',
-                  flexDirection: 'column',
-                  transition: 'all 0.3s ease-in-out',
-                  '&:hover': {
-                    transform: 'translateY(-8px)',
-                    boxShadow: 12
-                  },
-                  position: 'relative'
+              <Card
+                sx={{
+                  height: "420px",
+                  display: "flex",
+                  flexDirection: "column",
+                  transition: "all 0.3s ease-in-out",
+                  "&:hover": { transform: "translateY(-8px)", boxShadow: 12 },
+                  position: "relative",
                 }}
                 elevation={3}
               >
-                {/* お気に入りボタン */}
                 <IconButton
                   sx={{
-                    position: 'absolute',
+                    position: "absolute",
                     top: 8,
                     right: 8,
                     zIndex: 1,
-                    bgcolor: 'white',
-                    '&:hover': { bgcolor: 'grey.100' }
+                    bgcolor: "white",
+                    "&:hover": { bgcolor: "grey.100" },
                   }}
                   size="small"
                   onClick={() => toggleFavorite(student.id)}
                 >
-                  {favorites.has(student.id) ? 
-                    <FavoriteIcon color="error" /> : 
+                  {favorites.has(student.id) ? (
+                    <FavoriteIcon color="error" />
+                  ) : (
                     <FavoriteBorderIcon />
-                  }
+                  )}
                 </IconButton>
-
                 <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                  {/* プロフィール部分 */}
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                    <Avatar 
-                      sx={{ 
-                        width: 50, 
-                        height: 50, 
+                  <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+                    <Avatar
+                      src={student.avatar}
+                      alt={student.name}
+                      sx={{
+                        width: 50,
+                        height: 50,
                         mr: 2,
-                        bgcolor: 'primary.main',
-                        fontSize: '1.8rem',
-                        border: '3px solid',
-                        borderColor: 'primary.light'
+                        border: "3px solid",
+                        borderColor: "primary.light",
                       }}
                     >
-                      {student.name.charAt(0)}
+                      {!student.avatar && student.name.charAt(0)}
                     </Avatar>
                     <Box sx={{ flexGrow: 1 }}>
-                      <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold', mb: 0.5 }}>
+                      <Typography
+                        variant="h6"
+                        component="h2"
+                        sx={{ fontWeight: "bold", mb: 0.5 }}
+                      >
                         {student.name}
                       </Typography>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                        <SchoolIcon sx={{ fontSize: 16, mr: 0.5, color: 'text.secondary' }} />
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", mb: 1 }}
+                      >
+                        <SchoolIcon
+                          sx={{
+                            fontSize: 16,
+                            mr: 0.5,
+                            color: "text.secondary",
+                          }}
+                        />
                         <Typography variant="body2" color="text.secondary">
-                          {student.university.length > 20 ? 
-                            student.university.substring(0, 20) + '...' : 
-                            student.university
-                          }
+                          {student.university}
                         </Typography>
                       </Box>
-                      <Rating value={4.5} precision={0.5} size="small" readOnly />
                     </Box>
                   </Box>
-
-                  {/* 自己紹介 */}
-                  <Typography 
-                    variant="body2" 
-                    color="text.secondary" 
-                    sx={{ 
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{
                       mb: 3,
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      lineHeight: 1.6,
-                      minHeight: '48px' // 最小の高さを設定して揃える
+                      display: "-webkit-box",
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      minHeight: "60px",
                     }}
                   >
                     {student.bio}
                   </Typography>
-
-                  {/* スキルタグ */}
                   <Box sx={{ mb: 3 }}>
-                    <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', color: 'text.secondary' }}>
-                      主なスキル
+                    <Typography
+                      variant="subtitle2"
+                      gutterBottom
+                      sx={{ fontWeight: "bold", color: "text.secondary" }}
+                    >
+                      スキル
                     </Typography>
                     <Stack direction="row" spacing={0.5} flexWrap="wrap">
-                      {(() => {
-                        // プロフィール設定で利用可能なスキルのみフィルタリング
-                        const validSkills = student.skills.filter(skill => 
-                          availableSkills.includes(skill)
-                        );
-                        const displaySkills = validSkills.slice(0, 4);
-                        const remainingCount = validSkills.length - 4;
-                        
-                        return (
-                          <>
-                            {displaySkills.map((skill, index) => {
-                              const iconName = getSkillIconName(skill);
-                              return (
-                                <Chip
-                                  key={index}
-                                  icon={iconName ? <SkillIcon iconName={iconName} /> : undefined}
-                                  label={skill}
-                                  size="small"
-                                  variant="filled"
-                                  sx={{ 
-                                    fontSize: '0.75rem',
-                                    mb: 0.5,
-                                    bgcolor: '#f5f5f5',
-                                    color: '#333',
-                                    fontWeight: 500,
-                                    border: '1px solid #e0e0e0',
-                                    '& .MuiChip-icon': {
-                                      fontSize: '16px',
-                                      marginLeft: '4px'
-                                    }
-                                  }}
-                                />
-                              );
-                            })}
-                            {remainingCount > 0 && (
-                              <Chip
-                                label={`+${remainingCount}`}
-                                size="small"
-                                variant="outlined"
-                                color="default"
-                                sx={{ fontSize: '0.75rem', mb: 0.5 }}
-                              />
-                            )}
-                          </>
-                        );
-                      })()}
+                      {(student.skills || [])
+                        .slice(0, 4)
+                        .map((skill, index) => (
+                          <Chip
+                            key={index}
+                            label={skill}
+                            size="small"
+                            variant="filled"
+                            sx={{
+                              fontSize: "0.75rem",
+                              mb: 0.5,
+                              bgcolor: "#e3f2fd",
+                              color: "#0d47a1",
+                              fontWeight: 500,
+                            }}
+                          />
+                        ))}
+                      {(student.skills || []).length > 4 && (
+                        <Chip
+                          label={`+${(student.skills || []).length - 4}`}
+                          size="small"
+                          variant="outlined"
+                          color="default"
+                          sx={{ fontSize: "0.75rem", mb: 0.5 }}
+                        />
+                      )}
                     </Stack>
                   </Box>
-
                   <Divider sx={{ mb: 2 }} />
-
-                  {/* アクションボタン */}
-                  <Box sx={{ display: 'flex', gap: 1, justifyContent: 'space-between' }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      gap: 1,
+                      justifyContent: "space-between",
+                    }}
+                  >
                     <Button
                       onClick={() => {
                         window.location.href = `/student/${student.id}`;
@@ -483,56 +418,28 @@ export default function CompanyPage() {
                       variant="contained"
                       startIcon={<PersonIcon />}
                       size="small"
-                      sx={{ 
+                      sx={{
                         flex: 1,
-                        textTransform: 'none',
+                        textTransform: "none",
                         borderRadius: 2,
-                        fontWeight: 600
+                        fontWeight: 600,
                       }}
                     >
-                      詳細を見る
+                      プロフィール
                     </Button>
-                    <IconButton 
+                    <IconButton
                       color="primary"
                       onClick={() => {
-                        // 学生IDからチャットを検索
-                        const existingChat = findChatByStudentId(student.id);
-                        if (existingChat) {
-                          // 既存のチャットがあれば直接そのチャットページに遷移
-                          window.location.href = `/chat/${existingChat.id}`;
-                        } else {
-                          // 既存のチャットがなければチャット一覧ページに遷移
-                          window.location.href = '/chat';
-                        }
+                        alert(`チャット機能は準備中です。`);
                       }}
-                      sx={{ 
-                        border: '2px solid',
-                        borderColor: 'primary.main',
-                        '&:hover': {
-                          bgcolor: 'primary.main',
-                          color: 'white'
-                        }
+                      sx={{
+                        border: "2px solid",
+                        borderColor: "primary.main",
+                        "&:hover": { bgcolor: "primary.main", color: "white" },
                       }}
                       size="small"
                     >
                       <ChatIcon />
-                    </IconButton>
-                    <IconButton 
-                      color="success"
-                      onClick={() => {
-                        alert(`${student.name}さんの採用検討機能は準備中です。`);
-                      }}
-                      sx={{ 
-                        border: '2px solid',
-                        borderColor: 'success.main',
-                        '&:hover': {
-                          bgcolor: 'success.main',
-                          color: 'white'
-                        }
-                      }}
-                      size="small"
-                    >
-                      <WorkIcon />
                     </IconButton>
                   </Box>
                 </CardContent>
@@ -542,50 +449,41 @@ export default function CompanyPage() {
         ))}
       </Grid>
 
-      {/* もっと見る/折りたたむボタン */}
-      {filteredStudents.length > 5 && (
-        <Box sx={{ textAlign: 'center', mt: 4, display: 'flex', gap: 2, justifyContent: 'center' }}>
-          {filteredStudents.length > displayCount && (
-            <Button
-              variant="outlined"
-              size="large"
-              onClick={() => setDisplayCount(prev => prev + 5)}
-              sx={{
-                textTransform: 'none',
-                borderRadius: 3,
-                px: 4,
-                py: 1.5,
-                fontWeight: 600,
-                fontSize: '1rem'
-              }}
-            >
-              もっと見る
-            </Button>
-          )}
-          {displayCount > 5 && (
-            <Button
-              variant="outlined"
-              size="large"
-              onClick={() => setDisplayCount(5)}
-              sx={{
-                textTransform: 'none',
-                borderRadius: 3,
-                px: 4,
-                py: 1.5,
-                fontWeight: 600,
-                fontSize: '1rem'
-              }}
-            >
-              折りたたむ
-            </Button>
-          )}
+      {filteredStudents.length > displayCount && (
+        <Box sx={{ textAlign: "center", mt: 4 }}>
+          <Button
+            variant="outlined"
+            size="large"
+            onClick={() => setDisplayCount((prev) => prev + 6)}
+            sx={{
+              textTransform: "none",
+              borderRadius: 3,
+              px: 4,
+              py: 1.5,
+              fontWeight: 600,
+              fontSize: "1rem",
+            }}
+          >
+            もっと見る
+          </Button>
         </Box>
       )}
 
-      {/* 空の状態 */}
+      {displayCount > 6 && (
+        <Box sx={{ textAlign: "center", mt: 2 }}>
+          <Button
+            variant="text"
+            size="small"
+            onClick={() => setDisplayCount(6)}
+          >
+            折りたたむ
+          </Button>
+        </Box>
+      )}
+
       {filteredStudents.length === 0 && !loading && (
-        <Box sx={{ textAlign: 'center', py: 8 }}>
-          <PersonIcon sx={{ fontSize: 100, color: 'text.secondary', mb: 2 }} />
+        <Box sx={{ textAlign: "center", py: 8 }}>
+          <PersonIcon sx={{ fontSize: 100, color: "text.secondary", mb: 2 }} />
           <Typography variant="h5" color="text.secondary" gutterBottom>
             条件に合う学生が見つかりませんでした
           </Typography>
@@ -595,9 +493,9 @@ export default function CompanyPage() {
           <Button
             variant="outlined"
             onClick={() => {
-              setSearchQuery('');
-              setUniversityFilter('');
-              setSkillFilter('');
+              setSearchQuery("");
+              setUniversityFilter("");
+              setSkillFilter("");
             }}
           >
             フィルターをリセット
@@ -605,19 +503,19 @@ export default function CompanyPage() {
         </Box>
       )}
 
-      {/* CTAセクション */}
+      {/* 企業向けCTAセクション */}
       <Paper 
         elevation={4} 
         sx={{ 
           mt: 6, 
-          textAlign: 'center', 
+          textAlign: "center", 
           p: 4, 
-          background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-          color: 'white'
+          background: "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
+          color: "white"
         }}
       >
         <TrendingUpIcon sx={{ fontSize: 60, mb: 2 }} />
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold' }}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold" }}>
           あなたの企業も参加しませんか？
         </Typography>
         <Typography variant="h6" sx={{ mb: 3, opacity: 0.9 }}>
@@ -626,16 +524,19 @@ export default function CompanyPage() {
         <Button 
           variant="contained" 
           size="large"
+          onClick={() => window.location.href = '/company/register'}
+          startIcon={<BusinessIcon />}
           sx={{ 
-            textTransform: 'none',
+            textTransform: "none",
             borderRadius: 3,
             px: 4,
             py: 1.5,
-            bgcolor: 'white',
-            color: 'primary.main',
-            fontWeight: 'bold',
-            '&:hover': {
-              bgcolor: 'grey.100'
+            bgcolor: "white",
+            color: "primary.main",
+            fontWeight: "bold",
+            fontSize: "1.1rem",
+            "&:hover": {
+              bgcolor: "grey.100"
             }
           }}
         >
@@ -651,31 +552,26 @@ function LoadingSkeleton() {
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Skeleton variant="text" width="40%" height={60} sx={{ mb: 2 }} />
       <Skeleton variant="text" width="60%" height={40} sx={{ mb: 4 }} />
-      
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        {[1, 2, 3].map((i) => (
-          <Grid size={{ xs: 12, sm: 4 }} key={i}>
-            <Skeleton variant="rectangular" height={100} sx={{ borderRadius: 2 }} />
-          </Grid>
-        ))}
-      </Grid>
-      
       <Skeleton variant="rectangular" height={120} sx={{ mb: 4 }} />
-      
       <Grid container spacing={3}>
         {[1, 2, 3, 4, 5, 6].map((i) => (
-          <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={i}>
+          <Grid item xs={12} sm={6} lg={4} key={i}>
             <Card sx={{ height: 420 }}>
               <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Skeleton variant="circular" width={60} height={60} sx={{ mr: 2 }} />
+                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                  <Skeleton
+                    variant="circular"
+                    width={60}
+                    height={60}
+                    sx={{ mr: 2 }}
+                  />
                   <Box sx={{ flexGrow: 1 }}>
                     <Skeleton variant="text" width="80%" />
                     <Skeleton variant="text" width="60%" />
                   </Box>
                 </Box>
                 <Skeleton variant="text" height={80} sx={{ mb: 2 }} />
-                <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
                   <Skeleton variant="rounded" width={60} height={24} />
                   <Skeleton variant="rounded" width={80} height={24} />
                   <Skeleton variant="rounded" width={70} height={24} />
