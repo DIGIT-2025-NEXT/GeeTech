@@ -45,6 +45,8 @@ import Link from 'next/link';
 import { getAllCompanies, type Company } from '@/lib/mock';
 import { useState, useEffect } from 'react';
 import { IndustryIcon } from '@/app/_components/IndustryIcon';
+import AdoptButton from './adopt';
+import RejectButton from './Reject';
 
 export default function StudentsPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -118,6 +120,8 @@ export default function StudentsPage() {
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
+      <AdoptButton studentid="4918c9e0-18f3-4fe6-b339-0375cf1a851a"></AdoptButton>
+      <RejectButton studentid="4918c9e0-18f3-4fe6-b339-0375cf1a851a"></RejectButton>
       {/* ヘッダーセクション */}
       <Box sx={{ mb: 4 }}>
         <Breadcrumbs sx={{ mb: 2 }}>
