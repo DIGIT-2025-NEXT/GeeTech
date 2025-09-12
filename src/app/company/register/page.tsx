@@ -127,174 +127,361 @@ export default function CompanyRegisterPage() {
     switch (activeStep) {
       case 0:
         return (
-          <Grid container spacing={3}>
-            <Grid xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="企業名"
-                required
-                value={companyData.companyName}
-                onChange={(e) => handleInputChange('companyName', e.target.value)}
-                error={!!errors.companyName}
-                helperText={errors.companyName}
-                InputProps={{
-                  startAdornment: <BusinessIcon sx={{ mr: 1, color: 'text.secondary' }} />
-                }}
-              />
-            </Grid>
-            <Grid xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="代表者名"
-                required
-                value={companyData.representativeName}
-                onChange={(e) => handleInputChange('representativeName', e.target.value)}
-                error={!!errors.representativeName}
-                helperText={errors.representativeName}
-                InputProps={{
-                  startAdornment: <PersonIcon sx={{ mr: 1, color: 'text.secondary' }} />
-                }}
-              />
-            </Grid>
-            <Grid xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="メールアドレス"
-                type="email"
-                required
-                value={companyData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                error={!!errors.email}
-                helperText={errors.email}
-                InputProps={{
-                  startAdornment: <EmailIcon sx={{ mr: 1, color: 'text.secondary' }} />
-                }}
-              />
-            </Grid>
-            <Grid xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="電話番号"
-                required
-                value={companyData.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
-                error={!!errors.phone}
-                helperText={errors.phone}
-                InputProps={{
-                  startAdornment: <PhoneIcon sx={{ mr: 1, color: 'text.secondary' }} />
-                }}
-              />
-            </Grid>
-            <Grid xs={12}>
-              <TextField
-                fullWidth
-                label="ウェブサイト"
-                value={companyData.website}
-                onChange={(e) => handleInputChange('website', e.target.value)}
-                placeholder="https://example.com"
-                InputProps={{
-                  startAdornment: <WebIcon sx={{ mr: 1, color: 'text.secondary' }} />
-                }}
-              />
-            </Grid>
-          </Grid>
+          <div className="max-w-3xl mx-auto px-4 md:px-6 space-y-6">
+            <Typography variant="h6" className="mt-6 mb-2 text-lg font-semibold">基本情報</Typography>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+              {/* 企業名 - 2カラム幅 */}
+              <div className="md:col-span-2">
+                <label htmlFor="companyName" className="text-sm font-medium mb-1 block">
+                  企業名 <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <BusinessIcon className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <TextField
+                    id="companyName"
+                    fullWidth
+                    value={companyData.companyName}
+                    onChange={(e) => handleInputChange('companyName', e.target.value)}
+                    error={!!errors.companyName}
+                    aria-invalid={!!errors.companyName}
+                    aria-describedby={errors.companyName ? "companyName-error" : undefined}
+                    className="h-11"
+                    sx={{
+                      '& .MuiInputBase-root': {
+                        height: '44px',
+                        borderRadius: '12px',
+                        paddingLeft: '64px',
+                      }
+                    }}
+                  />
+                </div>
+                {errors.companyName && (
+                  <p id="companyName-error" className="mt-1 text-xs text-red-600">
+                    {errors.companyName}
+                  </p>
+                )}
+              </div>
+
+              {/* 代表者名 */}
+              <div>
+                <label htmlFor="representativeName" className="text-sm font-medium mb-1 block">
+                  代表者名 <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <PersonIcon className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <TextField
+                    id="representativeName"
+                    fullWidth
+                    value={companyData.representativeName}
+                    onChange={(e) => handleInputChange('representativeName', e.target.value)}
+                    error={!!errors.representativeName}
+                    aria-invalid={!!errors.representativeName}
+                    aria-describedby={errors.representativeName ? "representativeName-error" : undefined}
+                    sx={{
+                      '& .MuiInputBase-root': {
+                        height: '44px',
+                        borderRadius: '12px',
+                        paddingLeft: '56px',
+                      }
+                    }}
+                  />
+                </div>
+                {errors.representativeName && (
+                  <p id="representativeName-error" className="mt-1 text-xs text-red-600">
+                    {errors.representativeName}
+                  </p>
+                )}
+              </div>
+
+              {/* メールアドレス */}
+              <div>
+                <label htmlFor="email" className="text-sm font-medium mb-1 block">
+                  メールアドレス <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <EmailIcon className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <TextField
+                    id="email"
+                    fullWidth
+                    type="email"
+                    value={companyData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    error={!!errors.email}
+                    aria-invalid={!!errors.email}
+                    aria-describedby={errors.email ? "email-error" : undefined}
+                    sx={{
+                      '& .MuiInputBase-root': {
+                        height: '44px',
+                        borderRadius: '12px',
+                        paddingLeft: '56px',
+                      }
+                    }}
+                  />
+                </div>
+                {errors.email && (
+                  <p id="email-error" className="mt-1 text-xs text-red-600">
+                    {errors.email}
+                  </p>
+                )}
+              </div>
+
+              {/* 電話番号 */}
+              <div>
+                <label htmlFor="phone" className="text-sm font-medium mb-1 block">
+                  電話番号 <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <PhoneIcon className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <TextField
+                    id="phone"
+                    fullWidth
+                    value={companyData.phone}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    error={!!errors.phone}
+                    aria-invalid={!!errors.phone}
+                    aria-describedby={errors.phone ? "phone-error" : undefined}
+                    sx={{
+                      '& .MuiInputBase-root': {
+                        height: '44px',
+                        borderRadius: '12px',
+                        paddingLeft: '56px',
+                      }
+                    }}
+                  />
+                </div>
+                {errors.phone && (
+                  <p id="phone-error" className="mt-1 text-xs text-red-600">
+                    {errors.phone}
+                  </p>
+                )}
+              </div>
+
+              {/* ウェブサイト - 2カラム幅 */}
+              <div className="md:col-span-2">
+                <label htmlFor="website" className="text-sm font-medium mb-1 block">
+                  ウェブサイト
+                </label>
+                <div className="relative">
+                  <WebIcon className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <TextField
+                    id="website"
+                    fullWidth
+                    value={companyData.website}
+                    onChange={(e) => handleInputChange('website', e.target.value)}
+                    placeholder="https://example.com"
+                    sx={{
+                      '& .MuiInputBase-root': {
+                        height: '44px',
+                        borderRadius: '12px',
+                        paddingLeft: '56px',
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
         );
 
       case 1:
         return (
-          <Grid container spacing={3}>
-            <Grid xs={12} md={6}>
-              <FormControl fullWidth required error={!!errors.industry}>
-                <InputLabel>業界</InputLabel>
-                <Select
-                  value={companyData.industry}
-                  label="業界"
-                  onChange={(e) => handleInputChange('industry', e.target.value)}
-                >
-                  {industries.map((industry) => (
-                    <MenuItem key={industry} value={industry}>
-                      {industry}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid xs={12} md={6}>
-              <FormControl fullWidth required error={!!errors.employeeCount}>
-                <InputLabel>従業員数</InputLabel>
-                <Select
-                  value={companyData.employeeCount}
-                  label="従業員数"
-                  onChange={(e) => handleInputChange('employeeCount', e.target.value)}
-                >
-                  {employeeRanges.map((range) => (
-                    <MenuItem key={range} value={range}>
-                      {range}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="設立年"
-                type="number"
-                value={companyData.establishedYear}
-                onChange={(e) => handleInputChange('establishedYear', e.target.value)}
-                inputProps={{ min: 1900, max: new Date().getFullYear() }}
-              />
-            </Grid>
-            <Grid xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="資本金（万円）"
-                type="number"
-                value={companyData.capital}
-                onChange={(e) => handleInputChange('capital', e.target.value)}
-                inputProps={{ min: 0 }}
-              />
-            </Grid>
-            <Grid xs={12}>
-              <TextField
-                fullWidth
-                label="所在地"
-                required
-                value={companyData.address}
-                onChange={(e) => handleInputChange('address', e.target.value)}
-                error={!!errors.address}
-                helperText={errors.address}
-                InputProps={{
-                  startAdornment: <LocationIcon sx={{ mr: 1, color: 'text.secondary' }} />
-                }}
-              />
-            </Grid>
-            <Grid xs={12}>
-              <TextField
-                fullWidth
-                label="企業説明"
-                required
-                multiline
-                rows={4}
-                value={companyData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
-                error={!!errors.description}
-                helperText={errors.description || '企業の特色や魅力をアピールしてください'}
-                placeholder="当社は..."
-              />
-            </Grid>
-            <Grid xs={12}>
-              <TextField
-                fullWidth
-                label="事業内容"
-                multiline
-                rows={3}
-                value={companyData.businessContent}
-                onChange={(e) => handleInputChange('businessContent', e.target.value)}
-                placeholder="主な事業内容を詳しく教えてください"
-              />
-            </Grid>
-          </Grid>
+          <div className="max-w-3xl mx-auto px-4 md:px-6 space-y-6">
+            <Typography variant="h6" className="mt-6 mb-2 text-lg font-semibold">詳細情報</Typography>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+              {/* 業界 */}
+              <div>
+                <label htmlFor="industry" className="text-sm font-medium mb-1 block">
+                  業界 <span className="text-red-500">*</span>
+                </label>
+                <FormControl fullWidth required error={!!errors.industry}>
+                  <Select
+                    id="industry"
+                    value={companyData.industry}
+                    onChange={(e) => handleInputChange('industry', e.target.value)}
+                    aria-invalid={!!errors.industry}
+                    aria-describedby={errors.industry ? "industry-error" : undefined}
+                    sx={{
+                      '& .MuiInputBase-root': {
+                        height: '44px',
+                        borderRadius: '12px',
+                      }
+                    }}
+                  >
+                    {industries.map((industry) => (
+                      <MenuItem key={industry} value={industry}>
+                        {industry}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                {errors.industry && (
+                  <p id="industry-error" className="mt-1 text-xs text-red-600">
+                    {errors.industry}
+                  </p>
+                )}
+              </div>
+
+              {/* 従業員数 */}
+              <div>
+                <label htmlFor="employeeCount" className="text-sm font-medium mb-1 block">
+                  従業員数 <span className="text-red-500">*</span>
+                </label>
+                <FormControl fullWidth required error={!!errors.employeeCount}>
+                  <Select
+                    id="employeeCount"
+                    value={companyData.employeeCount}
+                    onChange={(e) => handleInputChange('employeeCount', e.target.value)}
+                    aria-invalid={!!errors.employeeCount}
+                    aria-describedby={errors.employeeCount ? "employeeCount-error" : undefined}
+                    sx={{
+                      '& .MuiInputBase-root': {
+                        height: '44px',
+                        borderRadius: '12px',
+                      }
+                    }}
+                  >
+                    {employeeRanges.map((range) => (
+                      <MenuItem key={range} value={range}>
+                        {range}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                {errors.employeeCount && (
+                  <p id="employeeCount-error" className="mt-1 text-xs text-red-600">
+                    {errors.employeeCount}
+                  </p>
+                )}
+              </div>
+
+              {/* 設立年 */}
+              <div>
+                <label htmlFor="establishedYear" className="text-sm font-medium mb-1 block">
+                  設立年
+                </label>
+                <TextField
+                  id="establishedYear"
+                  fullWidth
+                  type="number"
+                  value={companyData.establishedYear}
+                  onChange={(e) => handleInputChange('establishedYear', e.target.value)}
+                  inputProps={{ min: 1900, max: new Date().getFullYear() }}
+                  sx={{
+                    '& .MuiInputBase-root': {
+                      height: '44px',
+                      borderRadius: '12px',
+                    }
+                  }}
+                />
+              </div>
+
+              {/* 資本金 */}
+              <div>
+                <label htmlFor="capital" className="text-sm font-medium mb-1 block">
+                  資本金（万円）
+                </label>
+                <TextField
+                  id="capital"
+                  fullWidth
+                  type="number"
+                  value={companyData.capital}
+                  onChange={(e) => handleInputChange('capital', e.target.value)}
+                  inputProps={{ min: 0 }}
+                  sx={{
+                    '& .MuiInputBase-root': {
+                      height: '44px',
+                      borderRadius: '12px',
+                    }
+                  }}
+                />
+              </div>
+
+              {/* 所在地 - 2カラム幅 */}
+              <div className="md:col-span-2">
+                <label htmlFor="address" className="text-sm font-medium mb-1 block">
+                  所在地 <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <LocationIcon className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <TextField
+                    id="address"
+                    fullWidth
+                    value={companyData.address}
+                    onChange={(e) => handleInputChange('address', e.target.value)}
+                    error={!!errors.address}
+                    aria-invalid={!!errors.address}
+                    aria-describedby={errors.address ? "address-error" : undefined}
+                    sx={{
+                      '& .MuiInputBase-root': {
+                        height: '44px',
+                        borderRadius: '12px',
+                        paddingLeft: '56px',
+                      }
+                    }}
+                  />
+                </div>
+                {errors.address && (
+                  <p id="address-error" className="mt-1 text-xs text-red-600">
+                    {errors.address}
+                  </p>
+                )}
+              </div>
+
+              {/* 企業説明 - 2カラム幅 */}
+              <div className="md:col-span-2">
+                <label htmlFor="description" className="text-sm font-medium mb-1 block">
+                  企業説明 <span className="text-red-500">*</span>
+                </label>
+                <TextField
+                  id="description"
+                  fullWidth
+                  multiline
+                  rows={4}
+                  value={companyData.description}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  error={!!errors.description}
+                  aria-invalid={!!errors.description}
+                  aria-describedby={errors.description ? "description-error" : undefined}
+                  placeholder="当社は..."
+                  sx={{
+                    '& .MuiInputBase-root': {
+                      borderRadius: '12px',
+                    }
+                  }}
+                />
+                {errors.description ? (
+                  <p id="description-error" className="mt-1 text-xs text-red-600">
+                    {errors.description}
+                  </p>
+                ) : (
+                  <p className="mt-1 text-xs text-gray-500">
+                    企業の特色や魅力をアピールしてください
+                  </p>
+                )}
+              </div>
+
+              {/* 事業内容 - 2カラム幅 */}
+              <div className="md:col-span-2">
+                <label htmlFor="businessContent" className="text-sm font-medium mb-1 block">
+                  事業内容
+                </label>
+                <TextField
+                  id="businessContent"
+                  fullWidth
+                  multiline
+                  rows={3}
+                  value={companyData.businessContent}
+                  onChange={(e) => handleInputChange('businessContent', e.target.value)}
+                  placeholder="主な事業内容を詳しく教えてください"
+                  sx={{
+                    '& .MuiInputBase-root': {
+                      borderRadius: '12px',
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          </div>
         );
 
       case 2:
@@ -439,13 +626,18 @@ export default function CompanyRegisterPage() {
           {renderStepContent()}
           
           {/* ボタン */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+          <div className="flex justify-center gap-6 pt-8 max-w-3xl mx-auto px-4 md:px-6">
             <Button
               disabled={activeStep === 0}
               onClick={handleBack}
               variant="outlined"
-              size="large"
-              sx={{ px: 4 }}
+              className="min-w-[140px] h-11"
+              sx={{ 
+                minWidth: '140px',
+                height: '44px',
+                borderRadius: '12px',
+                px: 4 
+              }}
             >
               戻る
             </Button>
@@ -453,13 +645,18 @@ export default function CompanyRegisterPage() {
             <Button
               variant="contained"
               onClick={activeStep === steps.length - 1 ? handleSubmit : handleNext}
-              size="large"
-              sx={{ px: 4 }}
+              className="min-w-[140px] h-11"
+              sx={{ 
+                minWidth: '140px',
+                height: '44px',
+                borderRadius: '12px',
+                px: 4 
+              }}
               startIcon={activeStep === steps.length - 1 ? <CheckIcon /> : undefined}
             >
               {activeStep === steps.length - 1 ? '登録完了' : '次へ'}
             </Button>
-          </Box>
+          </div>
         </CardContent>
       </Card>
 
