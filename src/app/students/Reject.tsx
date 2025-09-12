@@ -20,7 +20,7 @@ export default function RejectButton({ studentid }: Props){
         const { data: company } = await supabase
                 .from('company')
                 .select('*')
-                .eq('id', '47b78e6b-0123-43cc-a23d-5785ebf2f370')
+                .eq('id', COMPANY_ID)
                 .single();
         const { data: studentprofile } = await supabase
                 .from('profiles')
@@ -33,7 +33,7 @@ export default function RejectButton({ studentid }: Props){
             const {data,error}= await supabase
                 .from('company')
                 .update({ rejectedid: newRejectedIDArray,adoptedid:newAodptedIDArray})
-                .eq("id",'47b78e6b-0123-43cc-a23d-5785ebf2f370')
+                .eq("id",COMPANY_ID)
             if(error){
                 setSnackMsg(`不採用に失敗しました`);
                 setSnackOpen(true);
@@ -61,7 +61,7 @@ export default function RejectButton({ studentid }: Props){
         const { data: company } = await supabase
                 .from('company')
                 .select('*')
-                .eq('id', '47b78e6b-0123-43cc-a23d-5785ebf2f370')
+                .eq('id', COMPANY_ID)
                 .single();
         const { data: studentprofile } = await supabase
                 .from('profiles')
@@ -84,7 +84,7 @@ export default function RejectButton({ studentid }: Props){
             const {data,error}= await supabase
                 .from('company')
                 .update({ participants_id: newApplyedIDArray,rejectedid:newRejectedIDArray})
-                .eq("id",'47b78e6b-0123-43cc-a23d-5785ebf2f370')
+                .eq("id",COMPANY_ID)
             if(error){
                 setSnackMsg(`不採用に失敗しました`);
                 setSnackOpen(true);
