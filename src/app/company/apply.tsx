@@ -53,7 +53,7 @@ export default function ApplyButton({ companyid: companyid }: Props){
             //supabaseでのやつを実装
 
             const newArray = [...(current?.participants_id || []), STUDENT_ID];
-            const { data, error } = await supabase
+            const { error } = await supabase
                 .from('company')
                 .update({ participants_id: newArray })
                 .eq('id', companyid);

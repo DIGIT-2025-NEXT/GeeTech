@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { validateAuthConfig, getGoogleRedirectUri, getSupabaseProjectId } from '@/utils/auth-helpers'
+import { useState } from 'react'
+import { validateAuthConfig } from '@/utils/auth-helpers'
 import { Card, CardContent, CardHeader, Typography, Box, Button, Alert } from '@mui/material'
 import { ContentCopy, Refresh } from '@mui/icons-material'
 

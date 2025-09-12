@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/lib/types_db";
 import { createClient } from "@/lib/supabase/client";
 

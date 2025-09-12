@@ -53,7 +53,7 @@ export default function LoginPage() {
           "確認メールを送信しました。メールボックスを確認してください。"
         );
       }
-    } catch (error) {
+    } catch {
       setMessage("エラーが発生しました。");
     } finally {
       setLoading(false);
@@ -69,7 +69,7 @@ export default function LoginPage() {
       if (error) {
         setMessage(error || "エラーが発生しました");
       }
-    } catch (error) {
+    } catch {
       setMessage("Google認証でエラーが発生しました。");
     } finally {
       setLoading(false);
