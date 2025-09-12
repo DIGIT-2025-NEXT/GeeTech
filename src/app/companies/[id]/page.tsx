@@ -51,14 +51,34 @@ export default function CompanyDetailPage({ params }: Props) {
       
       try {
         // Supabaseから企業データを取得
+        console.log('Fetching company data for ID:', id);
         const { data: companyData, error: companyError } = await supabase
           .from('company')
           .select('*')
           .eq('id', id)
           .single();
           
+        console.log('Supabase response - data:', companyData);
+        console.log('Supabase response - error:', companyError);
+        console.log('Has error:', !!companyError);
+        console.log('Has data:', !!companyData);
+          
         if (companyError) {
-          console.error('Error fetching company:', companyError);
+          console.error('Error fetching company:', {
+            message: companyError.message,
+            details: companyError.details,
+            hint: companyError.hint,
+            code: companyError.code
+          });
+          
+          // エラーが PGRST116 (行が見つからない) の場合は、データが存在しないことを意味する
+          if (companyError.code === 'PGRST116') {
+            console.log('Company not found, showing 404');
+          } else {
+            // その他のエラーの場合
+            console.error('Other database error occurred');
+          }
+          
           notFound();
           return;
         }
@@ -202,18 +222,6 @@ export default function CompanyDetailPage({ params }: Props) {
 
               {/* アクションボタン */}
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Button
-                  variant="contained"
-                  startIcon={<WorkIcon />}
-                  size="large"
-                  sx={{ 
-                    textTransform: 'none',
-                    borderRadius: 2,
-                    py: 1.5
-                  }}
-                >
-                  応募する
-                </Button>
                 <Button
                   variant="outlined"
                   startIcon={<EmailIcon />}
