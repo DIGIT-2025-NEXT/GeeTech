@@ -35,10 +35,10 @@ import {
   CheckCircle as CheckCircleIcon
 } from '@mui/icons-material';
 import Link from 'next/link';
-import { getAllstudentss, getAllProjects } from '@/lib/mock';
+import { getAllStudents, getAllProjects } from '@/lib/mock';
 
 export default async function CompanyDashboard() {
-  const studentss = (await getAllstudentss()).slice(0, 3); // 注目の学生3名
+  const studentss = (await getAllStudents()).slice(0, 3); // 注目の学生3名
   const projects = getAllProjects(); // すべてのプロジェクト
 
   // 会社情報（実際にはログインした会社の情報を取得）
@@ -292,7 +292,7 @@ export default async function CompanyDashboard() {
                         <Box sx={{ display: 'flex', gap: 1 }}>
                           <Button 
                             component={Link}
-                            href={`/Student/${Student.id}`}
+                            href={`/Student/${students.id}`}
                             size="small" 
                             variant="outlined"
                             sx={{ textTransform: 'none', flex: 1 }}
