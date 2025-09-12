@@ -8,11 +8,16 @@ import {getStudentById,getCompanyById,getchatById} from '@/lib/mock';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function Chat({ params }: { params: Promise<{ chatid: string }> }) {
-    const { chatid } = React.use(params);
+    const [chatid, setChatid] = React.useState<string>('');
+    
+    React.useEffect(() => {
+        params.then(({ chatid }) => setChatid(chatid));
+    }, [params]);
     const chatlogs = getchatById(chatid);
     const { user, loading } = useAuth();
     const userid = user?.id ?? '';
-    if (loading) {
+    
+    if (loading || !chatid) {
         return (
           <Container maxWidth="xl" sx={{ py: 4 }}>
             <Box sx={{py:4}}><Link href="/chat">←チャット一覧に戻る</Link></Box>

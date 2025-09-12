@@ -557,6 +557,7 @@ export default function CompanyPage() {
         <Button 
           variant="contained" 
           size="large"
+          onClick={() => window.location.href = '/company/register'}
           sx={{ 
             textTransform: 'none',
             borderRadius: 3,

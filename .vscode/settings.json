@@ -28,5 +28,7 @@
         "tzsbxafggyykmfopjcdv",
         "unrealengine",
         "Wordmark"
-    ]
+    ],
+    "chatgpt.openOnStartup": false,
+    "chatgpt.commentCodeLensEnabled": false
 }
