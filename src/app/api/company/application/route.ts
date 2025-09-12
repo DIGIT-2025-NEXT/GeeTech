@@ -4,25 +4,7 @@ import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-
-// 入力データのバリデーションスキーマ
-const applicationSchema = z.object({
-  companyName: z.string().min(1, "企業名を入力してください"),
-  representativeName: z.string().min(1, "代表者名を入力してください"),
-  email: z.string().email("有効なメールアドレスを入力してください"),
-  phone: z.string().min(1, "電話番号を入力してください"),
-  website: z
-    .string()
-    .url("有効なURLを入力してください")
-    .optional()
-    .or(z.literal("")),
-  industry: z.string().uuid("有効な業界IDを選択してください"),
-  employeeCount: z.string().min(1, "従業員数を選択してください"),
-  establishedYear: z.string().optional(),
-  address: z.string().min(1, "住所を入力してください"),
-  description: z.string().min(1, "企業説明を入力してください"),
-  businessContent: z.string().optional(),
-});
+import { applicationSchema } from "@/lib/schema/companyApplication";
 
 // 従業員数の文字列を数値に変換するヘルパー関数
 const parseEmployeeCount = (range: string): number | null => {
@@ -65,6 +47,7 @@ export async function POST(request: Request) {
       address: parsedData.address,
       description: parsedData.description,
       business_detail: parsedData.businessContent,
+      is_without_recompense: parsedData.is_without_recompense || false,
     };
 
     // Supabaseにデータを挿入

@@ -23,6 +23,8 @@ import {
   Alert,
   AlertTitle,
   CircularProgress,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 import {
   Business as BusinessIcon,
@@ -82,13 +84,14 @@ export default function CompanyRegisterPage() {
     address: "",
     description: "",
     businessContent: "",
+    is_without_recompense: false,
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | boolean) => {
     setCompanyData((prev) => ({
       ...prev,
       [field]: value,
@@ -112,7 +115,7 @@ export default function CompanyRegisterPage() {
         newErrors.representativeName = "代表者名を入力してください";
       if (!companyData.email.trim())
         newErrors.email = "メールアドレスを入力してください";
-      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(companyData.email))
+      else if (!/^[^"]+@[^"]+\.[^"]+$/.test(companyData.email))
         newErrors.email = "有効なメールアドレスを入力してください";
       if (!companyData.phone.trim())
         newErrors.phone = "電話番号を入力してください";
@@ -163,10 +166,8 @@ export default function CompanyRegisterPage() {
         "企業登録申請が完了しました！管理者による審査後、ご連絡いたします。"
       );
       window.location.href = "/company";
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        setSubmitError(error.message || "予期せぬエラーが発生しました。");
-      }
+    } catch (error: any) {
+      setSubmitError(error.message || "予期せぬエラーが発生しました。");
     } finally {
       setIsSubmitting(false);
     }
@@ -371,6 +372,19 @@ export default function CompanyRegisterPage() {
                 placeholder="主な事業内容を詳しく教えてください"
               />
             </Grid>
+            <Grid item xs={12}>
+                <FormControlLabel
+                    control={
+                    <Checkbox
+                        checked={companyData.is_without_recompense}
+                        onChange={(e) => handleInputChange("is_without_recompense", e.target.checked)}
+                        name="is_without_recompense"
+                        color="primary"
+                    />
+                    }
+                    label="無償での募集（インターンシップ等）"
+                />
+            </Grid>
           </Grid>
         );
 
@@ -532,6 +546,10 @@ export default function CompanyRegisterPage() {
                         </Typography>
                       </Grid>
                     )}
+                    <Grid item xs={12}>
+                        <Typography variant="body2" color="text.secondary">無償での募集</Typography>
+                        <Typography variant="body1">{companyData.is_without_recompense ? 'はい' : 'いいえ'}</Typography>
+                    </Grid>
                   </Grid>
                 </Paper>
               </Grid>
@@ -644,7 +662,8 @@ export default function CompanyRegisterPage() {
           • 企業登録後、管理者による審査を行います（通常1-2営業日）
           <br />
           • 審査完了後、登録いただいたメールアドレスに通知をお送りします
-          <br />• 登録情報は後からダッシュボードで変更可能です
+          <br />
+          • 登録情報は後からダッシュボードで変更可能です
         </Alert>
       </Box>
     </Container>
