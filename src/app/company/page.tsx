@@ -36,6 +36,8 @@ import {
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
   School as SchoolIcon,
+  Business as BusinessIcon,
+  TrendingUp as TrendingUpIcon,
 } from "@mui/icons-material";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -146,17 +148,38 @@ export default function StudentPage() {
           </Typography>
           <Typography color="text.primary">学生一覧</Typography>
         </Breadcrumbs>
-        <Typography
-          variant="h3"
-          component="h1"
-          gutterBottom
-          sx={{ fontWeight: "bold", color: "primary.main" }}
-        >
-          未来を担う才能たち
-        </Typography>
-        <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
-          あなたの会社を次のレベルへ導く、優秀な学生を見つけよう。
-        </Typography>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+          <Box sx={{ flex: 1 }}>
+            <Typography
+              variant="h3"
+              component="h1"
+              gutterBottom
+              sx={{ fontWeight: "bold", color: "primary.main" }}
+            >
+              未来を担う才能たち
+            </Typography>
+            <Typography variant="h6" color="text.secondary">
+              あなたの会社を次のレベルへ導く、優秀な学生を見つけよう。
+            </Typography>
+          </Box>
+          <Button
+            variant="contained"
+            size="large"
+            onClick={() => window.location.href = '/company/register'}
+            startIcon={<BusinessIcon />}
+            sx={{
+              textTransform: "none",
+              borderRadius: 3,
+              px: 3,
+              py: 1.5,
+              fontWeight: "bold",
+              fontSize: "1rem",
+              ml: 3
+            }}
+          >
+            企業登録
+          </Button>
+        </Box>
       </Box>
 
       <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
@@ -479,6 +502,47 @@ export default function StudentPage() {
           </Button>
         </Box>
       )}
+
+      {/* 企業向けCTAセクション */}
+      <Paper 
+        elevation={4} 
+        sx={{ 
+          mt: 6, 
+          textAlign: "center", 
+          p: 4, 
+          background: "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
+          color: "white"
+        }}
+      >
+        <TrendingUpIcon sx={{ fontSize: 60, mb: 2 }} />
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold" }}>
+          あなたの企業も参加しませんか？
+        </Typography>
+        <Typography variant="h6" sx={{ mb: 3, opacity: 0.9 }}>
+          優秀な学生との出会いが、あなたの事業を加速させます。
+        </Typography>
+        <Button 
+          variant="contained" 
+          size="large"
+          onClick={() => window.location.href = '/company/register'}
+          startIcon={<BusinessIcon />}
+          sx={{ 
+            textTransform: "none",
+            borderRadius: 3,
+            px: 4,
+            py: 1.5,
+            bgcolor: "white",
+            color: "primary.main",
+            fontWeight: "bold",
+            fontSize: "1.1rem",
+            "&:hover": {
+              bgcolor: "grey.100"
+            }
+          }}
+        >
+          企業登録はこちら
+        </Button>
+      </Paper>
     </Container>
   );
 }
