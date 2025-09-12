@@ -27,12 +27,8 @@ import {
   Skeleton,
   Collapse,
 } from '@mui/material';
-import 
-  Grid2 
-  from '@mui/material/Unstable_Grid2';
 import {
   Person as PersonIcon,
-  School as SchoolIcon,
   Chat as ChatIcon,
   Work as WorkIcon,
   Search as SearchIcon,

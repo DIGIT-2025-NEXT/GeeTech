@@ -9,7 +9,6 @@ import {
   Chip,
   Button,
   Box,
-  IconButton,
   Paper,
   Breadcrumbs,
   Stack,
@@ -18,7 +17,6 @@ import {
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import {
-  Person as PersonIcon,
   School as SchoolIcon,
   Chat as ChatIcon,
   Work as WorkIcon,
@@ -32,8 +30,6 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { SkillIcon } from '@/app/_components/SkillIcon';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const GridWorkaround = Grid as any;
 
 export default function StudentDetailPage() {
   const params = useParams();
@@ -96,14 +92,6 @@ export default function StudentDetailPage() {
     return skillToIconMap[skillName] || null;
   };
 
-  // SkillIcon.tsxで利用可能なスキル一覧
-  const availableSkills = [
-    'HTML/CSS', 'JavaScript', 'TypeScript', 'React', 'Vue.js', 'Angular', 'Next.js', 'Nuxt.js', 'Svelte',
-    'Node.js', 'Express', 'Python', 'Django', 'Flask', 'Go', 'Ruby on Rails', 'PHP', 'Laravel',
-    'Java', 'Spring', 'Swift', 'Kotlin', 'AWS', 'Google Cloud', 'Azure', 'Docker', 'Kubernetes', 'Terraform',
-    'PostgreSQL', 'MySQL', 'MongoDB', 'Redis', 'Prisma', 'C++', 'C#', 'Rust', 'Unity', 'Unreal Engine',
-    'TensorFlow', 'PyTorch', 'GraphQL', 'Supabase', 'Firebase', 'Git', 'Figma', 'Storybook', 'Jest', 'Flutter'
-  ];
 
   useEffect(() => {
     const timer = setTimeout(() => {

@@ -22,7 +22,6 @@ import {
   TableHead,
   TableRow
 } from '@mui/material'
-import { Grid } from '@mui/material';
 import {
   Add as AddIcon,
   Person as PersonIcon,
@@ -39,7 +38,7 @@ import Link from 'next/link';
 import { getAllStudents, getAllProjects } from '@/lib/mock';
 
 export default async function CompanyDashboard() {
-  const students = getAllStudents().slice(0, 3); // 注目の学生3名
+  const students = (await getAllStudents()).slice(0, 3); // 注目の学生3名
   const projects = getAllProjects(); // すべてのプロジェクト
 
   // 会社情報（実際にはログインした会社の情報を取得）

@@ -215,7 +215,7 @@ export type Database = {
           name: string;
           university: string;
           bio: string;
-          skills: string[];
+          skills: string[] | string;
           avatar: string;
         };
         Insert: {

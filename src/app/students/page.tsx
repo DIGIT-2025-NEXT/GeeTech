@@ -22,14 +22,11 @@ import {
   Breadcrumbs,
   Fade,
   Stack,
-  Rating,
   Divider,
   Skeleton,
   Collapse
 } from '@mui/material';
 import {
-  Person as PersonIcon,
-  School as SchoolIcon,
   Business as BusinessIcon,
   Chat as ChatIcon,
   Work as WorkIcon,

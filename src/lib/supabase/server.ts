@@ -17,7 +17,7 @@ export async function createClient() {
   // URLの形式を検証
   try {
     new URL(supabaseUrl)
-  } catch (error) {
+  } catch {
     throw new Error(`Invalid NEXT_PUBLIC_SUPABASE_URL: ${supabaseUrl}. Expected format: https://your-project-id.supabase.co`)
   }
 

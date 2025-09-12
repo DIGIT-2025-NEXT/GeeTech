@@ -17,7 +17,6 @@ import {
   Select,
   MenuItem,
   Chip,
-  Avatar,
   Paper,
   Breadcrumbs,
   Divider,
