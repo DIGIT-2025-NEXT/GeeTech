@@ -4,7 +4,7 @@
 import { Box, Button, Card, CardContent, Container, Stack, Typography, Breadcrumbs} from '@mui/material';
 import Link from 'next/link';
 import { getAllChat, type Chat, getCompanyByIdSync } from '@/lib/mock';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from '@/contexts/AuthContext';
 
 interface ChatRoom {
@@ -121,16 +121,15 @@ export default function Chat() {
         </Breadcrumbs>
         <Typography variant='h4'>直近のチャット</Typography>
             <Stack spacing={2}>
-              {sortedchats.map((e)=>
-              <Card key={e.id}>
+              {rooms.map((room)=>
+              <Card key={room.id}>
                 <CardContent>
-                  <Typography variant='h6'>{getCompanyByIdSync(e.companyid)?.name}</Typography>
-                  <Typography>{e.chatlog[e.chatlog.length-1].chattext}</Typography>
-                  <Button href={`/chat/${e.id}`} sx={{bgcolor:"black",color:"white"}}>チャットを見る</Button>
+                  <Typography variant='h6'>{room.company.name}</Typography>
+                  <Typography>{room.lastMessage?.message || '最新のメッセージがありません'}</Typography>
+                  <Button href={`/chat/${room.id}`} sx={{bgcolor:"black",color:"white"}}>チャットを見る</Button>
                 </CardContent>
               </Card>
             )}
-            {sortedchats.length>morecount*10 ?(<Button variant='outlined' onClick={addmorecount} sx={{color:'"blue"'}}>もっと見る</Button>):("")}
             </Stack>
         </Container>
     )
