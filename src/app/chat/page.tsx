@@ -4,7 +4,7 @@
 import { Box, Button, Card, CardContent, Container, Stack, Typography, Breadcrumbs} from '@mui/material';
 import Link from 'next/link';
 import { getAllChat, type Chat, getCompanyByIdSync } from '@/lib/mock';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from '@/contexts/AuthContext';
 
 interface ChatRoom {

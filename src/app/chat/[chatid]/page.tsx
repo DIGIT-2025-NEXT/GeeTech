@@ -4,7 +4,6 @@
 import { Box, Button, Container, Stack, TextField, Typography, Card, CardContent} from '@mui/material';
 import Link from 'next/link';
 import React from 'react';
-import {getStudentById,getCompanyByIdSync,getchatById} from '@/lib/mock';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface ChatMessage {
@@ -289,41 +288,34 @@ export default function Chat({ params }: { params: Promise<{ chatid: string }> }
     const otherPartyDetail = userType === 'student' ? companyInfo?.industry : studentInfo?.university;
 
     return (
-        <Container maxWidth="xl" sx={{ display: "flex", flexDirection: "column", height: "85vh"}}>
-            <Box sx={{py:4}}><Link href="/chat">←チャット一覧に戻る</Link></Box>
-            <Typography variant='h6'>このチャットにアクセスする権限がありません。</Typography>
-          </Container>
-        );
-    */
-    return (
         <Container maxWidth="xl" sx={{ display: "flex", flexDirection: "column",height: "85vh"}}>
         <Box sx={{py:4}}><Link href="/chat">←チャット一覧に戻る</Link></Box>
-        <Typography variant='h5'>{getCompanyByIdSync(chatlogs.companyid)?.name}</Typography>
+        <Typography variant='h5'>{otherPartyName}</Typography>
             <Box sx={{ flex:1,overflowY: "auto",p:2}}>
                 <Stack spacing={1}>
-                    {chatlogs.chatlog.map((e,index)=>
-                    e.speaker ==="student"?(
+                    {chatData.messages.map((message: any, index: number) =>
+                    message.sender_type === "student" ? (
                     <Stack key={index} sx={{alignSelf: "flex-end"}}>
-                        <Typography sx={{fontSize:16}}>{getStudentById(chatlogs.studentid)?.name}</Typography>
+                        <Typography sx={{fontSize:16}}>{studentInfo?.name}</Typography>
                         <Card sx={{p:1,maxWidth: 600, width: "fit-content",bgcolor:"aqua"}}>
-                            <Typography>{e.chattext}</Typography>
+                            <Typography>{message.message}</Typography>
                         </Card>
                         <Typography variant="overline" color="text.secondary">
-                            {new Date(e.chattime).toLocaleString("ja-JP")}
+                            {new Date(message.created_at).toLocaleString("ja-JP")}
                         </Typography>
                     </Stack>
                     ):(
                     <Stack key={index} sx={{alignSelf: "flex-start"}}>
-                        <Typography sx={{fontSize:16}}>{getCompanyByIdSync(chatlogs.companyid)?.name}</Typography>
+                        <Typography sx={{fontSize:16}}>{companyInfo?.name}</Typography>
                         <Card sx={{p:1,maxWidth: 600, width: "fit-content",bgcolor:"white"}}>
-                            <Typography>{e.chattext}</Typography>
+                            <Typography>{message.message}</Typography>
                         </Card>
                         <Typography variant="overline" color="text.secondary">
-                            {new Date(e.chattime).toLocaleString("ja-JP")}
+                            {new Date(message.created_at).toLocaleString("ja-JP")}
                         </Typography>
                     </Stack>
                     ))}
-                    
+                    <div ref={messagesEndRef} />
                 </Stack>
             </Box>
             <Box sx={{p: 2, borderTop: "1px solid #ddd", display: "flex", gap: 1}}>
@@ -333,7 +325,7 @@ export default function Chat({ params }: { params: Promise<{ chatid: string }> }
                     variant='outlined'
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
+                    onKeyDown={handleKeyPress}
                     disabled={sending}
                 />
                 <Button 
