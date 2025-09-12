@@ -1,100 +1,132 @@
-import { createServerClient } from '@supabase/ssr'
-import { NextResponse, type NextRequest } from 'next/server'
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
 
 // アクセス制御が必要なパスを定義
-const PROTECTED_PATHS = [
-  '/company',
-  '/students'
-]
+const PROTECTED_PATHS = ["/company", "/students"];
 
-// 認証が必要だが、profile_typeに基づくアクセス制御は不要なパス  
-const AUTH_REQUIRED_PATHS = [
-  '/dashboard',
-  '/profile',
-  '/chat'
-]
+// 認証が必要だが、profile_typeに基づくアクセス制御は不要なパス
+const AUTH_REQUIRED_PATHS = ["/dashboard", "/profile", "/chat"];
 
 // 公開パス（認証不要）
 const PUBLIC_PATHS = [
-  '/',
-  '/auth',
-  '/events',
-  '/debug',
-  '/profile-quick-setup',
-  '/middleware-test',
-  '/test-access'
-]
+  "/",
+  "/auth",
+  "/events",
+  "/debug",
+  "/profile-quick-setup",
+  "/middleware-test",
+  "/test-access",
+];
 
 /**
  * パスがアクセス制御の対象かどうかを判定
  */
 function isProtectedPath(pathname: string): boolean {
-  return PROTECTED_PATHS.some(path => pathname.startsWith(path))
+  return PROTECTED_PATHS.some((path) => pathname.startsWith(path));
 }
 
 /**
  * パスが認証必須かどうかを判定
  */
 function isAuthRequiredPath(pathname: string): boolean {
-  return AUTH_REQUIRED_PATHS.some(path => pathname.startsWith(path)) || isProtectedPath(pathname)
+  return (
+    AUTH_REQUIRED_PATHS.some((path) => pathname.startsWith(path)) ||
+    isProtectedPath(pathname)
+  );
 }
 
 /**
  * パスが公開パスかどうかを判定
  */
 function isPublicPath(pathname: string): boolean {
-  return PUBLIC_PATHS.some(path => pathname === path || pathname.startsWith(`${path}/`))
+  return PUBLIC_PATHS.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`)
+  );
 }
 
 /**
  * profileタイプに基づくアクセスチェック
  */
-function checkPathAccess(pathname: string, profileType: string | null): boolean {
-  console.log(`[Access Check] Path: ${pathname}, Profile: ${profileType}`)
-  
+function checkPathAccess(
+  pathname: string,
+  profileType: string | null
+): boolean {
+  console.log(`[Access Check] Path: ${pathname}, Profile: ${profileType}`);
+
   if (!profileType) {
-    console.log(`[Access Check] No profile type - access denied`)
-    return false
+    console.log(`[Access Check] No profile type - access denied`);
+    return false;
   }
-  
-  if (profileType === 'students' && pathname.startsWith('/company')) {
-    console.log(`[Access Check] Students blocked from /company`)
-    return false
+
+  // /students/[studentId] のような動的パスを識別するための正規表現
+  const studentDetailPathRegex = /^\/students\/[^/]+$/;
+  // /company/[companyId] のような動的パスを識別するための正規表現
+  const companyDetailPathRegex = /^\/company\/[^/]+$/;
+
+  // students ロールの場合のアクセス制御
+  if (profileType === "students") {
+    if (pathname === "/students") {
+      console.log(`[Access Check] Students access to /students granted`);
+      return true;
+    }
+    if (studentDetailPathRegex.test(pathname)) {
+      console.log(`[Access Check] Students blocked from /students/[studentId]`);
+      return false;
+    }
+    if (companyDetailPathRegex.test(pathname)) {
+      console.log(
+        `[Access Check] Students access to /company/[companyId] granted`
+      );
+      return true;
+    }
   }
-  
-  if (profileType === 'company' && pathname.startsWith('/students')) {
-    console.log(`[Access Check] Company blocked from /students`)
-    return false
+
+  // company ロールの場合のアクセス制御
+  if (profileType === "company") {
+    if (pathname === "/company") {
+      console.log(`[Access Check] Company access to /company granted`);
+      return true;
+    }
+    if (companyDetailPathRegex.test(pathname)) {
+      console.log(`[Access Check] Company blocked from /company/[companyId]`);
+      return false;
+    }
+    if (studentDetailPathRegex.test(pathname)) {
+      console.log(
+        `[Access Check] Company access to /students/[studentId] granted`
+      );
+      return true;
+    }
   }
-  
-  if (profileType === 'admin') {
-    console.log(`[Access Check] Admin access granted`)
-    return true
+
+  if (profileType === "admin") {
+    console.log(`[Access Check] Admin access granted`);
+    return true;
   }
-  
-  console.log(`[Access Check] Default access granted`)
-  return true
+
+  console.log(`[Access Check] Default access granted`);
+  return true;
 }
 
 export async function middleware(request: NextRequest) {
-  const pathname = request.nextUrl.pathname
-  
-  console.log(`[Middleware] 🔍 Processing: ${pathname}`)
+  const pathname = request.nextUrl.pathname;
+
+  console.log(`[Middleware] 🔍 Processing: ${pathname}`);
 
   // 静的ファイル、API routes、Next.js内部パスをスキップ
   if (
-    pathname.startsWith('/_next') ||
-    pathname.startsWith('/api') ||
-    pathname.includes('.') ||
-    pathname.startsWith('/favicon')
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/api") ||
+    pathname.includes(".") ||
+    pathname.startsWith("/favicon")
   ) {
-    console.log(`[Middleware] ⏭️ Skipping static/api: ${pathname}`)
-    return NextResponse.next()
+    console.log(`[Middleware] ⏭️ Skipping static/api: ${pathname}`);
+    return NextResponse.next();
   }
 
   let supabaseResponse = NextResponse.next({
     request,
-  })
+  });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -102,20 +134,22 @@ export async function middleware(request: NextRequest) {
     {
       cookies: {
         getAll() {
-          return request.cookies.getAll()
+          return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value, options }) =>
+            request.cookies.set(name, value)
+          );
           supabaseResponse = NextResponse.next({
             request,
-          })
+          });
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
-          )
+          );
         },
       },
     }
-  )
+  );
 
   // IMPORTANT: Avoid writing any logic between createServerClient and
   // supabase.auth.getUser(). A simple mistake could make it very hard to debug
@@ -123,70 +157,75 @@ export async function middleware(request: NextRequest) {
 
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await supabase.auth.getUser();
 
   console.log(`[Middleware] 🔐 User status:`, {
     hasUser: !!user,
-    userId: user?.id
-  })
+    userId: user?.id,
+  });
 
   // 公開パスは認証不要
   if (isPublicPath(pathname)) {
-    console.log(`[Middleware] 🌐 Public path: ${pathname}`)
-    return supabaseResponse
+    console.log(`[Middleware] 🌐 Public path: ${pathname}`);
+    return supabaseResponse;
   }
 
   // 認証が必要なパスで未認証の場合
   if (isAuthRequiredPath(pathname) && !user) {
-    console.log(`[Middleware] 🚫 Unauthenticated access to: ${pathname}`)
-    const url = request.nextUrl.clone()
-    url.pathname = '/auth/login'
-    url.searchParams.set('redirect', pathname)
-    return NextResponse.redirect(url)
+    console.log(`[Middleware] 🚫 Unauthenticated access to: ${pathname}`);
+    const url = request.nextUrl.clone();
+    url.pathname = "/auth/login";
+    url.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(url);
   }
 
   // 認証済みユーザーの保護されたパスチェック
   if (isProtectedPath(pathname) && user) {
-    console.log(`[Middleware] 🔒 Checking protected path: ${pathname}`)
-    
+    console.log(`[Middleware] 🔒 Checking protected path: ${pathname}`);
+
     try {
       // プロファイル取得
       const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('profile_type')
-        .eq('id', user.id)
-        .single()
+        .from("profiles")
+        .select("profile_type")
+        .eq("id", user.id)
+        .single();
 
       console.log(`[Middleware] 👤 Profile data:`, {
         userId: user.id,
         profileType: profile?.profile_type,
-        profileError: profileError?.message
-      })
+        profileError: profileError?.message,
+      });
 
       if (profileError) {
-        console.log(`[Middleware] ❌ Profile error: ${profileError.message}`)
-        const url = request.nextUrl.clone()
-        url.pathname = '/profile-quick-setup'
-        return NextResponse.redirect(url)
+        console.log(`[Middleware] ❌ Profile error: ${profileError.message}`);
+        const url = request.nextUrl.clone();
+        url.pathname = "/profile-quick-setup";
+        return NextResponse.redirect(url);
       }
 
       // アクセス制御チェック
-      const hasAccess = checkPathAccess(pathname, profile?.profile_type || null)
-      
+      const hasAccess = checkPathAccess(
+        pathname,
+        profile?.profile_type || null
+      );
+
       if (!hasAccess) {
-        console.log(`[Middleware] 🚨 Access DENIED for ${profile?.profile_type} to ${pathname}`)
-        
+        console.log(
+          `[Middleware] 🚨 Access DENIED for ${profile?.profile_type} to ${pathname}`
+        );
+
         // APIリクエストの場合はJSON、通常のページリクエストの場合はHTMLを返す
-        const isApiRequest = pathname.startsWith('/api/')
-        
+        const isApiRequest = pathname.startsWith("/api/");
+
         if (isApiRequest) {
           return new NextResponse(
-            JSON.stringify({ error: 'Insufficient permissions' }),
-            { 
+            JSON.stringify({ error: "Insufficient permissions" }),
+            {
               status: 403,
-              headers: { 'Content-Type': 'application/json' }
+              headers: { "Content-Type": "application/json" },
             }
-          )
+          );
         } else {
           // ページリクエストの場合は403エラーページを表示
           const errorHtml = `
@@ -243,32 +282,36 @@ export async function middleware(request: NextRequest) {
                 <div class="container">
                   <h1>403 - Access Denied</h1>
                   <p>このページにアクセスする権限がありません。</p>
-                  <p>プロファイルタイプ: <strong>${profile?.profile_type || 'Unknown'}</strong></p>
+                  <p>プロファイルタイプ: <strong>${
+                    profile?.profile_type || "Unknown"
+                  }</strong></p>
                   <a href="/dashboard" class="back-button">ダッシュボードに戻る</a>
                 </div>
               </body>
             </html>
-          `
-          
+          `;
+
           return new NextResponse(errorHtml, {
             status: 403,
-            headers: { 'Content-Type': 'text/html; charset=utf-8' }
-          })
+            headers: { "Content-Type": "text/html; charset=utf-8" },
+          });
         }
       }
 
-      console.log(`[Middleware] ✅ Access GRANTED for ${profile?.profile_type} to ${pathname}`)
+      console.log(
+        `[Middleware] ✅ Access GRANTED for ${profile?.profile_type} to ${pathname}`
+      );
     } catch (error) {
-      console.error(`[Middleware] 💥 Error checking profile:`, error)
+      console.error(`[Middleware] 💥 Error checking profile:`, error);
       // エラーの場合はプロファイル設定ページへ
-      const url = request.nextUrl.clone()
-      url.pathname = '/profile-quick-setup'
-      return NextResponse.redirect(url)
+      const url = request.nextUrl.clone();
+      url.pathname = "/profile-quick-setup";
+      return NextResponse.redirect(url);
     }
   }
 
-  console.log(`[Middleware] ✅ Request allowed: ${pathname}`)
-  return supabaseResponse
+  console.log(`[Middleware] ✅ Request allowed: ${pathname}`);
+  return supabaseResponse;
 }
 
 export const config = {
@@ -281,6 +324,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * - .well-known (apple-touch-icon, etc.)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|\\.well-known|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    "/((?!api|_next/static|_next/image|favicon.ico|\\.well-known|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
-}
+};
