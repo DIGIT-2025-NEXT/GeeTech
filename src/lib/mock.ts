@@ -182,7 +182,7 @@ export async function getAllStudents(): Promise<Student[]> {
     return [];
   }
   // skillsがstringの場合は配列に変換
-  return (data || []).map((student: any) => ({
+  return (data || []).map((student: Tables<'students'>) => ({
     id: student.id,
     name: student.name,
     university: student.university,
