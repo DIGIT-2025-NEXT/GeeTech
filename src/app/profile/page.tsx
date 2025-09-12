@@ -35,14 +35,25 @@ export default function ProfilePage() {
     error: skillsError,
   } = useSkills();
 
-  // 未ログインならloginにリダイレクトする
-  useEffect(() => {
-    if (!user && !profileLoading) {
-      router.replace("/login");
-    }
-  }, [user, profileLoading, router]);
-
   const loading = profileLoading || skillsLoading;
+  console.log(profile?.profile_type);
+
+  useEffect(() => {
+    if (loading) {
+      return; // ローディングが完了するまで何もしない
+    }
+
+    if (!user) {
+      router.replace("/login");
+      return;
+    }
+
+    console.log(profile?.profile_type);
+    // 企業アカウントの場合、プロフィールページではなく企業情報ページにリダイレクト
+    if (profile?.profile_type === "company") {
+      router.push("/company");
+    }
+  }, [loading, user, profile, router]);
   const error = profileError || skillsError;
 
   if (loading) {
