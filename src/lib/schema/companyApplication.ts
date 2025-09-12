@@ -10,12 +10,23 @@ export const applicationSchema = z.object({
   website: z.string().url('有効なURLを入力してください').optional().or(z.literal('')), 
   industry: z.string().uuid('有効な業界IDを選択してください'),
   employeeCount: z.string().min(1, '従業員数を選択してください'),
-  establishedYear: z.string().optional(),
+  establishedYear: z.preprocess(
+    (val) => (val === "" ? undefined : val),
+    z.coerce.number({ invalid_type_error: '数値を入力してください' })
+      .int()
+      .max(new Date().getFullYear(), { message: '未来の設立年は設定できません' })
+      .optional()
+  ),
   address: z.string().min(1, '住所を入力してください'),
   description: z.string().min(1, '企業説明を入力してください'),
   businessContent: z.string().optional(),
   is_without_recompense: z.boolean().optional(),
-  capital: z.string().optional(),
+  capital: z.preprocess(
+    (val) => (val === "" ? undefined : val),
+    z.coerce.number({ invalid_type_error: '数値を入力してください' })
+      .min(0, { message: '資本金に負の値は設定できません' })
+      .optional()
+  ),
 });
 
 // ステップごとのバリデーションのために、スキーマを部分的に定義します
@@ -32,5 +43,6 @@ export const step2Schema = applicationSchema.pick({
     employeeCount: true,
     address: true,
     description: true,
+    establishedYear: true,
+    capital: true,
 });
-
