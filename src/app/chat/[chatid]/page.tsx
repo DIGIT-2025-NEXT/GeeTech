@@ -5,6 +5,7 @@ import { Box, Button, Container, Stack, TextField, Typography, Card, CardContent
 import Link from 'next/link';
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useWebSocket } from '@/hooks/useWebSocket';
 
 interface ChatMessage {
   id: string;
@@ -40,6 +41,7 @@ export default function Chat({ params }: { params: Promise<{ chatid: string }> }
     const messagesEndRef = React.useRef<HTMLDivElement>(null);
     
     const { user, loading } = useAuth();
+    const { lastMessage } = useWebSocket(chatid);
     
     React.useEffect(() => {
         params.then(({ chatid }) => setChatid(chatid));
@@ -112,52 +114,23 @@ export default function Chat({ params }: { params: Promise<{ chatid: string }> }
         }
     }, [chatid, user, loading, fetchChatData]);
 
-    // リアルタイム更新の設定
+    // WebSocketからのメッセージを処理
     React.useEffect(() => {
-        if (!chatData) return;
-
-        const setupRealtimeSubscription = async () => {
-            const { createClient } = await import('@/lib/supabase/client');
-            const supabase = createClient();
-
-            // チャットメッセージのリアルタイム購読
-            const subscription = supabase
-                .channel(`chat-${chatid}`)
-                .on(
-                    'postgres_changes',
-                    {
-                        event: 'INSERT',
-                        schema: 'public',
-                        table: 'chat_messages',
-                        filter: `room_id=eq.${chatid}`
-                    },
-                    (payload) => {
-                        const newMessage = payload.new as ChatMessage;
-                        setChatData(prev => {
-                            if (!prev) return prev;
-                            // 既に存在するメッセージかチェック
-                            const messageExists = prev.messages.some(msg => msg.id === newMessage.id);
-                            if (messageExists) return prev;
-                            
-                            return {
-                                ...prev,
-                                messages: [...prev.messages, newMessage]
-                            };
-                        });
-                    }
-                )
-                .subscribe();
-
-            return () => {
-                subscription.unsubscribe();
-            };
-        };
-
-        const unsubscribe = setupRealtimeSubscription();
-        return () => {
-            unsubscribe.then(cleanup => cleanup?.());
-        };
-    }, [chatData, chatid]);
+        if (lastMessage && lastMessage.type === 'chat_message' && chatData) {
+            const newMessage = lastMessage.data as ChatMessage;
+            setChatData(prev => {
+                if (!prev) return prev;
+                // 既に存在するメッセージかチェック
+                const messageExists = prev.messages.some(msg => msg.id === newMessage.id);
+                if (messageExists) return prev;
+                
+                return {
+                    ...prev,
+                    messages: [...prev.messages, newMessage]
+                };
+            });
+        }
+    }, [lastMessage, chatData]);
 
     // メッセージが更新されたときに自動スクロール
     React.useEffect(() => {

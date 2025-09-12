@@ -105,59 +105,20 @@ export default function Chat() {
     }
   }, [user, loading, fetchChatRooms]);
 
-  // リアルタイム更新の設定
+  // ポーリングによる定期更新（WebSocketを使ったリアルタイム更新の代替）
   useEffect(() => {
-    if (!user || loading) return;
+    if (!user || !userType) return;
 
-    const setupRealtimeSubscription = async () => {
-      const { createClient } = await import('@/lib/supabase/client');
-      const supabase = createClient();
+    // 4秒ごとにチャットルーム一覧を更新
+    const intervalId = setInterval(() => {
+      console.log(`Polling for chat rooms updates (${userType})`);
+      fetchChatRooms();
+    }, 4000);
 
-      // チャットメッセージのリアルタイム購読（新しいメッセージで部屋リストを更新）
-      const messageSubscription = supabase
-        .channel('chat-messages-global')
-        .on(
-          'postgres_changes',
-          {
-            event: '*', // INSERT, UPDATE, DELETE全てを監視
-            schema: 'public',
-            table: 'chat_messages'
-          },
-          () => {
-            // メッセージに変更があった場合、チャット一覧を更新
-            fetchChatRooms();
-          }
-        )
-        .subscribe();
-
-      // チャットルームのリアルタイム購読
-      const roomSubscription = supabase
-        .channel('chat-rooms-global')
-        .on(
-          'postgres_changes',
-          {
-            event: '*', // INSERT, UPDATE, DELETE全てを監視
-            schema: 'public',
-            table: 'chat_rooms'
-          },
-          () => {
-            // ルームに変更があった場合、チャット一覧を更新
-            fetchChatRooms();
-          }
-        )
-        .subscribe();
-
-      return () => {
-        messageSubscription.unsubscribe();
-        roomSubscription.unsubscribe();
-      };
-    };
-
-    const unsubscribe = setupRealtimeSubscription();
     return () => {
-      unsubscribe.then(cleanup => cleanup?.());
+      clearInterval(intervalId);
     };
-  }, [user, loading, fetchChatRooms]);
+  }, [user, userType, fetchChatRooms]);
 
   if (loading || loadingRooms) {
     return (
