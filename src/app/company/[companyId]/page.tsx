@@ -60,8 +60,8 @@ export default function CompanyDetailPage({ params }: Props) {
     return <div>Loading...</div>;
   }
 
-  const backHref = fromPage === 'students' ? '/students' : '/company';
-  const backText = fromPage === 'students' ? '学生ページに戻る' : '企業一覧に戻る';
+  const backHref = fromPage === 'students' ? '/students' : '/students';
+  const backText = fromPage === 'students' ? '学生ページに戻る' : '学生ページに戻る';
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
