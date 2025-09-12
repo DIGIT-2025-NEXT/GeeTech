@@ -19,7 +19,6 @@ import {
 import {
   Category as CategoryIcon,
   ArrowBack as ArrowBackIcon,
-  Work as WorkIcon,
   Email as EmailIcon,
   LocationOn as LocationIcon,
   Language as LanguageIcon,
