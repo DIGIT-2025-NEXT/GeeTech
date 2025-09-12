@@ -34,7 +34,7 @@ import { useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
 interface Props {
-  params: Promise<{ companyId: string }>;
+  params: Promise<{ id: string }>;
 }
 
 export default function CompanyDetailPage({ params }: Props) {
@@ -44,8 +44,8 @@ export default function CompanyDetailPage({ params }: Props) {
   const fromPage = searchParams.get('from');
 
   useEffect(() => {
-    params.then(async ({ companyId }) => {
-      console.log('Company page: Fetching data for companyId:', companyId);
+    params.then(async ({ id }) => {
+      console.log('Company page: Fetching data for id:', id);
       
       const supabase = createClient();
       
@@ -54,7 +54,7 @@ export default function CompanyDetailPage({ params }: Props) {
         const { data: companyData, error: companyError } = await supabase
           .from('company')
           .select('*')
-          .eq('id', companyId)
+          .eq('id', id)
           .single();
           
         if (companyError) {
@@ -64,7 +64,7 @@ export default function CompanyDetailPage({ params }: Props) {
         }
         
         if (!companyData) {
-          console.error('Company page: Company not found for ID:', companyId);
+          console.error('Company page: Company not found for ID:', id);
           notFound();
           return;
         }
@@ -84,7 +84,7 @@ export default function CompanyDetailPage({ params }: Props) {
         };
         
         // プロジェクトデータも取得（現時点ではモックデータをフォールバック）
-        const projectsData = await getProjectsByCompanyId(companyId);
+        const projectsData = await getProjectsByCompanyId(id);
         
         console.log('Company page: Company data:', company);
         console.log('Company page: Projects data:', projectsData);

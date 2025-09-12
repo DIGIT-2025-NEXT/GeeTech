@@ -66,6 +66,7 @@ export default function StudentsPage() {
       setLoading(true);
       const allCompanies = await getAllCompanies();
       const allProjects = await getAllProjects();
+      console.log('Company data from Supabase:', allCompanies);
       setCompanies(allCompanies);
       setFilteredCompanies(allCompanies);
       setProjects(allProjects);
@@ -433,7 +434,7 @@ export default function StudentsPage() {
                   <Box sx={{ display: 'flex', gap: 0.8, justifyContent: 'space-between' }}>
                     <Button
                       component={Link}
-                      href={`/company/${company.id}`}
+                      href={`/companies/${company.id}`}
                       variant="contained"
                       startIcon={<BusinessIcon sx={{ fontSize: 16 }} />}
                       size="small"

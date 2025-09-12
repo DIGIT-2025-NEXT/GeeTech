@@ -3,7 +3,8 @@
 
 import { Box, Button, Card, CardContent, Container, Stack, Typography, Breadcrumbs} from '@mui/material';
 import Link from 'next/link';
-import { useState, useEffect } from "react";
+import { getAllChat, type Chat, getCompanyByIdSync } from '@/lib/mock';
+import { useState } from "react";
 import { useAuth } from '@/contexts/AuthContext';
 
 interface ChatRoom {
@@ -110,49 +111,27 @@ export default function Chat() {
       </Container>
     )
   }
-
-  return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Breadcrumbs sx={{ mb: 2 }}>
-        <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
-          ホーム
-        </Link>
-        <Typography color="text.primary">チャット</Typography>
-      </Breadcrumbs>
-      <Typography variant='h4'>直近のチャット</Typography>
-      <Stack spacing={2} sx={{ mt: 2 }}>
-        {rooms.map((room) => (
-          <Card key={room.id}>
-            <CardContent>
-              <Typography variant='h6'>
-                {userType === 'student' ? room.company.name : room.students.name}
-              </Typography>
-              <Typography variant='subtitle2' color='text.secondary'>
-                {userType === 'student' ? room.company.industry : room.students.university}
-              </Typography>
-              {room.lastMessage && (
-                <Typography sx={{ mt: 1, mb: 2 }}>
-                  {room.lastMessage.sender_type === userType ? 'あなた: ' : ''}
-                  {room.lastMessage.message}
-                </Typography>
-              )}
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Button 
-                  href={`/chat/${room.id}`} 
-                  sx={{ bgcolor: "black", color: "white" }}
-                >
-                  チャットを見る
-                </Button>
-                {room.lastMessage && (
-                  <Typography variant='caption' color='text.secondary'>
-                    {new Date(room.lastMessage.created_at).toLocaleDateString('ja-JP')}
-                  </Typography>
-                )}
-              </Box>
-            </CardContent>
-          </Card>
-        ))}
-      </Stack>
-    </Container>
-  )
+    return (
+        <Container maxWidth="xl" sx={{ py: 4 }}>
+        <Breadcrumbs sx={{ mb: 2 }}>
+          <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+            ホーム
+          </Link>
+          <Typography color="text.primary">チャット</Typography>
+        </Breadcrumbs>
+        <Typography variant='h4'>直近のチャット</Typography>
+            <Stack spacing={2}>
+              {sortedchats.map((e)=>
+              <Card key={e.id}>
+                <CardContent>
+                  <Typography variant='h6'>{getCompanyById(e.companyid)?.name}</Typography>
+                  <Typography>{e.chatlog[e.chatlog.length-1].chattext}</Typography>
+                  <Button href={`/chat/${e.id}`} sx={{bgcolor:"black",color:"white"}}>チャットを見る</Button>
+                </CardContent>
+              </Card>
+            )}
+            {sortedchats.length>morecount*10 ?(<Button variant='outlined' onClick={addmorecount} sx={{color:'"blue"'}}>もっと見る</Button>):("")}
+            </Stack>
+        </Container>
+    )
 }
