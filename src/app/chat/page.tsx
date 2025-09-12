@@ -124,7 +124,7 @@ export default function Chat() {
               {sortedchats.map((e)=>
               <Card key={e.id}>
                 <CardContent>
-                  <Typography variant='h6'>{getCompanyById(e.companyid)?.name}</Typography>
+                  <Typography variant='h6'>{getCompanyByIdSync(e.companyid)?.name}</Typography>
                   <Typography>{e.chatlog[e.chatlog.length-1].chattext}</Typography>
                   <Button href={`/chat/${e.id}`} sx={{bgcolor:"black",color:"white"}}>チャットを見る</Button>
                 </CardContent>
