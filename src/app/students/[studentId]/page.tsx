@@ -9,8 +9,7 @@ import {
   Button,
   Box,
   Avatar,
-  Divider,
-  CircularProgress
+  Divider
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
@@ -24,24 +23,17 @@ import { getStudentById, Student } from '@/lib/mock';
 import { notFound } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { useAccessControl } from '@/hooks/useAccessControl';
 
 interface Props {
   params: Promise<{ studentId: string }>;
 }
 
 export default function StudentDetailPage({ params }: Props) {
-  // アクセス制御 - 学生アカウントのみ許可
-  const { loading: accessLoading } = useAccessControl(['students']);
-  
   const [student, setStudent] = useState<Student | null>(null);
   const searchParams = useSearchParams();
   const fromPage = searchParams.get('from');
 
   useEffect(() => {
-    // アクセス制御中は何もしない
-    if (accessLoading) return;
-    
     params.then(({ studentId }) => {
       const studentData = getStudentById(studentId);
       
@@ -51,16 +43,7 @@ export default function StudentDetailPage({ params }: Props) {
       
       setStudent(studentData);
     });
-  }, [params, accessLoading]); // アクセス制御が完了してから実行
-
-  // アクセス制御中は必ずローディング画面を表示（最優先）
-  if (accessLoading) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
-        <CircularProgress size={60} />
-      </Box>
-    );
-  }
+  }, [params]);
 
   if (!student) {
     return <div>Loading...</div>;
