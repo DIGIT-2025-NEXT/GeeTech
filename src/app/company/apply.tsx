@@ -2,7 +2,6 @@
 
 import {Button, Snackbar, Dialog, DialogContent, DialogActions, DialogTitle, Typography, Box}  from '@mui/material';
 import { useState } from 'react';
-import { addParticipartedid,getCompanyById } from '@/lib/mock';
 import { useAuth } from '@/contexts/AuthContext';
 import { createClient } from '@/lib/supabase/client';
 
@@ -14,6 +13,7 @@ export default function ApplyButton({ companyid: companyid }: Props){
     const [UItext, setUItext] = useState<string>('');
     const [loginDialogOpen, setLoginDialogOpen] = useState(false);
     const { user } = useAuth();
+    const [companyname,setcompanyname]=useState<string>("");
     const STUDENT_ID = user?.id ?? '';
     const supabase = createClient();
     const handleSnackClose = () => setSnackOpen(false);
@@ -26,7 +26,6 @@ export default function ApplyButton({ companyid: companyid }: Props){
     const handleLoginRedirect = () => {
         window.location.href = '/login';
     };
-    const companyname = getCompanyById(companyid)?.name;
     const apply=async()=> {
         if (!user?.id) {
             setLoginDialogOpen(true);
@@ -37,7 +36,7 @@ export default function ApplyButton({ companyid: companyid }: Props){
                 .select('*')
                 .eq('id', companyid)
                 .single();
-        const company = getCompanyById(companyid);
+        setcompanyname(current.name);
         const appliedIds: string[] = current?.applyed_id || [];
         const adoptedIds: string[] = current?.adopted_id || [];
         const rejectedIds: string[] = current?.rejected_id || [];
@@ -63,7 +62,6 @@ export default function ApplyButton({ companyid: companyid }: Props){
                 setSnackOpen(true);
                 return
             }
-            addParticipartedid(companyid,STUDENT_ID);
             setSnackMsg(`${companyname}に応募しました`);
             setSnackOpen(true);
         }
