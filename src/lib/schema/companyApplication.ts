@@ -12,7 +12,7 @@ export const applicationSchema = z.object({
   employeeCount: z.string().min(1, '従業員数を選択してください'),
   establishedYear: z.preprocess(
     (val) => (val === "" ? undefined : val),
-    z.coerce.number({ invalid_type_error: '数値を入力してください' })
+    z.coerce.number()
       .int()
       .max(new Date().getFullYear(), { message: '未来の設立年は設定できません' })
       .optional()
@@ -23,7 +23,7 @@ export const applicationSchema = z.object({
   is_without_recompense: z.boolean().optional(),
   capital: z.preprocess(
     (val) => (val === "" ? undefined : val),
-    z.coerce.number({ invalid_type_error: '数値を入力してください' })
+    z.coerce.number()
       .min(0, { message: '資本金に負の値は設定できません' })
       .optional()
   ),

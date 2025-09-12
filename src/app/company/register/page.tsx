@@ -89,19 +89,19 @@ export default function CompanyRegisterPage() {
     is_without_recompense: false,
   });
 
-  const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleInputChange = (field: string, value: string | boolean) => {
-    setCompanyData(prev => ({
+    setCompanyData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
     if (errors[field]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [field]: ""
+        [field]: "",
       }));
     }
   };
@@ -109,24 +109,24 @@ export default function CompanyRegisterPage() {
   const validateStep = (step: number) => {
     let schema;
     if (step === 0) {
-        schema = step1Schema;
+      schema = step1Schema;
     } else if (step === 1) {
-        schema = step2Schema;
+      schema = step2Schema;
     } else {
-        return true; // 確認画面ではバリデーション不要
+      return true; // 確認画面ではバリデーション不要
     }
 
     const result = schema.safeParse(companyData);
 
     if (!result.success) {
-        const newErrors: { [key: string]: string } = {};
-        result.error.issues.forEach(err => {
-            if(err.path[0]) {
-                newErrors[err.path[0].toString()] = err.message;
-            }
-        });
-        setErrors(newErrors);
-        return false;
+      const newErrors: { [key: string]: string } = {};
+      result.error.issues.forEach((err) => {
+        if (err.path[0]) {
+          newErrors[err.path[0].toString()] = err.message;
+        }
+      });
+      setErrors(newErrors);
+      return false;
     }
 
     setErrors({});
@@ -145,30 +145,35 @@ export default function CompanyRegisterPage() {
 
   const handleSubmit = async () => {
     if (!validateStep(0) || !validateStep(1)) {
-        setSubmitError('入力内容にエラーがあります。前のステップに戻って確認してください。');
-        return;
+      setSubmitError(
+        "入力内容にエラーがあります。前のステップに戻って確認してください。"
+      );
+      return;
     }
     setIsSubmitting(true);
     setSubmitError(null);
     try {
-      const response = await fetch('/api/company/application', {
-        method: 'POST',
+      const response = await fetch("/api/company/application", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(companyData),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || '登録に失敗しました。');
+        throw new Error(errorData.error || "登録に失敗しました。");
       }
 
-      alert('企業登録申請が完了しました！管理者による審査後、ご連絡いたします。');
-      window.location.href = '/company';
-
-    } catch (error: any) {
-      setSubmitError(error.message || '予期せぬエラーが発生しました。');
+      alert(
+        "企業登録申請が完了しました！管理者による審査後、ご連絡いたします。"
+      );
+      window.location.href = "/company";
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setSubmitError(error.message || "予期せぬエラーが発生しました。");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -185,11 +190,15 @@ export default function CompanyRegisterPage() {
                 label="企業名"
                 required
                 value={companyData.companyName}
-                onChange={(e) => handleInputChange('companyName', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("companyName", e.target.value)
+                }
                 error={!!errors.companyName}
                 helperText={errors.companyName}
                 InputProps={{
-                  startAdornment: <BusinessIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                  startAdornment: (
+                    <BusinessIcon sx={{ mr: 1, color: "text.secondary" }} />
+                  ),
                 }}
               />
             </Grid>
@@ -199,11 +208,15 @@ export default function CompanyRegisterPage() {
                 label="代表者名"
                 required
                 value={companyData.representativeName}
-                onChange={(e) => handleInputChange('representativeName', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("representativeName", e.target.value)
+                }
                 error={!!errors.representativeName}
                 helperText={errors.representativeName}
                 InputProps={{
-                  startAdornment: <PersonIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                  startAdornment: (
+                    <PersonIcon sx={{ mr: 1, color: "text.secondary" }} />
+                  ),
                 }}
               />
             </Grid>
@@ -214,11 +227,13 @@ export default function CompanyRegisterPage() {
                 type="email"
                 required
                 value={companyData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
+                onChange={(e) => handleInputChange("email", e.target.value)}
                 error={!!errors.email}
                 helperText={errors.email}
                 InputProps={{
-                  startAdornment: <EmailIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                  startAdornment: (
+                    <EmailIcon sx={{ mr: 1, color: "text.secondary" }} />
+                  ),
                 }}
               />
             </Grid>
@@ -228,11 +243,13 @@ export default function CompanyRegisterPage() {
                 label="電話番号"
                 required
                 value={companyData.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
+                onChange={(e) => handleInputChange("phone", e.target.value)}
                 error={!!errors.phone}
                 helperText={errors.phone}
                 InputProps={{
-                  startAdornment: <PhoneIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                  startAdornment: (
+                    <PhoneIcon sx={{ mr: 1, color: "text.secondary" }} />
+                  ),
                 }}
               />
             </Grid>
@@ -241,12 +258,14 @@ export default function CompanyRegisterPage() {
                 fullWidth
                 label="ウェブサイト"
                 value={companyData.website}
-                onChange={(e) => handleInputChange('website', e.target.value)}
+                onChange={(e) => handleInputChange("website", e.target.value)}
                 placeholder="https://example.com"
                 error={!!errors.website}
                 helperText={errors.website}
                 InputProps={{
-                  startAdornment: <WebIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                  startAdornment: (
+                    <WebIcon sx={{ mr: 1, color: "text.secondary" }} />
+                  ),
                 }}
               />
             </Grid>
@@ -262,7 +281,9 @@ export default function CompanyRegisterPage() {
                 <Select
                   value={companyData.industry}
                   label="業界"
-                  onChange={(e) => handleInputChange('industry', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("industry", e.target.value)
+                  }
                 >
                   {industries.map((industry) => (
                     <MenuItem key={industry.id} value={industry.id}>
@@ -270,7 +291,9 @@ export default function CompanyRegisterPage() {
                     </MenuItem>
                   ))}
                 </Select>
-                {errors.industry && <FormHelperText>{errors.industry}</FormHelperText>}
+                {errors.industry && (
+                  <FormHelperText>{errors.industry}</FormHelperText>
+                )}
               </FormControl>
             </Grid>
             <Grid item xs={12} md={6}>
@@ -279,7 +302,9 @@ export default function CompanyRegisterPage() {
                 <Select
                   value={companyData.employeeCount}
                   label="従業員数"
-                  onChange={(e) => handleInputChange('employeeCount', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("employeeCount", e.target.value)
+                  }
                 >
                   {employeeRanges.map((range) => (
                     <MenuItem key={range} value={range}>
@@ -287,7 +312,9 @@ export default function CompanyRegisterPage() {
                     </MenuItem>
                   ))}
                 </Select>
-                {errors.employeeCount && <FormHelperText>{errors.employeeCount}</FormHelperText>}
+                {errors.employeeCount && (
+                  <FormHelperText>{errors.employeeCount}</FormHelperText>
+                )}
               </FormControl>
             </Grid>
             <Grid item xs={12} md={6}>
@@ -296,7 +323,9 @@ export default function CompanyRegisterPage() {
                 label="設立年"
                 type="number"
                 value={companyData.establishedYear}
-                onChange={(e) => handleInputChange('establishedYear', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("establishedYear", e.target.value)
+                }
                 error={!!errors.establishedYear}
                 helperText={errors.establishedYear}
                 inputProps={{ min: 1900 }}
@@ -308,7 +337,7 @@ export default function CompanyRegisterPage() {
                 label="資本金（万円）"
                 type="number"
                 value={companyData.capital}
-                onChange={(e) => handleInputChange('capital', e.target.value)}
+                onChange={(e) => handleInputChange("capital", e.target.value)}
                 error={!!errors.capital}
                 helperText={errors.capital}
                 inputProps={{ min: 0 }}
@@ -320,11 +349,13 @@ export default function CompanyRegisterPage() {
                 label="所在地"
                 required
                 value={companyData.address}
-                onChange={(e) => handleInputChange('address', e.target.value)}
+                onChange={(e) => handleInputChange("address", e.target.value)}
                 error={!!errors.address}
                 helperText={errors.address}
                 InputProps={{
-                  startAdornment: <LocationIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                  startAdornment: (
+                    <LocationIcon sx={{ mr: 1, color: "text.secondary" }} />
+                  ),
                 }}
               />
             </Grid>
@@ -336,9 +367,13 @@ export default function CompanyRegisterPage() {
                 multiline
                 rows={4}
                 value={companyData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("description", e.target.value)
+                }
                 error={!!errors.description}
-                helperText={errors.description || '企業の特色や魅力をアピールしてください'}
+                helperText={
+                  errors.description || "企業の特色や魅力をアピールしてください"
+                }
                 placeholder="当社は..."
               />
             </Grid>
@@ -349,28 +384,37 @@ export default function CompanyRegisterPage() {
                 multiline
                 rows={3}
                 value={companyData.businessContent}
-                onChange={(e) => handleInputChange('businessContent', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("businessContent", e.target.value)
+                }
                 placeholder="主な事業内容を詳しく教えてください"
               />
             </Grid>
             <Grid item xs={12}>
-                <FormControlLabel
-                    control={
-                    <Checkbox
-                        checked={companyData.is_without_recompense}
-                        onChange={(e) => handleInputChange('is_without_recompense', e.target.checked)}
-                        name="is_without_recompense"
-                        color="primary"
-                    />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={companyData.is_without_recompense}
+                    onChange={(e) =>
+                      handleInputChange(
+                        "is_without_recompense",
+                        e.target.checked
+                      )
                     }
-                    label="無償での募集（インターンシップ等）"
-                />
+                    name="is_without_recompense"
+                    color="primary"
+                  />
+                }
+                label="無償での募集（インターンシップ等）"
+              />
             </Grid>
           </Grid>
         );
 
       case 2:
-        const selectedIndustry = industries.find(ind => ind.id === companyData.industry);
+        const selectedIndustry = industries.find(
+          (ind) => ind.id === companyData.industry
+        );
         return (
           <Box>
             {submitError && (
@@ -387,32 +431,56 @@ export default function CompanyRegisterPage() {
             <Grid container spacing={3}>
               <Grid item xs={12}>
                 <Paper elevation={1} sx={{ p: 3, mb: 2 }}>
-                  <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Typography
+                    variant="h6"
+                    gutterBottom
+                    sx={{ display: "flex", alignItems: "center" }}
+                  >
                     <BusinessIcon sx={{ mr: 1 }} />
                     基本情報
                   </Typography>
                   <Divider sx={{ mb: 2 }} />
                   <Grid container spacing={2}>
                     <Grid item xs={12} sm={6}>
-                      <Typography variant="body2" color="text.secondary">企業名</Typography>
-                      <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{companyData.companyName}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        企業名
+                      </Typography>
+                      <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+                        {companyData.companyName}
+                      </Typography>
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                      <Typography variant="body2" color="text.secondary">代表者名</Typography>
-                      <Typography variant="body1">{companyData.representativeName}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        代表者名
+                      </Typography>
+                      <Typography variant="body1">
+                        {companyData.representativeName}
+                      </Typography>
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                      <Typography variant="body2" color="text.secondary">メールアドレス</Typography>
-                      <Typography variant="body1">{companyData.email}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        メールアドレス
+                      </Typography>
+                      <Typography variant="body1">
+                        {companyData.email}
+                      </Typography>
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                      <Typography variant="body2" color="text.secondary">電話番号</Typography>
-                      <Typography variant="body1">{companyData.phone}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        電話番号
+                      </Typography>
+                      <Typography variant="body1">
+                        {companyData.phone}
+                      </Typography>
                     </Grid>
                     {companyData.website && (
                       <Grid item xs={12}>
-                        <Typography variant="body2" color="text.secondary">ウェブサイト</Typography>
-                        <Typography variant="body1">{companyData.website}</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          ウェブサイト
+                        </Typography>
+                        <Typography variant="body1">
+                          {companyData.website}
+                        </Typography>
                       </Grid>
                     )}
                   </Grid>
@@ -421,49 +489,93 @@ export default function CompanyRegisterPage() {
 
               <Grid item xs={12}>
                 <Paper elevation={1} sx={{ p: 3 }}>
-                  <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Typography
+                    variant="h6"
+                    gutterBottom
+                    sx={{ display: "flex", alignItems: "center" }}
+                  >
                     <WorkIcon sx={{ mr: 1 }} />
                     詳細情報
                   </Typography>
                   <Divider sx={{ mb: 2 }} />
                   <Grid container spacing={2}>
                     <Grid item xs={12} sm={6}>
-                      <Typography variant="body2" color="text.secondary">業界</Typography>
-                      <Chip label={selectedIndustry?.name || '未選択'} color="primary" variant="outlined" />
+                      <Typography variant="body2" color="text.secondary">
+                        業界
+                      </Typography>
+                      <Chip
+                        label={selectedIndustry?.name || "未選択"}
+                        color="primary"
+                        variant="outlined"
+                      />
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                      <Typography variant="body2" color="text.secondary">従業員数</Typography>
-                      <Typography variant="body1">{companyData.employeeCount}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        従業員数
+                      </Typography>
+                      <Typography variant="body1">
+                        {companyData.employeeCount}
+                      </Typography>
                     </Grid>
                     {companyData.establishedYear && (
                       <Grid item xs={12} sm={6}>
-                        <Typography variant="body2" color="text.secondary">設立年</Typography>
-                        <Typography variant="body1">{companyData.establishedYear}年</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          設立年
+                        </Typography>
+                        <Typography variant="body1">
+                          {companyData.establishedYear}年
+                        </Typography>
                       </Grid>
                     )}
                     {companyData.capital && (
                       <Grid item xs={12} sm={6}>
-                        <Typography variant="body2" color="text.secondary">資本金</Typography>
-                        <Typography variant="body1">{companyData.capital}万円</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          資本金
+                        </Typography>
+                        <Typography variant="body1">
+                          {companyData.capital}万円
+                        </Typography>
                       </Grid>
                     )}
                     <Grid item xs={12}>
-                      <Typography variant="body2" color="text.secondary">所在地</Typography>
-                      <Typography variant="body1">{companyData.address}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        所在地
+                      </Typography>
+                      <Typography variant="body1">
+                        {companyData.address}
+                      </Typography>
                     </Grid>
                     <Grid item xs={12}>
-                      <Typography variant="body2" color="text.secondary">企業説明</Typography>
-                      <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>{companyData.description}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        企業説明
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        sx={{ whiteSpace: "pre-line" }}
+                      >
+                        {companyData.description}
+                      </Typography>
                     </Grid>
                     {companyData.businessContent && (
                       <Grid item xs={12}>
-                        <Typography variant="body2" color="text.secondary">事業内容</Typography>
-                        <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>{companyData.businessContent}</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          事業内容
+                        </Typography>
+                        <Typography
+                          variant="body1"
+                          sx={{ whiteSpace: "pre-line" }}
+                        >
+                          {companyData.businessContent}
+                        </Typography>
                       </Grid>
                     )}
                     <Grid item xs={12}>
-                        <Typography variant="body2" color="text.secondary">無償での募集</Typography>
-                        <Typography variant="body1">{companyData.is_without_recompense ? 'はい' : 'いいえ'}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        無償での募集
+                      </Typography>
+                      <Typography variant="body1">
+                        {companyData.is_without_recompense ? "はい" : "いいえ"}
+                      </Typography>
                     </Grid>
                   </Grid>
                 </Paper>
@@ -482,22 +594,33 @@ export default function CompanyRegisterPage() {
       {/* ヘッダー */}
       <Box sx={{ mb: 4 }}>
         <Breadcrumbs sx={{ mb: 2 }}>
-          <Typography 
-            sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
-            onClick={() => window.location.href = '/'}
+          <Typography
+            sx={{
+              cursor: "pointer",
+              "&:hover": { textDecoration: "underline" },
+            }}
+            onClick={() => (window.location.href = "/")}
           >
             ホーム
           </Typography>
-          <Typography 
-            sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
-            onClick={() => window.location.href = '/company'}
+          <Typography
+            sx={{
+              cursor: "pointer",
+              "&:hover": { textDecoration: "underline" },
+            }}
+            onClick={() => (window.location.href = "/company")}
           >
             企業向けページ
           </Typography>
           <Typography color="text.primary">企業登録</Typography>
         </Breadcrumbs>
 
-        <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+        <Typography
+          variant="h3"
+          component="h1"
+          gutterBottom
+          sx={{ fontWeight: "bold", color: "primary.main" }}
+        >
           企業登録
         </Typography>
         <Typography variant="h6" color="text.secondary">
@@ -520,9 +643,9 @@ export default function CompanyRegisterPage() {
       <Card elevation={3}>
         <CardContent sx={{ p: 4 }}>
           {renderStepContent()}
-          
+
           {/* ボタン */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
             <Button
               disabled={activeStep === 0 || isSubmitting}
               onClick={handleBack}
@@ -532,16 +655,28 @@ export default function CompanyRegisterPage() {
             >
               戻る
             </Button>
-            
+
             <Button
               variant="contained"
-              onClick={activeStep === steps.length - 1 ? handleSubmit : handleNext}
+              onClick={
+                activeStep === steps.length - 1 ? handleSubmit : handleNext
+              }
               size="large"
               sx={{ px: 4 }}
               disabled={isSubmitting}
-              startIcon={isSubmitting ? <CircularProgress size={24} color="inherit" /> : (activeStep === steps.length - 1 ? <CheckIcon /> : undefined)}
+              startIcon={
+                isSubmitting ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : activeStep === steps.length - 1 ? (
+                  <CheckIcon />
+                ) : undefined
+              }
             >
-              {activeStep === steps.length - 1 ? (isSubmitting ? '登録中...' : '登録申請') : '次へ'}
+              {activeStep === steps.length - 1
+                ? isSubmitting
+                  ? "登録中..."
+                  : "登録申請"
+                : "次へ"}
             </Button>
           </Box>
         </CardContent>
@@ -554,8 +689,7 @@ export default function CompanyRegisterPage() {
           • 企業登録後、管理者による審査を行います（通常1-2営業日）
           <br />
           • 審査完了後、登録いただいたメールアドレスに通知をお送りします
-          <br />
-          • 登録情報は後からダッシュボードで変更可能です
+          <br />• 登録情報は後からダッシュボードで変更可能です
         </Alert>
       </Box>
     </Container>
