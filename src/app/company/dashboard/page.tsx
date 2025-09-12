@@ -22,7 +22,6 @@ import {
   TableHead,
   TableRow
 } from '@mui/material'
-import { Grid } from '@mui/material';
 import {
   Add as AddIcon,
   Person as PersonIcon,
@@ -39,7 +38,7 @@ import Link from 'next/link';
 import { getAllStudents, getAllProjects } from '@/lib/mock';
 
 export default async function CompanyDashboard() {
-  const students = getAllStudents().slice(0, 3); // 注目の学生3名
+  const studentss = (await getAllStudents()).slice(0, 3); // 注目の学生3名
   const projects = getAllProjects(); // すべてのプロジェクト
 
   // 会社情報（実際にはログインした会社の情報を取得）
@@ -231,7 +230,7 @@ export default async function CompanyDashboard() {
                   </Typography>
                   <Button 
                     component={Link}
-                    href="/students"
+                    href="/studentss"
                     variant="outlined"
                     size="small"
                     sx={{ textTransform: 'none' }}
@@ -241,8 +240,8 @@ export default async function CompanyDashboard() {
                 </Box>
 
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-                  {students.map((student) => (
-                    <Box key={student.id} sx={{ width: { xs: '100%', sm: '50%', md: '33.33%' }, minWidth: 280 }}>
+                  {studentss.map((students) => (
+                    <Box key={students.id} sx={{ width: { xs: '100%', sm: '50%', md: '33.33%' }, minWidth: 280 }}>
                       <Paper 
                         elevation={1} 
                         sx={{ 
@@ -265,20 +264,20 @@ export default async function CompanyDashboard() {
                               fontSize: '1rem'
                             }}
                           >
-                            {student.name.charAt(0)}
+                            {students.name.charAt(0)}
                           </Avatar>
                           <Box>
                             <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
-                              {student.name}
+                              {students.name}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
-                              {student.university.split(' ')[0]}
+                              {students.university.split(' ')[0]}
                             </Typography>
                           </Box>
                         </Box>
                         
                         <Box sx={{ display: 'flex', gap: 0.5, mb: 1.5 }}>
-                          {student.skills.slice(0, 2).map((skill, index) => (
+                          {students.skills.slice(0, 2).map((skill, index) => (
                             <Chip 
                               key={index}
                               label={skill} 
@@ -293,7 +292,7 @@ export default async function CompanyDashboard() {
                         <Box sx={{ display: 'flex', gap: 1 }}>
                           <Button 
                             component={Link}
-                            href={`/students/${student.id}`}
+                            href={`/Student/${students.id}`}
                             size="small" 
                             variant="outlined"
                             sx={{ textTransform: 'none', flex: 1 }}

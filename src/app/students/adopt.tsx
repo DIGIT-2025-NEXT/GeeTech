@@ -29,7 +29,7 @@ export default function AdoptButton({ studentid }: Props){
         setStudentName(studentprofile?.username);
         const newRejectedIDArray = [...(company?.rejectedid || [])].filter((aaa)=>aaa!==studentid);
             const newAodptedIDArray = [...(company?.adoptedid || []), studentid];
-            const {data,error}= await supabase
+            const {error}= await supabase
                 .from('company')
                 .update({ rejectedid: newRejectedIDArray,adoptedid:newAodptedIDArray})
                 .eq("id",COMPANY_ID)
@@ -82,7 +82,7 @@ export default function AdoptButton({ studentid }: Props){
             //supabaseでのやつを実装
             const newApplyedIDArray = [...(company?.participants_id || [])].filter((aaa)=>aaa!==studentid);
             const newAodptedIDArray = [...(company?.adoptedid || []), studentid];
-            const {data,error}= await supabase
+            const {error}= await supabase
                 .from('company')
                 .update({ participants_id: newApplyedIDArray,adoptedid:newAodptedIDArray})
                 .eq("id",COMPANY_ID)

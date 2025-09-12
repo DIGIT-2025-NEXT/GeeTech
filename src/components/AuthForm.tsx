@@ -26,7 +26,7 @@ export default function AuthForm() {
       } else if (!isLogin) {
         setMessage('確認メールを送信しました。メールボックスを確認してください。')
       }
-    } catch (error) {
+    } catch {
       setMessage('エラーが発生しました。')
     } finally {
       setLoading(false)

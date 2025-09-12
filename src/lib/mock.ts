@@ -174,8 +174,22 @@ export async function getNext10(): Promise<Event[]> {
   return events.filter(event => new Date(event.starts_on) >= now);
 }
 
-export function getAllStudents(): Student[] {
-  return mockStudents;
+export async function getAllStudents(): Promise<Student[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase.from('students').select('id, name, university, bio, skills, avatar');
+  if (error) {
+    console.error('Error fetching students:', error);
+    return [];
+  }
+  // skillsがstringの場合は配列に変換
+  return (data || []).map((student: Tables<'students'>) => ({
+    id: student.id,
+    name: student.name,
+    university: student.university,
+    bio: student.bio,
+    skills: Array.isArray(student.skills) ? student.skills : (student.skills ? student.skills.split(',') : []),
+    avatar: student.avatar || undefined,
+  }));
 }
 
 // Mock company data

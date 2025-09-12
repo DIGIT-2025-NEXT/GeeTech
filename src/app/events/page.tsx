@@ -1,7 +1,7 @@
 'use client'
 
 import { useAuth } from '@/contexts/AuthContext'
-import { Container, Paper, Typography, Button, Box, Avatar, Divider } from '@mui/material'
+import { Container, Paper, Typography, Button, Box, Divider } from '@mui/material'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { getNext10, Event } from '@/lib/mock' // Import Event type and getNext10
