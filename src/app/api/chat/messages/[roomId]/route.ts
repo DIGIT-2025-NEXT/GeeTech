@@ -33,22 +33,36 @@ export async function GET(
     }
 
     // ユーザーがこのルームにアクセス権限があるかチェック
+    console.log('Access check:', {
+      userId: user.id,
+      roomStudentId: room.student_id,
+      roomCompanyId: room.company_id,
+      isStudent: room.student_id === user.id
+    });
+
     let hasAccess = false
     if (room.student_id === user.id) {
+      console.log('Access granted: User is the student in this room');
       hasAccess = true
     } else {
       // 企業ユーザーの場合、company テーブルでuser_idをチェック
-      const { data: company } = await supabase
+      console.log('Checking company access for user:', user.id);
+      const { data: company, error: companyError } = await supabase
         .from('company')
         .select('id')
         .eq('user_id', user.id)
         .eq('id', room.company_id)
         .single()
       
+      console.log('Company check result:', { company, companyError });
+      
       if (company) {
+        console.log('Access granted: User is the company in this room');
         hasAccess = true
       }
     }
+
+    console.log('Final access result:', hasAccess);
 
     if (!hasAccess) {
       return NextResponse.json(
