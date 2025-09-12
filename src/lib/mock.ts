@@ -260,7 +260,37 @@ const mockCompanies: Company[] = [
   },
 ];
 
-export function getCompanyById(id: string): Company | undefined {
+export async function getCompanyById(id: string): Promise<Company | undefined> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('company')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.error('Error fetching company by ID:', error);
+    return undefined;
+  }
+
+  if (!data) return undefined;
+
+  return {
+    id: data.id,
+    name: data.name,
+    industry: data.industry,
+    description: data.description,
+    features: data.features || [],
+    logo: data.logo || '',
+    projects: data.projects || [],
+    partcipantsid: data.partcipantsid || [],
+    adoptedid: data.adoptedid || [],
+    Rejectedid: data.Rejectedid || [],
+  };
+}
+
+// Fallback for synchronous access (for backwards compatibility)
+export function getCompanyByIdSync(id: string): Company | undefined {
   return mockCompanies.find(company => company.id === id);
 }
 

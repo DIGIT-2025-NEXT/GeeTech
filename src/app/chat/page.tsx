@@ -3,7 +3,7 @@
 
 import { Box, Button, Card, CardContent, Container, Stack, Typography,Breadcrumbs} from '@mui/material';
 import Link from 'next/link';
-import { getAllChat, type Chat, getCompanyById } from '@/lib/mock';
+import { getAllChat, type Chat, getCompanyByIdSync } from '@/lib/mock';
 import { useState } from "react";
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -79,7 +79,7 @@ export default function Chat() {
               {sortedchats.map((e)=>
               <Card key={e.id}>
                 <CardContent>
-                  <Typography variant='h6'>{getCompanyById(e.companyid)?.name}</Typography>
+                  <Typography variant='h6'>{getCompanyByIdSync(e.companyid)?.name}</Typography>
                   <Typography>{e.chatlog[e.chatlog.length-1].chattext}</Typography>
                   <Button href={`/chat/${e.id}`} sx={{bgcolor:"black",color:"white"}}>チャットを見る</Button>
                 </CardContent>

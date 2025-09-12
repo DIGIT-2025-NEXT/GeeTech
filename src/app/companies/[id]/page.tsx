@@ -33,7 +33,7 @@ import { useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
 interface Props {
-  params: Promise<{ companyId: string }>;
+  params: Promise<{ id: string }>;
 }
 
 export default function CompanyDetailPage({ params }: Props) {
@@ -43,11 +43,15 @@ export default function CompanyDetailPage({ params }: Props) {
   const fromPage = searchParams.get('from');
 
   useEffect(() => {
-    params.then(async ({ companyId }) => {
-      const companyData = getCompanyById(companyId);
-      const projectsData = await getProjectsByCompanyId(companyId);
+    params.then(async ({ id }) => {
+      console.log('Company ID from URL:', id);
+      const companyData = await getCompanyById(id);
+      console.log('Company data received:', companyData);
+      const projectsData = await getProjectsByCompanyId(id);
+      console.log('Projects data received:', projectsData);
       
       if (!companyData) {
+        console.log('No company data found, redirecting to 404');
         notFound();
       }
       

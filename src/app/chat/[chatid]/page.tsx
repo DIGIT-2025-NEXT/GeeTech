@@ -4,7 +4,7 @@
 import { Box, Button, Container, Stack, TextField, Typography, Card, CardContent} from '@mui/material';
 import Link from 'next/link';
 import React from 'react';
-import {getStudentById,getCompanyById,getchatById} from '@/lib/mock';
+import {getStudentById,getCompanyByIdSync,getchatById} from '@/lib/mock';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function Chat({ params }: { params: Promise<{ chatid: string }> }) {
@@ -62,7 +62,7 @@ export default function Chat({ params }: { params: Promise<{ chatid: string }> }
     return (
         <Container maxWidth="xl" sx={{ display: "flex", flexDirection: "column",height: "85vh"}}>
         <Box sx={{py:4}}><Link href="/chat">←チャット一覧に戻る</Link></Box>
-        <Typography variant='h5'>{getCompanyById(chatlogs.companyid)?.name}</Typography>
+        <Typography variant='h5'>{getCompanyByIdSync(chatlogs.companyid)?.name}</Typography>
             <Box sx={{ flex:1,overflowY: "auto",p:2}}>
                 <Stack spacing={1}>
                     {chatlogs.chatlog.map((e,index)=>
@@ -78,7 +78,7 @@ export default function Chat({ params }: { params: Promise<{ chatid: string }> }
                     </Stack>
                     ):(
                     <Stack key={index} sx={{alignSelf: "flex-start"}}>
-                        <Typography sx={{fontSize:16}}>{getCompanyById(chatlogs.companyid)?.name}</Typography>
+                        <Typography sx={{fontSize:16}}>{getCompanyByIdSync(chatlogs.companyid)?.name}</Typography>
                         <Card sx={{p:1,maxWidth: 600, width: "fit-content",bgcolor:"white"}}>
                             <Typography>{e.chattext}</Typography>
                         </Card>
