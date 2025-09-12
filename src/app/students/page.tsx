@@ -24,7 +24,8 @@ import {
   Stack,
   Divider,
   Skeleton,
-  Collapse
+  Collapse,
+  CircularProgress
 } from '@mui/material';
 import {
   Business as BusinessIcon,
@@ -44,8 +45,12 @@ import { useState, useEffect } from 'react';
 import { IndustryIcon } from '@/app/_components/IndustryIcon';
 import AdoptButton from './adopt';
 import RejectButton from './Reject';
+import { useAccessControl } from '@/hooks/useAccessControl';
 
 export default function StudentsPage() {
+  // アクセス制御 - 学生アカウントのみ許可
+  const { loading: accessLoading } = useAccessControl(['students']);
+  
   const [companies, setCompanies] = useState<Company[]>([]);
   const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -57,6 +62,9 @@ export default function StudentsPage() {
   const [displayCount, setDisplayCount] = useState(5);
 
   useEffect(() => {
+    // アクセス制御中は何もしない
+    if (accessLoading) return;
+    
     // シミュレートされたローディング
     const timer = setTimeout(async () => {
       const allCompanies = await getAllCompanies();
@@ -66,7 +74,7 @@ export default function StudentsPage() {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [accessLoading]); // アクセス制御が完了してから実行
 
   useEffect(() => {
     let filtered = companies;
@@ -111,6 +119,15 @@ export default function StudentsPage() {
   const industries = Array.from(new Set(companies.map(c => c.industry)));
   const features = Array.from(new Set(companies.flatMap(c => c.features || [])));
   const projects = getAllProjects();
+
+  // アクセス制御中は必ずローディング画面を表示（最優先）
+  if (accessLoading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
+        <CircularProgress size={60} />
+      </Box>
+    );
+  }
 
   if (loading) {
     return <LoadingSkeleton />;

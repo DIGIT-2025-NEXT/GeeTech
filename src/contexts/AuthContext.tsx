@@ -24,21 +24,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
-  let supabase: SupabaseClient | null = null
-  try {
-    supabase = createClient()
-  } catch (err) {
-    console.error('Failed to initialize Supabase client:', err)
-    setError(err instanceof Error ? err.message : 'Failed to initialize Supabase client')
-    setLoading(false)
-  }
+  // Supabaseクライアントを常に作成（条件付きにしない）
+  const supabase = createClient()
 
   useEffect(() => {
-    if (!supabase) {
-      setLoading(false)
-      return
-    }
-
     // 開発時に認証設定をログ出力
     logAuthConfig()
 
@@ -74,13 +63,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     )
 
     return () => subscription.unsubscribe()
-  }, [supabase])
+  }, []) // 依存配列からsupabaseを削除
 
   const signUp = async (email: string, password: string) => {
-    if (!supabase) {
-      return { error: 'Supabase client not initialized' }
-    }
-    
     try {
       const { error } = await supabase.auth.signUp({
         email,
@@ -99,10 +84,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signIn = async (email: string, password: string) => {
-    if (!supabase) {
-      return { error: 'Supabase client not initialized' }
-    }
-    
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -116,10 +97,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signInWithGoogle = async () => {
-    if (!supabase) {
-      return { error: 'Supabase client not initialized' }
-    }
-    
     const redirectUri = getGoogleRedirectUri()
     if (!redirectUri) {
       return { 
@@ -142,10 +119,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
-    if (!supabase) {
-      return
-    }
-    
     try {
       await supabase.auth.signOut()
     } catch (err) {
