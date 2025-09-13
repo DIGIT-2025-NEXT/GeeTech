@@ -9,7 +9,6 @@ import {
   Button,
   Box,
   Grid,
-  Paper,
   Breadcrumbs,
   Alert,
   AlertTitle,
@@ -21,7 +20,6 @@ import {
 import {
   School as SchoolIcon,
   Person as PersonIcon,
-  Email as EmailIcon,
   Code as CodeIcon,
   Save as SaveIcon,
   CloudUpload as CloudUploadIcon,
@@ -175,10 +173,11 @@ export default function StudentProfileCreatePage() {
 
       // アバター画像をアップロード
       if (avatarFile) {
-        avatarUrl = await uploadAvatar(avatarFile);
-        if (!avatarUrl) {
+        const uploadedUrl = await uploadAvatar(avatarFile);
+        if (!uploadedUrl) {
           throw new Error('画像のアップロードに失敗しました');
         }
+        avatarUrl = uploadedUrl;
       }
 
       const response = await fetch("/api/students/profile", {
