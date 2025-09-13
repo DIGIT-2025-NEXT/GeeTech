@@ -47,6 +47,37 @@ export default function ProfileSetupPage() {
   useEffect(() => {
     if (!loading && !user) {
       router.push('/auth/login')
+      return
+    }
+
+    // 既にプロファイルが設定済みのユーザーは適切なホームページにリダイレクト
+    if (user) {
+      const checkExistingProfile = async () => {
+        try {
+          const supabase = createClient()
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('profile_type')
+            .eq('id', user.id)
+            .single()
+
+          if (!error && profile?.profile_type) {
+            // 既にプロファイルが設定済みの場合は適切なページにリダイレクト
+            if (profile.profile_type === 'company') {
+              router.push('/company')
+            } else if (profile.profile_type === 'students') {
+              router.push('/students')
+            } else {
+              router.push('/dashboard')
+            }
+          }
+        } catch (profileError) {
+          console.error('Error checking existing profile:', profileError)
+          // エラーの場合はsetupページを継続表示
+        }
+      }
+
+      checkExistingProfile()
     }
   }, [user, loading, router])
 
