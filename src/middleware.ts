@@ -11,7 +11,6 @@ const AUTH_REQUIRED_PATHS = ["/dashboard", "/profile", "/chat"];
 const PUBLIC_PATHS = [
   "/",
   "/auth",
-  "/events",
   "/debug",
   "/profile-quick-setup",
   "/middleware-test",

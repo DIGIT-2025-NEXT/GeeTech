@@ -33,7 +33,7 @@ export default function LoginPage() {
 
   // すでにサインインしているならトップへ
   useEffect(() => {
-    if (user) router.replace("/events");
+    if (user) router.replace("/students");
   }, [user, router]);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
