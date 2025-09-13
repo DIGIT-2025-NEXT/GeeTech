@@ -1,6 +1,7 @@
 'use client'
 
 import {Button, Snackbar, Dialog, DialogTitle, DialogContent, DialogActions, Box, Typography}  from '@mui/material';
+import { Work as WorkIcon } from '@mui/icons-material';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { createClient } from '@/lib/supabase/client';
@@ -17,12 +18,12 @@ export default function AdoptButton({ studentid }: Props){
     const supabase = createClient();
     const COMPANY_ID = user?.id?? '';
     const [companyname,setCompanyName]=useState("");
-    const title=`${companyname}からの採用通知`;
-    const body=`あなたは${companyname}に採用されました`;
     const link=`/dashboard`;
     const { sendNotification } = useNotifications();
     const handleSnackClose = () => setSnackOpen(false);
     const handleSend = async () => {
+    const title=`${companyname}からの採用通知`;
+    const body=`あなたは${companyname}に採用されました`;
     const params: SendNotificationParams = {
       recipient_id: studentid,
       title,
@@ -33,6 +34,7 @@ export default function AdoptButton({ studentid }: Props){
     try {
       await sendNotification(params);
     } catch (error) {
+      console.error('Failed to send adoption notification:', error);
     }
   };
     const handleConfirm = async() => {
@@ -124,7 +126,22 @@ export default function AdoptButton({ studentid }: Props){
     };
     return(
         <>
-        <Button onClick={() => adopt()}>採用する</Button>
+        <Button 
+          onClick={() => adopt()}
+          fullWidth
+          variant="outlined"
+          startIcon={<WorkIcon />}
+          size="large"
+          color="success"
+          sx={{ 
+            textTransform: 'none',
+            borderRadius: 2,
+            fontWeight: 600,
+            py: 1.5
+          }}
+        >
+          採用する
+        </Button>
         <Snackbar open={snackOpen} autoHideDuration={3000} onClose={handleSnackClose} message={snackMsg} />
         <Dialog open={confirmOpen} onClose={handleCancel}>
             <DialogTitle>{"注意"}</DialogTitle>

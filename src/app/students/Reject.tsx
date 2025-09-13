@@ -1,6 +1,7 @@
 'use client'
 
 import {Button, Snackbar, Dialog, DialogTitle, DialogContent, DialogActions, Box, Typography}  from '@mui/material';
+import { Work as WorkIcon } from '@mui/icons-material';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { createClient } from '@/lib/supabase/client';
@@ -17,12 +18,12 @@ export default function RejectButton({ studentid }: Props){
     const supabase = createClient();
     const COMPANY_ID = user?.id?? '';
     const [companyname,setCompanyName]=useState("");
-    const title=`${companyname}からの不採用通知`;
-    const body=`申し訳ございませんが、${companyname}では今回は見送らせていただきます`;
     const link=`/dashboard`;
     const { sendNotification } = useNotifications();
     const handleSnackClose = () => setSnackOpen(false);
     const handleSend = async () => {
+    const title=`${companyname}からの不採用通知`;
+    const body=`申し訳ございませんが、${companyname}では今回は見送らせていただきます`;
     const params: SendNotificationParams = {
       recipient_id: studentid,
       title,
@@ -33,6 +34,7 @@ export default function RejectButton({ studentid }: Props){
     try {
       await sendNotification(params);
     } catch (error) {
+      console.error('Failed to send rejection notification:', error);
     }
   };
     const handleConfirm = async() => {
@@ -120,7 +122,22 @@ export default function RejectButton({ studentid }: Props){
     };
     return(
         <>
-        <Button onClick={() => adopt()}>不採用にする</Button>
+        <Button 
+          onClick={() => adopt()}
+          fullWidth
+          variant="outlined"
+          startIcon={<WorkIcon />}
+          size="large"
+          color="error"
+          sx={{ 
+            textTransform: 'none',
+            borderRadius: 2,
+            fontWeight: 600,
+            py: 1.5
+          }}
+        >
+          不採用にする
+        </Button>
         <Snackbar open={snackOpen} autoHideDuration={3000} onClose={handleSnackClose} message={snackMsg} />
         <Dialog open={confirmOpen} onClose={handleCancel}>
             <DialogTitle>{"注意"}</DialogTitle>
