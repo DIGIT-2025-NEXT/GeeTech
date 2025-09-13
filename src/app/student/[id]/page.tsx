@@ -25,7 +25,7 @@ import {
   Phone as PhoneIcon,
   LinkedIn as LinkedInIcon,
 } from '@mui/icons-material';
-import { findChatByStudentId, type Student } from '@/lib/mock';
+import { type Student } from '@/lib/mock';
 import { createClient } from '@/lib/supabase/client';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
@@ -286,15 +286,8 @@ export default function StudentDetailPage() {
               startIcon={<ChatIcon />}
               size="large"
               onClick={() => {
-                // 学生IDからチャットを検索
-                const existingChat = findChatByStudentId(studentId);
-                if (existingChat) {
-                  // 既存のチャットがあれば直接そのチャットページに遷移
-                  window.location.href = `/chat/${existingChat.id}`;
-                } else {
-                  // 既存のチャットがなければチャット一覧ページに遷移
-                  window.location.href = '/chat';
-                }
+                // チャット一覧ページに遷移
+                window.location.href = '/chat';
               }}
               sx={{ 
                 textTransform: 'none',
