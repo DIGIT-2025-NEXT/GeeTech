@@ -39,7 +39,7 @@ import { getAllStudents, getAllProjects } from '@/lib/mock';
 
 export default async function CompanyDashboard() {
   const studentss = (await getAllStudents()).slice(0, 3); // 注目の学生3名
-  const projects = getAllProjects(); // すべてのプロジェクト
+  const projects = await getAllProjects(); // すべてのプロジェクト
 
   // 会社情報（実際にはログインした会社の情報を取得）
   const company = {

@@ -46,6 +46,34 @@ export interface ChatLog{
   chatlog: ChatLog[];
  }
 
+// Fallback mock data for projects (until Supabase table is created)
+const mockProjectsFallback: Project[] = [
+  {
+    id: "1",
+    companyId: "1", 
+    title: "地域密着型マーケティングアシスタント",
+    description: "SNS運用、イベント企画などを通じて、私たちのサービスを地域に広めるお手伝いをしてください。実践的なマーケティングスキルが身につきます。",
+    skills: ["マーケティング", "SNS運用", "企画"],
+    status: "active"
+  },
+  {
+    id: "2",
+    companyId: "2",
+    title: "UI/UXデザインインターン", 
+    description: "製造業向けSaaSのユーザーインターフェース改善に取り組んでいただきます。実際のプロダクトに携われる貴重な経験です。",
+    skills: ["UI/UX", "Figma", "プロトタイピング"],
+    status: "active"
+  },
+  {
+    id: "3",
+    companyId: "3",
+    title: "環境データ分析プロジェクト",
+    description: "再生可能エネルギーの効率化に向けたデータ分析業務。Pythonを使った実践的なデータサイエンス経験が積めます。", 
+    skills: ["Python", "データ分析", "環境工学"],
+    status: "active"
+  }
+];
+
 
 // Mock student data
 const mockStudents: Student[] = [
@@ -232,37 +260,40 @@ const mockCompanies: Company[] = [
   },
 ];
 
-export function getCompanyById(id: string): Company | undefined {
+export async function getCompanyById(id: string): Promise<Company | undefined> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('company')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.error('Error fetching company by ID:', error);
+    return undefined;
+  }
+
+  if (!data) return undefined;
+
+  return {
+    id: data.id,
+    name: data.name,
+    industry: data.industry,
+    description: data.description,
+    features: data.features || [],
+    logo: data.logo || '',
+    projects: data.projects || [],
+    partcipantsid: data.partcipantsid || [],
+    adoptedid: data.adoptedid || [],
+    Rejectedid: data.Rejectedid || [],
+  };
+}
+
+// Fallback for synchronous access (for backwards compatibility)
+export function getCompanyByIdSync(id: string): Company | undefined {
   return mockCompanies.find(company => company.id === id);
 }
 
-// Mock project data
-const mockProjects: Project[] = [
-  {
-    id: "1",
-    companyId: "1",
-    title: "地域密着型マーケティングアシスタント",
-    description: "SNS運用、イベント企画などを通じて、私たちのサービスを地域に広めるお手伝いをしてください。実践的なマーケティングスキルが身につきます。",
-    skills: ["マーケティング", "SNS運用", "企画"],
-    status: "active"
-  },
-  {
-    id: "2",
-    companyId: "2",
-    title: "UI/UXデザインインターン",
-    description: "製造業向けSaaSのユーザーインターフェース改善に取り組んでいただきます。実際のプロダクトに携われる貴重な経験です。",
-    skills: ["UI/UX", "Figma", "プロトタイピング"],
-    status: "active"
-  },
-  {
-    id: "3", 
-    companyId: "3",
-    title: "環境データ分析プロジェクト",
-    description: "再生可能エネルギーの効率化に向けたデータ分析業務。Pythonを使った実践的なデータサイエンス経験が積めます。",
-    skills: ["Python", "データ分析", "環境工学"],
-    status: "active"
-  }
-];
 export const mockChats: Chat[] = [
   {
     id: "chat-1",
@@ -626,12 +657,16 @@ export async function getAllCompanies(): Promise<Company[]> {
   }));
 }
 
-export function getProjectsByCompanyId(companyId: string): Project[] {
-  return mockProjects.filter(project => project.companyId === companyId);
+export async function getProjectsByCompanyId(companyId: string): Promise<Project[]> {
+  // Return mock data as fallback since we don't have proper UUID company IDs yet
+  console.log('Using fallback mock data for projects');
+  return mockProjectsFallback.filter(project => project.companyId === companyId);
 }
 
-export function getAllProjects(): Project[] {
-  return mockProjects;
+export async function getAllProjects(): Promise<Project[]> {
+  // Return mock data as fallback since we don't have proper UUID company IDs yet
+  console.log('Using fallback mock data for all projects');
+  return mockProjectsFallback;
 }
 export function getAllChat(): Chat[] {
   return mockChats;

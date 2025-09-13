@@ -25,7 +25,8 @@ import {
   Phone as PhoneIcon,
   LinkedIn as LinkedInIcon,
 } from '@mui/icons-material';
-import { getStudentById, findChatByStudentId, type Student } from '@/lib/mock';
+import { findChatByStudentId, type Student } from '@/lib/mock';
+import { createClient } from '@/lib/supabase/client';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { SkillIcon } from '@/app/_components/SkillIcon';
@@ -94,13 +95,45 @@ export default function StudentDetailPage() {
 
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      const foundStudent = getStudentById(studentId);
-      setStudent(foundStudent || null);
+    const fetchStudent = async () => {
+      if (!studentId) {
+        setLoading(false);
+        return;
+      }
+      
+      setLoading(true);
+      const supabase = createClient();
+      
+      try {
+        const { data, error } = await supabase
+          .from('students')
+          .select('id, name, university, bio, skills, avatar')
+          .eq('id', studentId)
+          .single();
+        
+        if (error) {
+          console.error('Error fetching student:', error);
+          setStudent(null);
+        } else {
+          const student: Student = {
+            id: data.id,
+            name: data.name,
+            university: data.university,
+            bio: data.bio,
+            skills: Array.isArray(data.skills) ? data.skills : (data.skills ? data.skills.split(',') : []),
+            avatar: data.avatar || undefined,
+          };
+          setStudent(student);
+        }
+      } catch (error) {
+        console.error('Error fetching student:', error);
+        setStudent(null);
+      }
+      
       setLoading(false);
-    }, 500);
-
-    return () => clearTimeout(timer);
+    };
+    
+    fetchStudent();
   }, [studentId]);
 
   if (loading) {

@@ -27,13 +27,14 @@ import {
   Assignment as AssignmentIcon
 } from '@mui/icons-material';
 import Link from 'next/link';
-import { getCompanyById, getProjectsByCompanyId, Company, Project } from '@/lib/mock';
+import { getProjectsByCompanyId, Company, Project } from '@/lib/mock';
+import { createClient } from '@/lib/supabase/client';
 import { notFound } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
 interface Props {
-  params: Promise<{ companyId: string }>;
+  params: Promise<{ id: string }>;
 }
 
 export default function CompanyDetailPage({ params }: Props) {
@@ -43,16 +44,57 @@ export default function CompanyDetailPage({ params }: Props) {
   const fromPage = searchParams.get('from');
 
   useEffect(() => {
-    params.then(({ companyId }) => {
-      const companyData = getCompanyById(companyId);
-      const projectsData = getProjectsByCompanyId(companyId);
+    params.then(async ({ id }) => {
+      console.log('Company page: Fetching data for id:', id);
       
-      if (!companyData) {
+      const supabase = createClient();
+      
+      try {
+        // Supabaseから企業データを取得
+        const { data: companyData, error: companyError } = await supabase
+          .from('company')
+          .select('*')
+          .eq('id', id)
+          .single();
+          
+        if (companyError) {
+          console.error('Error fetching company:', companyError);
+          notFound();
+          return;
+        }
+        
+        if (!companyData) {
+          console.error('Company page: Company not found for ID:', id);
+          notFound();
+          return;
+        }
+        
+        // Company型に変換
+        const company: Company = {
+          id: companyData.id,
+          name: companyData.name,
+          industry: companyData.industry,
+          description: companyData.description,
+          features: companyData.features || [],
+          logo: companyData.logo || '',
+          projects: companyData.projects || [],
+          partcipantsid: companyData.partcipantsid || [],
+          adoptedid: companyData.adoptedid || [],
+          Rejectedid: companyData.Rejectedid || [],
+        };
+        
+        // プロジェクトデータも取得（現時点ではモックデータをフォールバック）
+        const projectsData = await getProjectsByCompanyId(id);
+        
+        console.log('Company page: Company data:', company);
+        console.log('Company page: Projects data:', projectsData);
+        
+        setCompany(company);
+        setProjects(projectsData);
+      } catch (error) {
+        console.error('Error fetching company data:', error);
         notFound();
       }
-      
-      setCompany(companyData);
-      setProjects(projectsData);
     });
   }, [params]);
 
@@ -60,8 +102,8 @@ export default function CompanyDetailPage({ params }: Props) {
     return <div>Loading...</div>;
   }
 
-  const backHref = fromPage === 'students' ? '/students' : '/company';
-  const backText = fromPage === 'students' ? '学生ページに戻る' : '企業一覧に戻る';
+  const backHref = fromPage === 'students' ? '/students' : '/students';
+  const backText = fromPage === 'students' ? '学生ページに戻る' : '学生ページに戻る';
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
