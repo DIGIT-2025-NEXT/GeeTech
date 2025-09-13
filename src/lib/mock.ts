@@ -658,15 +658,71 @@ export async function getAllCompanies(): Promise<Company[]> {
 }
 
 export async function getProjectsByCompanyId(companyId: string): Promise<Project[]> {
-  // Return mock data as fallback since we don't have proper UUID company IDs yet
-  console.log('Using fallback mock data for projects');
-  return mockProjectsFallback.filter(project => project.companyId === companyId);
+  const supabase = createClient();
+
+  try {
+    console.log('Fetching projects for company ID:', companyId);
+    const { data, error } = await supabase
+      .from('project')
+      .select('*')
+      .eq('company_id', companyId);
+
+    if (error) {
+      console.error('Error fetching projects:', error);
+      return [];
+    }
+
+    console.log('Fetched project data:', data);
+
+    if (!data || data.length === 0) {
+      console.log('No projects found in database');
+      return [];
+    }
+
+    // Transform database data to Project interface format
+    const transformedProjects = data.map(project => ({
+      id: project.id,
+      companyId: project.company_id,
+      title: project.title,
+      description: project.description,
+      skills: Array.isArray(project.skills) ? project.skills : [],
+      status: project.status as 'active' | 'closed' | 'draft'
+    }));
+
+    console.log('Transformed projects:', transformedProjects);
+    return transformedProjects;
+  } catch (error) {
+    console.error('Error fetching projects:', error);
+    return [];
+  }
 }
 
 export async function getAllProjects(): Promise<Project[]> {
-  // Return mock data as fallback since we don't have proper UUID company IDs yet
-  console.log('Using fallback mock data for all projects');
-  return mockProjectsFallback;
+  const supabase = createClient();
+
+  try {
+    const { data, error } = await supabase
+      .from('project')
+      .select('*');
+
+    if (error) {
+      console.error('Error fetching all projects:', error);
+      return [];
+    }
+
+    // Transform database data to Project interface format
+    return (data || []).map(project => ({
+      id: project.id,
+      companyId: project.company_id,
+      title: project.title,
+      description: project.description,
+      skills: project.skills || [],
+      status: project.status as 'active' | 'closed' | 'draft'
+    }));
+  } catch (error) {
+    console.error('Error fetching all projects:', error);
+    return [];
+  }
 }
 export function getAllChat(): Chat[] {
   return mockChats;
