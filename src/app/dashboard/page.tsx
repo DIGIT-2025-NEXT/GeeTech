@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 // MUI imports
 import {
@@ -34,32 +35,11 @@ import { useAuth } from "@/contexts/AuthContext";
 
 type Notification = Tables<"notifications">;
 
-const dummyApplicationStatus: {
+type ApplicationStatus = {
   id: number;
   companyName: string;
   status: "Reviewing" | "Accepted" | "Rejected";
-}[] = [
-  {
-    id: 1,
-    companyName: "株式会社TechCorp",
-    status: "Reviewing",
-  },
-  {
-    id: 2,
-    companyName: "株式会社Innovate",
-    status: "Accepted",
-  },
-  {
-    id: 3,
-    companyName: "株式会社FutureWeb",
-    status: "Rejected",
-  },
-  {
-    id: 4,
-    companyName: "株式会社NextGen Solutions",
-    status: "Reviewing",
-  },
-];
+};
 // ---------------------
 
 // ステータスに応じてChipの色を返すヘルパー関数
@@ -80,6 +60,35 @@ export default function Dashboard() {
   const { profile } = useProfile();
   const { notifications, markAsRead } = useNotifications();
   const { signOut } = useAuth();
+  const [applicationStatus, setApplicationStatus] = useState<ApplicationStatus[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchApplicationStatus = async () => {
+      if (profile?.profile_type !== 'students') {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/student-applications');
+        if (response.ok) {
+          const data = await response.json();
+          setApplicationStatus(data);
+        } else {
+          console.error('Failed to fetch application status');
+          setApplicationStatus([]);
+        }
+      } catch (error) {
+        console.error('Error fetching application status:', error);
+        setApplicationStatus([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchApplicationStatus();
+  }, [profile]);
 
   const handleNotificationClick = async (notification: Notification) => {
     if (!notification.is_read) {
@@ -181,28 +190,44 @@ export default function Dashboard() {
                 応募状況
               </Typography>
               <List sx={{ p: 0 }}>
-                {dummyApplicationStatus.map((app, index) => (
-                  <Box key={app.id}>
-                    <ListItem disablePadding>
-                      <ListItemButton
-                        onClick={() => router.push(`/applications/${app.id}`)}
-                      >
-                        <ListItemText
-                          primary={app.companyName}
-                          secondary={app.status}
-                        />
-                        <Chip
-                          label={app.status}
-                          color={getStatusChipColor(app.status)}
-                          size="small"
-                        />
-                      </ListItemButton>
+                {profile?.profile_type === 'students' ? (
+                  loading ? (
+                    <ListItem>
+                      <ListItemText primary="読み込み中..." />
                     </ListItem>
-                    {index < dummyApplicationStatus.length - 1 && (
-                      <Divider component="li" />
-                    )}
-                  </Box>
-                ))}
+                  ) : applicationStatus.length > 0 ? (
+                    applicationStatus.map((app, index) => (
+                      <Box key={app.id}>
+                        <ListItem disablePadding>
+                          <ListItemButton
+                            onClick={() => router.push(`/applications/${app.id}`)}
+                          >
+                            <ListItemText
+                              primary={app.companyName}
+                              secondary={app.status}
+                            />
+                            <Chip
+                              label={app.status}
+                              color={getStatusChipColor(app.status)}
+                              size="small"
+                            />
+                          </ListItemButton>
+                        </ListItem>
+                        {index < applicationStatus.length - 1 && (
+                          <Divider component="li" />
+                        )}
+                      </Box>
+                    ))
+                  ) : (
+                    <ListItem>
+                      <ListItemText primary="応募履歴がありません" />
+                    </ListItem>
+                  )
+                ) : (
+                  <ListItem>
+                    <ListItemText primary="学生のみ表示される機能です" />
+                  </ListItem>
+                )}
               </List>
             </CardContent>
           </Card>
