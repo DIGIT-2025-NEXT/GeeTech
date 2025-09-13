@@ -5,6 +5,13 @@ type SSEConnection = {
   userId: string;
 }
 
+type BroadcastMessage = {
+  type: string;
+  data?: unknown;
+  roomId?: string;
+  timestamp: number;
+}
+
 class SSEManager {
   private connections = new Map<string, SSEConnection[]>()
   private encoder = new TextEncoder()
@@ -42,7 +49,7 @@ class SSEManager {
   }
 
   // 特定のルームにメッセージをブロードキャスト
-  broadcastToRoom(roomId: string, message: any) {
+  broadcastToRoom(roomId: string, message: BroadcastMessage) {
     const roomConnections = this.connections.get(roomId)
     if (!roomConnections || roomConnections.length === 0) {
       console.log(`No SSE connections for room ${roomId}`)
