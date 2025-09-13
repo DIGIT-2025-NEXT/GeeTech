@@ -96,16 +96,13 @@ function checkPathAccess(
 
   // company ロールの場合のアクセス制御
   if (profileType === "company") {
-    if (pathname === "/company") {
-      console.log(`[Access Check] Company access to /company granted`);
-      return true;
-    }
-    if (pathname === "/company/register") {
-      console.log(`[Access Check] Company access to /company granted`);
+    // 企業ユーザーは /company/* パスにアクセス可能
+    if (pathname.startsWith("/company")) {
+      console.log(`[Access Check] Company access to ${pathname} granted`);
       return true;
     }
     if (pathname === "/students") {
-      console.log(`[Access Check] Company blocked from /students granted`);
+      console.log(`[Access Check] Company blocked from /students`);
       return false;
     }
     if (companyDetailPathRegex.test(pathname)) {
@@ -117,10 +114,6 @@ function checkPathAccess(
         `[Access Check] Company access to /students/[studentId] granted`
       );
       return true;
-    }
-    if (pathname === "/students") {
-      console.log(`[Access Check] Company blocked from /students`);
-      return false;
     }
     console.log(`[Access Check] Company default access granted for: ${pathname}`);
     return true;
