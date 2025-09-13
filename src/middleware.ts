@@ -72,6 +72,10 @@ function checkPathAccess(
       console.log(`[Access Check] Students blocked from /company granted`);
       return false;
     }
+    if (pathname === "/company/register") {
+      console.log(`[Access Check] Students blocked from /company granted`);
+      return false;
+    }
     if (studentDetailPathRegex.test(pathname)) {
       console.log(`[Access Check] Students blocked from /students/[studentId]`);
       return false;
@@ -87,6 +91,10 @@ function checkPathAccess(
   // company ロールの場合のアクセス制御
   if (profileType === "company") {
     if (pathname === "/company") {
+      console.log(`[Access Check] Company access to /company granted`);
+      return true;
+    }
+    if (pathname === "/company/register") {
       console.log(`[Access Check] Company access to /company granted`);
       return true;
     }
