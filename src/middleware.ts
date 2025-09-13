@@ -68,6 +68,14 @@ function checkPathAccess(
       console.log(`[Access Check] Students access to /students granted`);
       return true;
     }
+    if (pathname === "/company") {
+      console.log(`[Access Check] Students blocked from /company granted`);
+      return false;
+    }
+    if (pathname === "/company/register") {
+      console.log(`[Access Check] Students blocked from /company granted`);
+      return false;
+    }
     if (studentDetailPathRegex.test(pathname)) {
       console.log(`[Access Check] Students blocked from /students/[studentId]`);
       return false;
@@ -91,6 +99,14 @@ function checkPathAccess(
     if (pathname === "/company") {
       console.log(`[Access Check] Company access to /company granted`);
       return true;
+    }
+    if (pathname === "/company/register") {
+      console.log(`[Access Check] Company access to /company granted`);
+      return true;
+    }
+    if (pathname === "/students") {
+      console.log(`[Access Check] Company blocked from /students granted`);
+      return false;
     }
     if (companyDetailPathRegex.test(pathname)) {
       console.log(`[Access Check] Company blocked from /company/[companyId]`);

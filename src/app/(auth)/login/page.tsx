@@ -14,7 +14,6 @@ import {
   Alert,
 } from "@mui/material";
 import { Google as GoogleIcon } from "@mui/icons-material";
-import AuthDebug from "@/components/AuthDebug";
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -186,8 +185,6 @@ export default function LoginPage() {
         </Box>
       </Paper>
 
-      {/* 開発環境でのデバッグ情報 */}
-      <AuthDebug />
     </Container>
   );
 }

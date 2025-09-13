@@ -62,20 +62,18 @@ export default function Chat() {
     }
   }, [user, loading, fetchChatRooms]);
 
-  // リアルタイム更新の設定
+  // ページフォーカス時の更新（ユーザーがページに戻ってきた時に最新データを取得）
   useEffect(() => {
-    if (!user || !userType) return;
-
-    // 4秒ごとにチャットルーム一覧を更新
-    const intervalId = setInterval(() => {
-      console.log(`Polling for chat rooms updates (${userType})`);
-      fetchChatRooms();
-    }, 4000);
-
-    return () => {
-      clearInterval(intervalId);
+    const handleFocus = () => {
+      if (user && !loading) {
+        console.log('Page focused, refreshing chat rooms');
+        fetchChatRooms();
+      }
     };
-  }, [user, userType, fetchChatRooms]);
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [user, loading, fetchChatRooms]);
 
   if (loading || loadingRooms) {
     return (
@@ -134,7 +132,17 @@ export default function Chat() {
         </Link>
         <Typography color="text.primary">チャット</Typography>
       </Breadcrumbs>
-      <Typography variant='h4'>直近のチャット</Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant='h4'>直近のチャット</Typography>
+        <Button 
+          variant='outlined' 
+          onClick={fetchChatRooms}
+          disabled={loadingRooms}
+          sx={{ minWidth: 120 }}
+        >
+          {loadingRooms ? '更新中...' : '更新'}
+        </Button>
+      </Box>
       <Stack spacing={2} sx={{ mt: 2 }}>
         {rooms.map((room) => (
           <Card key={room.id}>
