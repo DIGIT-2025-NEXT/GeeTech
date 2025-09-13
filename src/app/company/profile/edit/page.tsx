@@ -17,7 +17,12 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Avatar,
 } from "@mui/material";
+import {
+  Business as BusinessIcon,
+  CloudUpload as CloudUploadIcon,
+} from "@mui/icons-material";
 import { createClient } from "@/lib/supabase/client";
 
 const industries = [
@@ -65,6 +70,9 @@ export default function CompanyProfileEditPage() {
     features: [] as string[],
     logo: "",
   });
+
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string>("");
   
   const [originalData, setOriginalData] = useState({
     name: "",
@@ -135,12 +143,46 @@ export default function CompanyProfileEditPage() {
       const newFeatures = currentFeatures.includes(feature)
         ? currentFeatures.filter((f) => f !== feature)
         : [...currentFeatures, feature];
-      
+
       return {
         ...prev,
         features: newFeatures,
       };
     });
+  };
+
+  const handleLogoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setLogoPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadLogo = async (file: File): Promise<string | null> => {
+    try {
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      const response = await fetch('/api/upload/avatar', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('画像のアップロードに失敗しました');
+      }
+
+      const data = await response.json();
+      return data.url;
+    } catch (error) {
+      console.error('Logo upload error:', error);
+      return null;
+    }
   };
 
   const hasChanges = () => {
@@ -162,9 +204,6 @@ export default function CompanyProfileEditPage() {
       errors.push("企業説明は必須です");
     }
     
-    if (formData.description.trim().length < 20) {
-      errors.push("企業説明は20文字以上で入力してください");
-    }
     
     if (errors.length > 0) {
       setError(errors.join("、"));
@@ -195,12 +234,22 @@ export default function CompanyProfileEditPage() {
         .eq('user_id', currentUserId)
         .single();
 
+      let logoUrl = formData.logo;
+
+      // ロゴ画像をアップロード
+      if (logoFile) {
+        logoUrl = await uploadLogo(logoFile);
+        if (!logoUrl) {
+          throw new Error('画像のアップロードに失敗しました');
+        }
+      }
+
       const companyData = {
         name: formData.name,
         industry: formData.industry,
         description: formData.description,
         features: formData.features,
-        logo: formData.logo,
+        logo: logoUrl,
         user_id: currentUserId,
       };
 
@@ -314,13 +363,46 @@ export default function CompanyProfileEditPage() {
                 helperText="企業の特色や魅力をアピールしてください"
               />
 
-              <TextField
-                label="ロゴURL"
-                value={formData.logo}
-                onChange={(e) => handleInputChange("logo", e.target.value)}
-                fullWidth
-                helperText="企業ロゴの画像URLを入力してください"
-              />
+              <Box>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  企業ロゴ（任意）
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                  <Avatar
+                    src={logoPreview || formData.logo}
+                    sx={{ width: 80, height: 80 }}
+                  >
+                    <BusinessIcon sx={{ fontSize: 40 }} />
+                  </Avatar>
+                  <Box>
+                    <Button
+                      variant="outlined"
+                      component="label"
+                      startIcon={<CloudUploadIcon />}
+                      sx={{ mb: 1 }}
+                    >
+                      画像を選択
+                      <input
+                        type="file"
+                        hidden
+                        accept="image/*"
+                        onChange={handleLogoChange}
+                      />
+                    </Button>
+                    <Typography variant="caption" display="block" color="text.secondary">
+                      JPG, PNG, GIF対応（最大5MB）
+                    </Typography>
+                  </Box>
+                </Box>
+                <TextField
+                  label="ロゴURL（直接入力も可能）"
+                  value={formData.logo}
+                  onChange={(e) => handleInputChange("logo", e.target.value)}
+                  fullWidth
+                  helperText="画像を選択するか、直接URLを入力してください"
+                  size="small"
+                />
+              </Box>
             </Stack>
           </Paper>
         </Box>

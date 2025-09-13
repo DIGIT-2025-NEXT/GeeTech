@@ -34,7 +34,9 @@ import {
   FavoriteBorder as FavoriteBorderIcon,
   Favorite as FavoriteIcon,
   ExpandMore as ExpandMoreIcon,
-  ExpandLess as ExpandLessIcon
+  ExpandLess as ExpandLessIcon,
+  School as SchoolIcon,
+  Person as PersonIcon
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { getAllCompanies, getAllProjects, type Company, type Project } from '@/lib/mock';
@@ -553,6 +555,47 @@ export default function StudentsPage() {
           </Button>
         </Box>
       )}
+
+      {/* 学生プロフィール作成CTAセクション */}
+      <Paper
+        elevation={4}
+        sx={{
+          mt: 6,
+          textAlign: "center",
+          p: 4,
+          background: "linear-gradient(45deg, #4CAF50 30%, #81C784 90%)",
+          color: "white"
+        }}
+      >
+        <SchoolIcon sx={{ fontSize: 60, mb: 2 }} />
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold" }}>
+          学生の方も参加しませんか？
+        </Typography>
+        <Typography variant="h6" sx={{ mb: 3, opacity: 0.9 }}>
+          あなたのスキルと情熱を企業に伝えて、理想のキャリアを始めましょう。
+        </Typography>
+        <Button
+          variant="contained"
+          size="large"
+          onClick={() => window.location.href = '/students/profile/create'}
+          startIcon={<PersonIcon />}
+          sx={{
+            textTransform: "none",
+            borderRadius: 3,
+            px: 4,
+            py: 1.5,
+            bgcolor: "white",
+            color: "success.main",
+            fontWeight: "bold",
+            fontSize: "1.1rem",
+            "&:hover": {
+              bgcolor: "grey.100"
+            }
+          }}
+        >
+          学生プロフィール作成
+        </Button>
+      </Paper>
 
     </Container>
   );
