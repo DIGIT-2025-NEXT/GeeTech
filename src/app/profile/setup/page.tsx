@@ -5,6 +5,33 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { ProfileType } from '@/lib/types/auth'
+import {
+  Container,
+  Paper,
+  Typography,
+  TextField,
+  Button,
+  Box,
+  Grid,
+  FormControl,
+  FormLabel,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  Alert,
+  CircularProgress,
+  Stepper,
+  Step,
+  StepLabel,
+  Card,
+  CardContent,
+  Avatar
+} from '@mui/material'
+import {
+  Person as PersonIcon,
+  Business as BusinessIcon,
+  AccountCircle as AccountIcon
+} from '@mui/icons-material'
 
 export default function ProfileSetupPage() {
   const { user, loading } = useAuth()
@@ -76,138 +103,180 @@ export default function ProfileSetupPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-600">読み込み中...</p>
-        </div>
-      </div>
+      <Container maxWidth="sm" sx={{ py: 8 }}>
+        <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
+          <CircularProgress size={60} />
+          <Typography variant="h6" sx={{ mt: 2 }}>
+            読み込み中...
+          </Typography>
+        </Paper>
+      </Container>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <div className="mb-6 text-center">
-            <h1 className="text-2xl font-bold text-gray-900">
-              プロファイル設定
-            </h1>
-            <p className="mt-2 text-sm text-gray-600">
-              アカウントの設定を完了してください
-            </p>
-          </div>
+    <Container maxWidth="md" sx={{ py: 6 }}>
+      {/* ヘッダー */}
+      <Box textAlign="center" sx={{ mb: 4 }}>
+        <Avatar sx={{ width: 64, height: 64, mx: 'auto', mb: 2, bgcolor: 'primary.main' }}>
+          <AccountIcon sx={{ fontSize: 40 }} />
+        </Avatar>
+        <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
+          プロファイル設定
+        </Typography>
+        <Typography variant="h6" color="text.secondary">
+          アカウントの初期設定を完了してください
+        </Typography>
+      </Box>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
-                {error}
-              </div>
-            )}
+      {/* ステッパー */}
+      <Stepper activeStep={0} sx={{ mb: 4 }}>
+        <Step>
+          <StepLabel>アカウントタイプ選択</StepLabel>
+        </Step>
+        <Step>
+          <StepLabel>基本情報入力</StepLabel>
+        </Step>
+        <Step>
+          <StepLabel>完了</StepLabel>
+        </Step>
+      </Stepper>
 
-            {/* プロファイルタイプ選択 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                アカウントタイプ *
-              </label>
-              <div className="space-y-2">
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    value="students"
-                    checked={profileType === 'students'}
-                    onChange={(e) => setProfileType(e.target.value as ProfileType)}
-                    className="mr-2"
-                  />
-                  学生
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    value="company"
-                    checked={profileType === 'company'}
-                    onChange={(e) => setProfileType(e.target.value as ProfileType)}
-                    className="mr-2"
-                  />
-                  企業
-                </label>
-              </div>
-            </div>
+      <Paper elevation={3} sx={{ p: 4 }}>
+        <Box component="form" onSubmit={handleSubmit}>
+          {error && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {error}
+            </Alert>
+          )}
 
-            {/* 名前入力 */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-                  名 *
-                </label>
-                <input
-                  type="text"
-                  id="firstName"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-                  姓 *
-                </label>
-                <input
-                  type="text"
-                  id="lastName"
+          {/* アカウントタイプ選択 */}
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h5" gutterBottom sx={{ mb: 3, fontWeight: 'medium' }}>
+              1. アカウントタイプを選択
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <Card 
+                  variant={profileType === 'students' ? 'outlined' : 'elevation'}
+                  sx={{ 
+                    cursor: 'pointer',
+                    border: profileType === 'students' ? 2 : 1,
+                    borderColor: profileType === 'students' ? 'primary.main' : 'divider',
+                    bgcolor: profileType === 'students' ? 'primary.50' : 'background.paper',
+                    '&:hover': { boxShadow: 2 }
+                  }}
+                  onClick={() => setProfileType('students')}
+                >
+                  <CardContent sx={{ textAlign: 'center', py: 3 }}>
+                    <PersonIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
+                    <Typography variant="h6" gutterBottom>学生</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      就職活動やインターンシップを探している学生向け
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Card 
+                  variant={profileType === 'company' ? 'outlined' : 'elevation'}
+                  sx={{ 
+                    cursor: 'pointer',
+                    border: profileType === 'company' ? 2 : 1,
+                    borderColor: profileType === 'company' ? 'primary.main' : 'divider',
+                    bgcolor: profileType === 'company' ? 'primary.50' : 'background.paper',
+                    '&:hover': { boxShadow: 2 }
+                  }}
+                  onClick={() => setProfileType('company')}
+                >
+                  <CardContent sx={{ textAlign: 'center', py: 3 }}>
+                    <BusinessIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
+                    <Typography variant="h6" gutterBottom>企業</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      優秀な人材を探している企業・団体向け
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          </Box>
+
+          {/* 基本情報入力 */}
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h5" gutterBottom sx={{ mb: 3, fontWeight: 'medium' }}>
+              2. 基本情報を入力
+            </Typography>
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="姓"
+                  variant="outlined"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   required
+                  helperText="例: 田中"
                 />
-              </div>
-            </div>
-
-            {/* ユーザー名 */}
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-                ユーザー名 *
-              </label>
-              <input
-                type="text"
-                id="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-            </div>
-
-            {/* 企業名（企業選択時のみ表示） */}
-            {profileType === 'company' && (
-              <div>
-                <label htmlFor="companyName" className="block text-sm font-medium text-gray-700">
-                  企業名 *
-                </label>
-                <input
-                  type="text"
-                  id="companyName"
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
-                  className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="名"
+                  variant="outlined"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
                   required
+                  helperText="例: 太郎"
                 />
-              </div>
-            )}
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="ユーザー名"
+                  variant="outlined"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                  helperText="他のユーザーに表示される名前です"
+                />
+              </Grid>
+              {profileType === 'company' && (
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="企業名"
+                    variant="outlined"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    required
+                    helperText="正式な企業名を入力してください"
+                  />
+                </Grid>
+              )}
+            </Grid>
+          </Box>
 
-            <div className="pt-4">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? '作成中...' : 'プロファイルを作成'}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+          {/* 送信ボタン */}
+          <Box textAlign="center">
+            <Button
+              type="submit"
+              variant="contained"
+              size="large"
+              disabled={isSubmitting}
+              sx={{ px: 6, py: 1.5, fontSize: '1.1rem' }}
+            >
+              {isSubmitting ? (
+                <>
+                  <CircularProgress size={24} sx={{ mr: 1 }} />
+                  作成中...
+                </>
+              ) : (
+                'プロファイルを作成'
+              )}
+            </Button>
+          </Box>
+        </Box>
+      </Paper>
+    </Container>
   )
 }

@@ -5,12 +5,32 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   // if "next" is in param, use it as the redirect URL
-  const next = searchParams.get('next') ?? '/students'
+  let next = searchParams.get('next') ?? '/students'
 
   if (code) {
     const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
+      // ユーザーのprofile_typeに基づいてリダイレクト先を決定
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user && !searchParams.get('next')) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('profile_type')
+            .eq('id', user.id)
+            .single()
+          
+          if (profile?.profile_type === 'company') {
+            next = '/company'
+          } else if (profile?.profile_type === 'students') {
+            next = '/students'
+          }
+        }
+      } catch (profileError) {
+        console.error('Error fetching user profile:', profileError)
+      }
+
       const forwardedHost = request.headers.get('x-forwarded-host') // original origin before load balancer
       const isLocalEnv = process.env.NODE_ENV === 'development'
       if (isLocalEnv) {

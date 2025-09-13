@@ -428,7 +428,7 @@ export default function StudentsPage() {
                   <Divider sx={{ mb: 1.5 }} />
 
                   {/* アクションボタン */}
-                  <Box sx={{ display: 'flex', gap: 0.8, justifyContent: 'space-between' }}>
+                  <Box sx={{ display: 'flex', gap: 1, justifyContent: 'space-between', alignItems: 'center' }}>
                     <Button
                       component={Link}
                       href={`/companies/${company.id}`}
@@ -441,7 +441,7 @@ export default function StudentsPage() {
                         borderRadius: 2,
                         fontWeight: 600,
                         fontSize: '0.75rem',
-                        height: 32,
+                        height: 36,
                         px: 1.5
                       }}
                     >
@@ -458,17 +458,16 @@ export default function StudentsPage() {
                           bgcolor: 'primary.main',
                           color: 'white'
                         },
-                        width: 32,
-                        height: 32
+                        width: 36,
+                        height: 36
                       }}
-                      size="small"
                     >
                       {creatingChat === company.id ? (
-                        <Box sx={{ width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Box sx={{ width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <Box
                             sx={{
-                              width: 12,
-                              height: 12,
+                              width: 14,
+                              height: 14,
                               border: '2px solid',
                               borderColor: 'primary.main',
                               borderTopColor: 'transparent',
@@ -482,24 +481,8 @@ export default function StudentsPage() {
                           />
                         </Box>
                       ) : (
-                        <ChatIcon sx={{ fontSize: 16 }} />
+                        <ChatIcon sx={{ fontSize: 18 }} />
                       )}
-                    </IconButton>
-                    <IconButton 
-                      color="success"
-                      sx={{ 
-                        border: '1.5px solid',
-                        borderColor: 'success.main',
-                        '&:hover': {
-                          bgcolor: 'success.main',
-                          color: 'white'
-                        },
-                        width: 32,
-                        height: 32
-                      }}
-                      size="small"
-                    >
-                      <WorkIcon sx={{ fontSize: 16 }} />
                     </IconButton>
                   </Box>
                 </CardContent>
