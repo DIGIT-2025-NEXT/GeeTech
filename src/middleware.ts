@@ -68,6 +68,14 @@ function checkPathAccess(
       console.log(`[Access Check] Students access to /students granted`);
       return true;
     }
+    if (pathname === "/company") {
+      console.log(`[Access Check] Students blocked from /company granted`);
+      return false;
+    }
+    if (pathname === "/company/register") {
+      console.log(`[Access Check] Students blocked from /company granted`);
+      return false;
+    }
     if (studentDetailPathRegex.test(pathname)) {
       console.log(`[Access Check] Students blocked from /students/[studentId]`);
       return false;
@@ -78,6 +86,12 @@ function checkPathAccess(
       );
       return true;
     }
+    if (pathname === "/company") {
+      console.log(`[Access Check] Students blocked from /company`);
+      return false;
+    }
+    console.log(`[Access Check] Students default access granted for: ${pathname}`);
+    return true;
   }
 
   // company ロールの場合のアクセス制御
@@ -85,6 +99,14 @@ function checkPathAccess(
     if (pathname === "/company") {
       console.log(`[Access Check] Company access to /company granted`);
       return true;
+    }
+    if (pathname === "/company/register") {
+      console.log(`[Access Check] Company access to /company granted`);
+      return true;
+    }
+    if (pathname === "/students") {
+      console.log(`[Access Check] Company blocked from /students granted`);
+      return false;
     }
     if (companyDetailPathRegex.test(pathname)) {
       console.log(`[Access Check] Company blocked from /company/[companyId]`);
@@ -96,6 +118,12 @@ function checkPathAccess(
       );
       return true;
     }
+    if (pathname === "/students") {
+      console.log(`[Access Check] Company blocked from /students`);
+      return false;
+    }
+    console.log(`[Access Check] Company default access granted for: ${pathname}`);
+    return true;
   }
 
   if (profileType === "admin") {
@@ -198,15 +226,28 @@ export async function middleware(request: NextRequest) {
 
       if (profileError) {
         console.log(`[Middleware] ❌ Profile error: ${profileError.message}`);
+        // プロファイルが見つからない場合（PGRST116エラー）はプロファイル設定へ
+        if (profileError.code === 'PGRST116') {
+          const url = request.nextUrl.clone();
+          url.pathname = "/profile";
+          return NextResponse.redirect(url);
+        }
+        // その他のエラーの場合は一時的にアクセスを許可してログを出力
+        console.log(`[Middleware] ⚠️ Profile error but allowing access: ${profileError.message}`);
+      }
+
+      // プロファイルタイプがnullの場合はプロファイル設定へリダイレクト
+      if (!profile?.profile_type) {
+        console.log(`[Middleware] ⚠️ Profile type is null/undefined, redirecting to profile setup`);
         const url = request.nextUrl.clone();
-        url.pathname = "/profile-quick-setup";
+        url.pathname = "/profile";
         return NextResponse.redirect(url);
       }
 
       // アクセス制御チェック
       const hasAccess = checkPathAccess(
         pathname,
-        profile?.profile_type || null
+        profile.profile_type
       );
 
       if (!hasAccess) {
