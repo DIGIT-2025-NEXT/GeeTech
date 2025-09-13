@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSkills } from "@/hooks/useSkills";
 import { useProfile } from "@/hooks/useProfile";
+import { useProfileCreation } from "@/hooks/useProfileCreation";
 import {
   Box,
   Typography,
@@ -20,6 +21,7 @@ import { SkillIcon } from "@/app/_components/SkillIcon";
 
 export default function EditProfilePage() {
   const router = useRouter();
+  const { profileChecked, profileCreated } = useProfileCreation();
   const {
     loading: profileLoading,
     error: profileError,
@@ -83,10 +85,15 @@ export default function EditProfilePage() {
     }
   };
 
-  if (profileLoading || skillsLoading) {
+  if (profileLoading || skillsLoading || !profileChecked) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
         <CircularProgress />
+        <Box sx={{ ml: 2 }}>
+          <Typography variant="body2">
+            {!profileChecked ? 'プロフィール準備中...' : '読み込み中...'}
+          </Typography>
+        </Box>
       </Box>
     );
   }
