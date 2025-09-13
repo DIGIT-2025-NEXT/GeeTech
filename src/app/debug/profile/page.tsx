@@ -7,8 +7,8 @@ import { Container, Typography, Paper, Box, Button } from '@mui/material'
 
 export default function DebugProfilePage() {
   const { user, loading } = useAuth()
-  const [profile, setProfile] = useState<any>(null)
-  const [userMetadata, setUserMetadata] = useState<any>(null)
+  const [profile, setProfile] = useState<Record<string, unknown> | null>(null)
+  const [userMetadata, setUserMetadata] = useState<Record<string, unknown> | null>(null)
   const [profileLoading, setProfileLoading] = useState(true)
 
   useEffect(() => {
