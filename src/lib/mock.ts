@@ -24,6 +24,7 @@ export interface Company {
   partcipantsid?: string[];
   adoptedid?: string[];
   Rejectedid?: string[];
+  is_verified?: boolean;
 }
 
 export interface Project {
@@ -113,6 +114,7 @@ export async function getCompanyById(id: string): Promise<Company | undefined> {
     partcipantsid: data.partcipantsid || [],
     adoptedid: data.adoptedid || [],
     Rejectedid: data.Rejectedid || [],
+    is_verified: data.is_verified || false,
   };
 }
 
@@ -123,15 +125,18 @@ export async function getCompanyById(id: string): Promise<Company | undefined> {
 
 export async function getAllCompanies(): Promise<Company[]> {
   const supabase = createClient();
-  const { data, error } = await supabase.from('company').select('*');
+  // 認証済み企業のみを取得
+  const { data, error } = await supabase
+    .from('company')
+    .select('*')
+    .eq('is_verified', true);
 
   if (error) {
     console.error('Error fetching companies:', error);
     return [];
   }
 
-  // Ensure the fetched data matches the Company type
-  return data.map((company: Company) => ({
+  return (data || []).map((company: Company) => ({
     id: company.id,
     name: company.name,
     industry: company.industry,
@@ -141,7 +146,8 @@ export async function getAllCompanies(): Promise<Company[]> {
     projects: company.projects || [],
     partcipantsid: company.partcipantsid || [],
     adoptedid: company.adoptedid || [],
-    Rejectedid: company.Rejectedid || [], // Use Rejectedid as per the interface
+    Rejectedid: company.Rejectedid || [],
+    is_verified: company.is_verified || false,
   }));
 }
 
