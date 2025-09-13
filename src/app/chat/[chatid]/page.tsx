@@ -5,6 +5,7 @@ import { Box, Button, Container, Stack, TextField, Typography, Card, CardContent
 import Link from 'next/link';
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useWebSocket } from '@/hooks/useWebSocket';
 
 interface ChatMessage {
   id: string;
@@ -40,6 +41,7 @@ export default function Chat({ params }: { params: Promise<{ chatid: string }> }
     const messagesEndRef = React.useRef<HTMLDivElement>(null);
     
     const { user, loading } = useAuth();
+    const { lastMessage } = useWebSocket(chatid);
     
     React.useEffect(() => {
         params.then(({ chatid }) => setChatid(chatid));
@@ -47,58 +49,113 @@ export default function Chat({ params }: { params: Promise<{ chatid: string }> }
 
     const fetchUserInfo = React.useCallback(async (studentId: string, companyId: string) => {
         try {
-            // Supabaseから直接情報を取得する（一時的な実装）
-            // 実際にはAPIを作成することを推奨
+            console.log('=== FETCHING USER INFO VIA API ===');
+            console.log('Student ID from chat_rooms:', studentId);
+            console.log('Company ID from chat_rooms:', companyId);
+            
+            // サーバーサイドAPIを経由して学生情報を取得（RLS回避）
+            console.log('Fetching student info via API...');
+            const studentResponse = await fetch(`/api/users/${studentId}`);
+            console.log('Student API response status:', studentResponse.status);
+            
+            let studentName = '学生';
+            let university = '大学未設定';
+            
+            if (studentResponse.ok) {
+                const studentData = await studentResponse.json();
+                console.log('Student API data:', studentData);
+                
+                if (studentData.name && studentData.name !== '学生') {
+                    studentName = studentData.name;
+                    console.log('✓ Got student name from API:', studentName);
+                } else {
+                    studentName = `学生 (ID: ${studentId.substring(0, 8)})`;
+                    console.log('✓ Using API fallback name:', studentName);
+                }
+                
+                if (studentData.university && studentData.university !== '大学未設定') {
+                    university = studentData.university;
+                    console.log('✓ Got university from API:', university);
+                }
+            } else {
+                console.log('✗ Student API failed, using fallback');
+                studentName = `学生 (ID: ${studentId.substring(0, 8)})`;
+            }
+            
+            // 会社情報を直接取得（権限があるはず）
+            console.log('Fetching company info...');
             const { createClient } = await import('@/lib/supabase/client');
             const supabase = createClient();
             
-            // 学生情報を取得
-            const { data: studentData } = await supabase
-                .from('students')
-                .select('name, university')
-                .eq('id', studentId)
-                .single();
-            
-            if (studentData) {
-                setStudentInfo({ name: studentData.name, university: studentData.university });
-            }
-
-            // 会社情報を取得
-            const { data: companyData } = await supabase
+            const { data: companyData, error: companyError } = await supabase
                 .from('company')
                 .select('name, industry')
                 .eq('id', companyId)
                 .single();
             
-            if (companyData) {
-                setCompanyInfo({ name: companyData.name, industry: companyData.industry });
+            console.log('Company query result:', { data: companyData, error: companyError });
+            
+            if (companyData && !companyError) {
+                setCompanyInfo({ 
+                    name: companyData.name || '企業名不明', 
+                    industry: companyData.industry || '業界不明' 
+                });
+                console.log('✓ Set company info:', companyData.name);
             }
+            
+            console.log('=== FINAL RESULT ===');
+            console.log('Student name:', studentName);
+            console.log('University:', university);
+            
+            setStudentInfo({ 
+                name: studentName, 
+                university: university 
+            });
+            
         } catch (error) {
-            console.error('Error fetching user info:', error);
+            console.error('=== ERROR IN fetchUserInfo ===', error);
+            setStudentInfo({ 
+                name: `学生 (ID: ${studentId.substring(0, 8)})`, 
+                university: '大学未設定' 
+            });
         }
     }, []);
 
     const fetchChatData = React.useCallback(async () => {
         setLoadingChat(true);
+        console.log(`Fetching chat data for chatid: ${chatid}, user: ${user?.id}`);
         try {
             const response = await fetch(`/api/chat/messages/${chatid}`);
+            console.log(`Initial fetch response status: ${response.status}`);
+            
             if (response.ok) {
                 const data = await response.json();
+                console.log('Initial fetch data:', {
+                    messagesCount: data.messages?.length || 0,
+                    roomStudentId: data.room?.student_id,
+                    roomCompanyId: data.room?.company_id,
+                    currentUserId: user?.id
+                });
+                
                 setChatData(data);
                 
                 // ユーザータイプを判定
                 if (data.room.student_id === user?.id) {
+                    console.log('User type determined: student');
                     setUserType('student');
                 } else {
+                    console.log('User type determined: company');
                     setUserType('company');
                 }
 
                 // 学生と会社の情報を取得
                 await fetchUserInfo(data.room.student_id, data.room.company_id);
             } else if (response.status === 404) {
+                console.log('Chat room not found (404)');
                 setChatData(null);
             } else {
-                console.error('Failed to fetch chat data');
+                const errorText = await response.text();
+                console.error('Failed to fetch chat data:', response.status, errorText);
             }
         } catch (error) {
             console.error('Error fetching chat data:', error);
@@ -106,58 +163,45 @@ export default function Chat({ params }: { params: Promise<{ chatid: string }> }
         setLoadingChat(false);
     }, [chatid, user?.id, fetchUserInfo]);
 
+    // 破損したSupabaseクッキーをクリアする関数（未使用のため削除予定）
+    // const clearSupabaseCookies = React.useCallback(() => {
+    //     if (typeof window !== 'undefined') {
+    //         const cookiesToClear = [
+    //             'sb-access-token',
+    //             'sb-refresh-token', 
+    //             'supabase-auth-token',
+    //             'sb-auth-token'
+    //         ];
+    //         
+    //         cookiesToClear.forEach(cookieName => {
+    //             document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+    //         });
+    //     }
+    // }, []);
+
     React.useEffect(() => {
         if (chatid && user && !loading) {
             fetchChatData();
         }
     }, [chatid, user, loading, fetchChatData]);
 
-    // リアルタイム更新の設定
+    // WebSocketからのメッセージを処理
     React.useEffect(() => {
-        if (!chatData) return;
-
-        const setupRealtimeSubscription = async () => {
-            const { createClient } = await import('@/lib/supabase/client');
-            const supabase = createClient();
-
-            // チャットメッセージのリアルタイム購読
-            const subscription = supabase
-                .channel(`chat-${chatid}`)
-                .on(
-                    'postgres_changes',
-                    {
-                        event: 'INSERT',
-                        schema: 'public',
-                        table: 'chat_messages',
-                        filter: `room_id=eq.${chatid}`
-                    },
-                    (payload) => {
-                        const newMessage = payload.new as ChatMessage;
-                        setChatData(prev => {
-                            if (!prev) return prev;
-                            // 既に存在するメッセージかチェック
-                            const messageExists = prev.messages.some(msg => msg.id === newMessage.id);
-                            if (messageExists) return prev;
-                            
-                            return {
-                                ...prev,
-                                messages: [...prev.messages, newMessage]
-                            };
-                        });
-                    }
-                )
-                .subscribe();
-
-            return () => {
-                subscription.unsubscribe();
-            };
-        };
-
-        const unsubscribe = setupRealtimeSubscription();
-        return () => {
-            unsubscribe.then(cleanup => cleanup?.());
-        };
-    }, [chatData, chatid]);
+        if (lastMessage && lastMessage.type === 'chat_message' && chatData) {
+            const newMessage = lastMessage.data as ChatMessage;
+            setChatData(prev => {
+                if (!prev) return prev;
+                // 既に存在するメッセージかチェック
+                const messageExists = prev.messages.some(msg => msg.id === newMessage.id);
+                if (messageExists) return prev;
+                
+                return {
+                    ...prev,
+                    messages: [...prev.messages, newMessage]
+                };
+            });
+        }
+    }, [lastMessage, chatData]);
 
     // メッセージが更新されたときに自動スクロール
     React.useEffect(() => {
@@ -184,11 +228,7 @@ export default function Chat({ params }: { params: Promise<{ chatid: string }> }
             });
 
             if (response.ok) {
-                const data = await response.json();
-                setChatData(prev => ({
-                    ...prev!,
-                    messages: [...prev!.messages, data.message]
-                }));
+                // SSEでメッセージが自動的に追加されるので、送信成功時はメッセージをクリアするだけ
                 setNewMessage('');
             } else {
                 console.error('Failed to send message');
@@ -243,59 +283,91 @@ export default function Chat({ params }: { params: Promise<{ chatid: string }> }
     const otherPartyName = userType === 'student' ? companyInfo?.name : studentInfo?.name;
     const otherPartyDetail = userType === 'student' ? companyInfo?.industry : studentInfo?.university;
 
-    /*
     return (
         <Container maxWidth="xl" sx={{ display: "flex", flexDirection: "column", height: "85vh"}}>
-            <Box sx={{py:4}}><Link href="/chat">←チャット一覧に戻る</Link></Box>
-            <Typography variant='h6'>このチャットにアクセスする権限がありません。</Typography>
-          </Container>
-        );
-    */
-    return (
-        <Container maxWidth="xl" sx={{ display: "flex", flexDirection: "column",height: "85vh"}}>
-        <Box sx={{py:4}}><Link href="/chat">←チャット一覧に戻る</Link></Box>
-        <Typography variant='h5'>{companyInfo?.name || studentInfo?.name}</Typography>
-            <Box sx={{ flex:1,overflowY: "auto",p:2}}>
-                <Stack spacing={1}>
-                    {chatData.messages.map((message, index) =>
-                    message.sender_type === "student" ? (
-                    <Stack key={index} sx={{alignSelf: "flex-end"}}>
-                        <Typography sx={{fontSize:16}}>{studentInfo?.name}</Typography>
-                        <Card sx={{p:1,maxWidth: 600, width: "fit-content",bgcolor:"aqua"}}>
-                            <Typography>{message.message}</Typography>
-                        </Card>
-                        <Typography variant="overline" color="text.secondary">
-                            {new Date(message.created_at).toLocaleString("ja-JP")}
-                        </Typography>
-                    </Stack>
-                    ) : (
-                    <Stack key={index} sx={{alignSelf: "flex-start"}}>
-                        <Typography sx={{fontSize:16}}>{companyInfo?.name}</Typography>
-                        <Card sx={{p:1,maxWidth: 600, width: "fit-content",bgcolor:"white"}}>
-                            <Typography>{message.message}</Typography>
-                        </Card>
-                        <Typography variant="overline" color="text.secondary">
-                            {new Date(message.created_at).toLocaleString("ja-JP")}
-                        </Typography>
-                    </Stack>
-                    ))}
-                    
+            <Box sx={{py: 2}}>
+                <Link href="/chat" style={{ textDecoration: 'none', color: 'inherit' }}>
+                    ←チャット一覧に戻る
+                </Link>
+            </Box>
+            <Box sx={{ 
+                p: 2, 
+                borderBottom: "1px solid #ddd", 
+                bgcolor: "background.paper",
+                boxShadow: 1
+            }}>
+                <Typography variant='h5' sx={{ fontWeight: 'bold' }}>
+                    {otherPartyName || '読み込み中...'}
+                </Typography>
+                {otherPartyDetail && (
+                    <Typography variant='subtitle2' color='text.secondary' sx={{ mt: 0.5 }}>
+                        {otherPartyDetail}
+                    </Typography>
+                )}
+            </Box>
+            <Box sx={{ flex:1, overflowY: "auto", p:2}}>
+                <Stack spacing={2}>
+                    {chatData.messages.map((message: ChatMessage, index: number) => {
+                        const isMyMessage = message.sender_type === userType;
+                        const senderName = message.sender_type === 'student' ? studentInfo?.name : companyInfo?.name;
+                        
+                        return (
+                            <Stack key={index} sx={{alignSelf: isMyMessage ? "flex-end" : "flex-start"}}>
+                                <Typography sx={{fontSize: 14, mb: 0.5, textAlign: isMyMessage ? 'right' : 'left'}}>
+                                    {isMyMessage ? 'あなた' : senderName || '読み込み中...'}
+                                </Typography>
+                                <Card sx={{
+                                    p: 2, 
+                                    maxWidth: 600, 
+                                    width: "fit-content",
+                                    bgcolor: isMyMessage ? "primary.main" : "grey.100",
+                                    color: isMyMessage ? "white" : "text.primary",
+                                    borderRadius: 2,
+                                    boxShadow: 1
+                                }}>
+                                    <Typography>{message.message}</Typography>
+                                </Card>
+                                <Typography variant="caption" color="text.secondary" sx={{textAlign: isMyMessage ? 'right' : 'left', mt: 0.5}}>
+                                    {new Date(message.created_at).toLocaleString("ja-JP")}
+                                </Typography>
+                            </Stack>
+                        );
+                    })}
+                    <div ref={messagesEndRef} />
                 </Stack>
             </Box>
-            <Box sx={{p: 2, borderTop: "1px solid #ddd", display: "flex", gap: 1}}>
+            <Box sx={{
+                p: 2, 
+                borderTop: "1px solid #ddd", 
+                display: "flex", 
+                gap: 2,
+                bgcolor: "background.paper",
+                boxShadow: "0 -1px 3px rgba(0,0,0,0.1)"
+            }}>
                 <TextField 
                     fullWidth 
-                    placeholder='メッセージを入力' 
+                    placeholder='メッセージを入力してください' 
                     variant='outlined'
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
+                    onKeyDown={handleKeyPress}
                     disabled={sending}
+                    size="small"
+                    sx={{
+                        '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                        }
+                    }}
                 />
                 <Button 
                     variant='contained'
                     onClick={sendMessage}
                     disabled={!newMessage.trim() || sending}
+                    sx={{
+                        borderRadius: 2,
+                        minWidth: 80,
+                        height: 40
+                    }}
                 >
                     {sending ? '送信中...' : '送信'}
                 </Button>

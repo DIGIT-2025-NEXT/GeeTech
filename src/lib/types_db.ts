@@ -242,79 +242,41 @@ export type Database = {
           name: string;
           industry: string;
           description: string;
-          features: string[] | null;
-          logo: string | null;
-          projects: string[] | null;
-          partcipantsid: string[] | null;
-          adoptedid: string[] | null;
-          Rejectedid: string[] | null;
+          features: string[];
+          adoptedid: string[];
+          rejectedid: string[];
+          logo: string;
+          projects: string[];
+          participants_id: string[];
+          user_id: string;
         };
         Insert: {
           id?: string;
           name: string;
           industry: string;
           description: string;
-          features?: string[] | null;
-          logo?: string | null;
-          projects?: string[] | null;
-          partcipantsid?: string[] | null;
-          adoptedid?: string[] | null;
-          Rejectedid?: string[] | null;
+          features?: string[];
+          adoptedid?: string[];
+          rejectedid?: string[];
+          logo?: string;
+          projects?: string[];
+          participants_id?: string[];
+          user_id: string;
         };
         Update: {
           id?: string;
           name?: string;
           industry?: string;
           description?: string;
-          features?: string[] | null;
-          logo?: string | null;
-          projects?: string[] | null;
-          partcipantsid?: string[] | null;
-          adoptedid?: string[] | null;
-          Rejectedid?: string[] | null;
+          features?: string[];
+          adoptedid?: string[];
+          rejectedid?: string[];
+          logo?: string;
+          projects?: string[];
+          participants_id?: string[];
+          user_id?: string;
         };
         Relationships: [];
-      };
-      project: {
-        Row: {
-          id: string;
-          company_id: string;
-          title: string;
-          description: string;
-          skills: string[] | null;
-          status: string;
-          created_at: string;
-          updated_at: string | null;
-        };
-        Insert: {
-          id?: string;
-          company_id: string;
-          title: string;
-          description: string;
-          skills?: string[] | null;
-          status?: string;
-          created_at?: string;
-          updated_at?: string | null;
-        };
-        Update: {
-          id?: string;
-          company_id?: string;
-          title?: string;
-          description?: string;
-          skills?: string[] | null;
-          status?: string;
-          created_at?: string;
-          updated_at?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "project_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "company"
-            referencedColumns: ["id"]
-          }
-        ];
       };
     }
     Views: {
