@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { sseManager } from '@/lib/sse-manager'
 
 export async function POST(request: NextRequest) {
   try {
@@ -88,6 +89,22 @@ export async function POST(request: NextRequest) {
       .from('chat_rooms')
       .update({ updated_at: new Date().toISOString() })
       .eq('id', roomId)
+
+    // SSEでリアルタイムブロードキャスト
+    try {
+      const broadcastMessage = {
+        type: 'chat_message',
+        data: newMessage,
+        roomId: roomId,
+        timestamp: Date.now()
+      }
+
+      sseManager.broadcastToRoom(roomId, broadcastMessage)
+      console.log(`Message broadcasted via SSE for room ${roomId}`)
+    } catch (sseError) {
+      console.error('SSE broadcast error:', sseError)
+      // SSEエラーは送信処理を失敗させない
+    }
 
     return NextResponse.json({ message: newMessage }, { status: 201 })
 
