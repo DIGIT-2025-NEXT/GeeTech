@@ -30,6 +30,8 @@ import { createClient } from '@/lib/supabase/client';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { SkillIcon } from '@/app/_components/SkillIcon';
+import AdoptButton from '@/app/students/adopt';
+import RejectButton from '@/app/students/Reject';
 
 
 export default function StudentDetailPage() {
@@ -279,7 +281,7 @@ export default function StudentDetailPage() {
           アクション
         </Typography>
         <Grid container spacing={2}>
-          <Grid xs={12} sm={6}>
+          <Grid xs={12} sm={4}>
             <Button
               fullWidth
               variant="contained"
@@ -299,25 +301,11 @@ export default function StudentDetailPage() {
               メッセージを送る
             </Button>
           </Grid>
-          <Grid xs={12} sm={6}>
-            <Button
-              fullWidth
-              variant="outlined"
-              startIcon={<WorkIcon />}
-              size="large"
-              color="success"
-              onClick={() => {
-                alert(`${student.name}さんの採用検討機能は準備中です。`);
-              }}
-              sx={{ 
-                textTransform: 'none',
-                borderRadius: 2,
-                fontWeight: 600,
-                py: 1.5
-              }}
-            >
-              採用を検討
-            </Button>
+          <Grid xs={12} sm={4}>
+            <AdoptButton studentid={studentId} />
+          </Grid>
+          <Grid xs={12} sm={4}>
+            <RejectButton studentid={studentId} />
           </Grid>
         </Grid>
       </Paper>
