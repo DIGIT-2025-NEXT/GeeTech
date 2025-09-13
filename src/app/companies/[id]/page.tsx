@@ -19,7 +19,6 @@ import {
 import {
   Category as CategoryIcon,
   ArrowBack as ArrowBackIcon,
-  Work as WorkIcon,
   Email as EmailIcon,
   LocationOn as LocationIcon,
   Language as LanguageIcon,
@@ -27,14 +26,14 @@ import {
   Assignment as AssignmentIcon
 } from '@mui/icons-material';
 import Link from 'next/link';
-import { getCompanyById, getProjectsByCompanyId, Company, Project } from '@/lib/mock';
+import { getProjectsByCompanyId, Company, Project } from '@/lib/mock';
 import { createClient } from '@/lib/supabase/client';
 import { notFound } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
 interface Props {
-  params: Promise<{ companyId: string }>;
+  params: Promise<{ id: string }>;
 }
 
 export default function CompanyDetailPage({ params }: Props) {
@@ -44,27 +43,47 @@ export default function CompanyDetailPage({ params }: Props) {
   const fromPage = searchParams.get('from');
 
   useEffect(() => {
-    params.then(async ({ companyId }) => {
-      console.log('Company page: Fetching data for companyId:', companyId);
+    params.then(async ({ id }) => {
+      console.log('Company page: Fetching data for id:', id);
       
       const supabase = createClient();
       
       try {
         // Supabaseから企業データを取得
+        console.log('Fetching company data for ID:', id);
         const { data: companyData, error: companyError } = await supabase
           .from('company')
           .select('*')
-          .eq('id', companyId)
+          .eq('id', id)
           .single();
           
+        console.log('Supabase response - data:', companyData);
+        console.log('Supabase response - error:', companyError);
+        console.log('Has error:', !!companyError);
+        console.log('Has data:', !!companyData);
+          
         if (companyError) {
-          console.error('Error fetching company:', companyError);
+          console.error('Error fetching company:', {
+            message: companyError.message,
+            details: companyError.details,
+            hint: companyError.hint,
+            code: companyError.code
+          });
+          
+          // エラーが PGRST116 (行が見つからない) の場合は、データが存在しないことを意味する
+          if (companyError.code === 'PGRST116') {
+            console.log('Company not found, showing 404');
+          } else {
+            // その他のエラーの場合
+            console.error('Other database error occurred');
+          }
+          
           notFound();
           return;
         }
         
         if (!companyData) {
-          console.error('Company page: Company not found for ID:', companyId);
+          console.error('Company page: Company not found for ID:', id);
           notFound();
           return;
         }
@@ -84,7 +103,7 @@ export default function CompanyDetailPage({ params }: Props) {
         };
         
         // プロジェクトデータも取得（現時点ではモックデータをフォールバック）
-        const projectsData = await getProjectsByCompanyId(companyId);
+        const projectsData = await getProjectsByCompanyId(id);
         
         console.log('Company page: Company data:', company);
         console.log('Company page: Projects data:', projectsData);
@@ -202,18 +221,6 @@ export default function CompanyDetailPage({ params }: Props) {
 
               {/* アクションボタン */}
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Button
-                  variant="contained"
-                  startIcon={<WorkIcon />}
-                  size="large"
-                  sx={{ 
-                    textTransform: 'none',
-                    borderRadius: 2,
-                    py: 1.5
-                  }}
-                >
-                  応募する
-                </Button>
                 <Button
                   variant="outlined"
                   startIcon={<EmailIcon />}

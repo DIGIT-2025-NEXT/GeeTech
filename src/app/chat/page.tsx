@@ -3,7 +3,7 @@
 
 import { Box, Button, Card, CardContent, Container, Stack, Typography, Breadcrumbs} from '@mui/material';
 import Link from 'next/link';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from '@/contexts/AuthContext';
 
 interface ChatRoom {
@@ -36,13 +36,7 @@ export default function Chat() {
   const [loadingRooms, setLoadingRooms] = useState(false);
   const { user, loading } = useAuth();
 
-  useEffect(() => {
-    if (user && !loading) {
-      fetchChatRooms();
-    }
-  }, [user, loading]);
-
-  const fetchChatRooms = async () => {
+  const fetchChatRooms = useCallback(async () => {
     setLoadingRooms(true);
     try {
       const response = await fetch('/api/chat/rooms');
@@ -60,7 +54,28 @@ export default function Chat() {
       console.error('Error fetching chat rooms:', error);
     }
     setLoadingRooms(false);
-  };
+  }, []);
+
+  useEffect(() => {
+    if (user && !loading) {
+      fetchChatRooms();
+    }
+  }, [user, loading, fetchChatRooms]);
+
+  // リアルタイム更新の設定
+  useEffect(() => {
+    if (!user || !userType) return;
+
+    // 4秒ごとにチャットルーム一覧を更新
+    const intervalId = setInterval(() => {
+      console.log(`Polling for chat rooms updates (${userType})`);
+      fetchChatRooms();
+    }, 4000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [user, userType, fetchChatRooms]);
 
   if (loading || loadingRooms) {
     return (

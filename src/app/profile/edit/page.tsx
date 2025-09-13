@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useSkills } from "@/hooks/useSkills";
 import { useProfile } from "@/hooks/useProfile";
 import {
@@ -18,6 +19,7 @@ import {
 import { SkillIcon } from "@/app/_components/SkillIcon";
 
 export default function EditProfilePage() {
+  const router = useRouter();
   const {
     loading: profileLoading,
     error: profileError,
@@ -71,6 +73,9 @@ export default function EditProfilePage() {
         await handleSkillsSave();
       }
       setSuccessMessage("プロフィールを更新しました！");
+      setTimeout(() => {
+        router.push("/profile");
+      }, 1000);
     } catch (err) {
       console.error(err);
     } finally {

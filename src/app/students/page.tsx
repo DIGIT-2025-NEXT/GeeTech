@@ -39,12 +39,9 @@ import {
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { getAllCompanies, getAllProjects, type Company, type Project } from '@/lib/mock';
-import { createClient } from '@/lib/supabase/client';
 import { useState, useEffect } from 'react';
 import { IndustryIcon } from '@/app/_components/IndustryIcon';
 import { useAuth } from '@/contexts/AuthContext';
-import AdoptButton from './adopt';
-import RejectButton from './Reject';
 
 export default function StudentsPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -66,6 +63,7 @@ export default function StudentsPage() {
       setLoading(true);
       const allCompanies = await getAllCompanies();
       const allProjects = await getAllProjects();
+      console.log('Company data from Supabase:', allCompanies);
       setCompanies(allCompanies);
       setFilteredCompanies(allCompanies);
       setProjects(allProjects);
@@ -433,7 +431,7 @@ export default function StudentsPage() {
                   <Box sx={{ display: 'flex', gap: 0.8, justifyContent: 'space-between' }}>
                     <Button
                       component={Link}
-                      href={`/company/${company.id}`}
+                      href={`/companies/${company.id}`}
                       variant="contained"
                       startIcon={<BusinessIcon sx={{ fontSize: 16 }} />}
                       size="small"

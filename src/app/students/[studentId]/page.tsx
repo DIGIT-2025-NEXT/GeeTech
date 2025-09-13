@@ -19,7 +19,7 @@ import {
   Work as WorkIcon
 } from '@mui/icons-material';
 import Link from 'next/link';
-import { getStudentById, Student } from '@/lib/mock';
+import { type Student } from '@/lib/mock';
 import { notFound } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -35,11 +35,12 @@ export default function StudentDetailPage({ params }: Props) {
 
   useEffect(() => {
     params.then(({ studentId }) => {
-      const studentData = getStudentById(studentId);
+      // getStudentById function was removed, need to fetch from database
+      // This component needs to be updated to use Supabase
+      const studentData = null;
       
-      if (!studentData) {
-        notFound();
-      }
+      // Temporary: redirect to student list
+      window.location.href = '/students';
       
       setStudent(studentData);
     });

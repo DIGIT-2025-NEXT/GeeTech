@@ -75,14 +75,67 @@ export async function GET() {
         // 学生と会社の情報を別途取得
         const roomsWithInfo = await Promise.all(
           companyRooms.map(async (room) => {
-            const [studentResult, companyResult] = await Promise.all([
-              supabase.from('students').select('id, name, university, avatar').eq('id', room.student_id).single(),
+            console.log('Company room - fetching info for student_id:', room.student_id);
+            
+            // サーバーサイドでは直接profilesテーブルにアクセス可能（RLSをバイパス）
+            const [profileResult, studentResult, companyResult] = await Promise.all([
+              supabase.from('profiles').select('first_name, last_name, username, email').eq('id', room.student_id).single(),
+              supabase.from('students').select('university').eq('id', room.student_id).single(),
               supabase.from('company').select('id, name, industry').eq('id', room.company_id).single()
             ])
             
+            console.log('Company API Profile query result:', { 
+              studentId: room.student_id,
+              profileData: profileResult.data, 
+              profileError: profileResult.error 
+            });
+            
+            let studentName = '学生';
+            
+            if (profileResult.data && !profileResult.error) {
+              console.log('Company API - Profile data fields:', {
+                first_name: profileResult.data.first_name,
+                last_name: profileResult.data.last_name,
+                username: profileResult.data.username,
+                email: profileResult.data.email
+              });
+              
+              const firstName = profileResult.data.first_name || '';
+              const lastName = profileResult.data.last_name || '';
+              const username = profileResult.data.username || '';
+              const email = profileResult.data.email || '';
+              
+              if (firstName && lastName) {
+                studentName = `${firstName} ${lastName}`;
+                console.log('✓ Company API got full name:', studentName);
+              } else if (firstName) {
+                studentName = firstName;
+                console.log('✓ Company API got first name:', studentName);
+              } else if (lastName) {
+                studentName = lastName;
+                console.log('✓ Company API got last name:', studentName);
+              } else if (username) {
+                studentName = username;
+                console.log('✓ Company API got username:', studentName);
+              } else if (email) {
+                studentName = email.split('@')[0];
+                console.log('✓ Company API got name from email:', studentName);
+              } else {
+                studentName = `学生 (ID: ${room.student_id.substring(0, 8)})`;
+                console.log('✓ Company API using ID fallback:', studentName);
+              }
+            } else {
+              studentName = `学生 (ID: ${room.student_id.substring(0, 8)})`;
+              console.log('✗ Company API profile not found, using fallback:', studentName);
+            }
+            
             return {
               ...room,
-              students: studentResult.data,
+              students: {
+                id: room.student_id,
+                name: studentName,
+                university: studentResult.data?.university || '大学未設定'
+              },
               company: companyResult.data
             }
           })
@@ -113,14 +166,66 @@ export async function GET() {
         // 学生と会社の情報を別途取得
         const roomsWithInfo = await Promise.all(
           studentRooms.map(async (room) => {
-            const [studentResult, companyResult] = await Promise.all([
-              supabase.from('students').select('id, name, university, avatar').eq('id', room.student_id).single(),
+            console.log('Student room - fetching info for student_id:', room.student_id);
+            
+            const [profileResult, studentResult, companyResult] = await Promise.all([
+              supabase.from('profiles').select('first_name, last_name, username, email').eq('id', room.student_id).single(),
+              supabase.from('students').select('university').eq('id', room.student_id).single(),
               supabase.from('company').select('id, name, industry').eq('id', room.company_id).single()
             ])
             
+            console.log('Student API Profile query result:', { 
+              studentId: room.student_id,
+              profileData: profileResult.data, 
+              profileError: profileResult.error 
+            });
+            
+            let studentName = '学生';
+            
+            if (profileResult.data && !profileResult.error) {
+              console.log('Student API - Profile data fields:', {
+                first_name: profileResult.data.first_name,
+                last_name: profileResult.data.last_name,
+                username: profileResult.data.username,
+                email: profileResult.data.email
+              });
+              
+              const firstName = profileResult.data.first_name || '';
+              const lastName = profileResult.data.last_name || '';
+              const username = profileResult.data.username || '';
+              const email = profileResult.data.email || '';
+              
+              if (firstName && lastName) {
+                studentName = `${firstName} ${lastName}`;
+                console.log('✓ Student API got full name:', studentName);
+              } else if (firstName) {
+                studentName = firstName;
+                console.log('✓ Student API got first name:', studentName);
+              } else if (lastName) {
+                studentName = lastName;
+                console.log('✓ Student API got last name:', studentName);
+              } else if (username) {
+                studentName = username;
+                console.log('✓ Student API got username:', studentName);
+              } else if (email) {
+                studentName = email.split('@')[0];
+                console.log('✓ Student API got name from email:', studentName);
+              } else {
+                studentName = `学生 (ID: ${room.student_id.substring(0, 8)})`;
+                console.log('✓ Student API using ID fallback:', studentName);
+              }
+            } else {
+              studentName = `学生 (ID: ${room.student_id.substring(0, 8)})`;
+              console.log('✗ Student API profile not found, using fallback:', studentName);
+            }
+            
             return {
               ...room,
-              students: studentResult.data,
+              students: {
+                id: room.student_id,
+                name: studentName,
+                university: studentResult.data?.university || '大学未設定'
+              },
               company: companyResult.data
             }
           })

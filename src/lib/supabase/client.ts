@@ -46,20 +46,42 @@ export function createClient() {
       cookies: {
         get(name) {
           if (typeof window === 'undefined') return undefined
-          const value = document.cookie
-            .split('; ')
-            .find(row => row.startsWith(`${name}=`))
-            ?.split('=')[1]
-          return value ? decodeURIComponent(value) : undefined
+          try {
+            const value = document.cookie
+              .split('; ')
+              .find(row => row.startsWith(`${name}=`))
+              ?.split('=')[1]
+            if (!value) return undefined
+            
+            // シンプルなクッキー処理
+            try {
+              return decodeURIComponent(value)
+            } catch (parseError) {
+              console.warn(`Failed to parse cookie ${name}:`, parseError)
+              return value
+            }
+          } catch (error) {
+            console.warn(`Error getting cookie ${name}:`, error)
+            return undefined
+          }
         },
         set(name, value, options) {
           if (typeof window === 'undefined') return
-          const expires = options?.maxAge ? new Date(Date.now() + options.maxAge * 1000).toUTCString() : ''
-          document.cookie = `${name}=${encodeURIComponent(value)}; ${expires ? `expires=${expires}; ` : ''}path=${options?.path || '/'}; ${options?.domain ? `domain=${options.domain}; ` : ''}${options?.secure ? 'secure; ' : ''}${options?.httpOnly ? 'httponly; ' : ''}${options?.sameSite ? `samesite=${options.sameSite}; ` : ''}`
+          try {
+            const expires = options?.maxAge ? new Date(Date.now() + options.maxAge * 1000).toUTCString() : ''
+            const cookieValue = encodeURIComponent(value)
+            document.cookie = `${name}=${cookieValue}; ${expires ? `expires=${expires}; ` : ''}path=${options?.path || '/'}; ${options?.domain ? `domain=${options.domain}; ` : ''}${options?.secure ? 'secure; ' : ''}${options?.httpOnly ? 'httponly; ' : ''}${options?.sameSite ? `samesite=${options.sameSite}; ` : ''}`
+          } catch (error) {
+            console.warn(`Error setting cookie ${name}:`, error)
+          }
         },
         remove(name, options) {
           if (typeof window === 'undefined') return
-          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=${options?.path || '/'}; ${options?.domain ? `domain=${options.domain}; ` : ''}`
+          try {
+            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=${options?.path || '/'}; ${options?.domain ? `domain=${options.domain}; ` : ''}`
+          } catch (error) {
+            console.warn(`Error removing cookie ${name}:`, error)
+          }
         }
       }
     })
