@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session, SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 import { logAuthConfig, getGoogleRedirectUri } from '@/utils/auth-helpers'
+import { useRouter, usePathname } from 'next/navigation'
 
 interface AuthContextType {
   user: User | null
@@ -23,7 +24,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  
+  const router = useRouter()
+  const pathname = usePathname()
+
   let supabase: SupabaseClient | null = null
   try {
     supabase = createClient()
@@ -70,11 +73,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null)
         setLoading(false)
         setError(null) // 認証状態が変更されたらエラーをクリア
+
+        // ログイン時の自動リダイレクト
+        if (event === 'SIGNED_IN' && session?.user && pathname === '/login') {
+          try {
+            const profileType = session.user.user_metadata?.profile_type
+
+            if (profileType === 'company') {
+              router.push('/company')
+            } else if (profileType === 'students') {
+              router.push('/students')
+            } else {
+              // プロフィールテーブルから取得を試す
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('profile_type')
+                .eq('id', session.user.id)
+                .single()
+
+              if (profile?.profile_type === 'company') {
+                router.push('/company')
+              } else {
+                router.push('/students')
+              }
+            }
+          } catch (profileError) {
+            console.error('Error fetching user profile for redirect:', profileError)
+            router.push('/students') // Default fallback
+          }
+        }
       }
     )
 
     return () => subscription.unsubscribe()
-  }, [supabase])
+  }, [supabase, router, pathname])
 
   const signUp = async (email: string, password: string) => {
     if (!supabase) {
