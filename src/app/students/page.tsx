@@ -29,7 +29,6 @@ import {
 import {
   Business as BusinessIcon,
   Chat as ChatIcon,
-  Work as WorkIcon,
   Search as SearchIcon,
   Filter as FilterIcon,
   FavoriteBorder as FavoriteBorderIcon,

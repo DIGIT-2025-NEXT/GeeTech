@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 // アクセス制御が必要なパスを定義
-const PROTECTED_PATHS = ["/company", "/students"];
+const PROTECTED_PATHS = ["/company", "/students", "/admin"];
 
 // 認証が必要だが、profile_typeに基づくアクセス制御は不要なパス
 const AUTH_REQUIRED_PATHS = ["/dashboard", "/profile", "/chat"];
@@ -122,6 +122,12 @@ function checkPathAccess(
   if (profileType === "admin") {
     console.log(`[Access Check] Admin access granted`);
     return true;
+  }
+
+  // 管理者パスは管理者のみアクセス可能
+  if (pathname.startsWith("/admin")) {
+    console.log(`[Access Check] Non-admin blocked from admin path: ${pathname}`);
+    return false;
   }
 
   console.log(`[Access Check] Default access granted`);
