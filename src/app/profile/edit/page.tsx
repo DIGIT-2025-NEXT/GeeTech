@@ -75,7 +75,7 @@ export default function EditProfilePage() {
       setSuccessMessage("プロフィールを更新しました！");
       setTimeout(() => {
         router.push("/profile");
-      }, 1500);
+      }, 1000);
     } catch (err) {
       console.error(err);
     } finally {
