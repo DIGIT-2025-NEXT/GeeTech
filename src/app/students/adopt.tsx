@@ -17,12 +17,12 @@ export default function AdoptButton({ studentid }: Props){
     const supabase = createClient();
     const COMPANY_ID = user?.id?? '';
     const [companyname,setCompanyName]=useState("");
-    const title=`${companyname}からの採用通知`;
-    const body=`あなたは${companyname}に採用されました`;
     const link=`/dashboard`;
     const { sendNotification } = useNotifications();
     const handleSnackClose = () => setSnackOpen(false);
     const handleSend = async () => {
+    const title=`${companyname}からの採用通知`;
+    const body=`あなたは${companyname}に採用されました`;
     const params: SendNotificationParams = {
       recipient_id: studentid,
       title,
@@ -33,6 +33,7 @@ export default function AdoptButton({ studentid }: Props){
     try {
       await sendNotification(params);
     } catch (error) {
+      console.error('Failed to send adoption notification:', error);
     }
   };
     const handleConfirm = async() => {
