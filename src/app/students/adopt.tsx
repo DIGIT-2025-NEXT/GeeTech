@@ -4,6 +4,8 @@ import {Button, Snackbar, Dialog, DialogTitle, DialogContent, DialogActions, Box
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { createClient } from '@/lib/supabase/client';
+import { useNotifications } from '@/hooks/useNotifications';
+import { SendNotificationParams } from '@/contexts/NotificationContext';
 type Props = { studentid: string };
 export default function AdoptButton({ studentid }: Props){
     const [snackOpen, setSnackOpen] = useState(false);
@@ -14,7 +16,25 @@ export default function AdoptButton({ studentid }: Props){
     const [studentname, setStudentName]=useState<string>('');
     const supabase = createClient();
     const COMPANY_ID = user?.id?? '';
+    const [companyname,setCompanyName]=useState("");
+    const title=`${companyname}からの採用通知`;
+    const body=`あなたは${companyname}に採用されました`;
+    const link=`/dashboard`;
+    const { sendNotification } = useNotifications();
     const handleSnackClose = () => setSnackOpen(false);
+    const handleSend = async () => {
+    const params: SendNotificationParams = {
+      recipient_id: studentid,
+      title,
+      body,
+      link: link || undefined,
+    };
+
+    try {
+      await sendNotification(params);
+    } catch (error) {
+    }
+  };
     const handleConfirm = async() => {
         const { data: company } = await supabase
                 .from('company')
@@ -26,6 +46,7 @@ export default function AdoptButton({ studentid }: Props){
                 .select('username')
                 .eq('id', studentid)
                 .single();
+        setCompanyName(company.name);
         setStudentName(studentprofile?.username);
         const newRejectedIDArray = [...(company?.rejectedid || [])].filter((aaa)=>aaa!==studentid);
             const newAodptedIDArray = [...(company?.adoptedid || []), studentid];
@@ -40,6 +61,7 @@ export default function AdoptButton({ studentid }: Props){
                 setSnackOpen(true);
                 return
             }
+            handleSend();
             setSnackMsg(`${studentname}を採用しました`);
             setSnackOpen(true);
             //採用通知の実装
@@ -69,6 +91,7 @@ export default function AdoptButton({ studentid }: Props){
                 .select('username')
                 .eq('id', studentid)
                 .single();
+        setCompanyName(company.name);
         setStudentName(studentprofile?.username);
         const adoptedIds: string[] = company.adoptedid??[];
         const rejectedIds: string[] = company.rejectedid??[];
@@ -93,6 +116,7 @@ export default function AdoptButton({ studentid }: Props){
                 setSnackOpen(true);
                 return
             }
+            handleSend();
             setSnackMsg(`${studentname}を採用しました`);
             setSnackOpen(true);
             //採用通知の実装
