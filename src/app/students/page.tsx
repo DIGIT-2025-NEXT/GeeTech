@@ -458,16 +458,16 @@ export default function StudentsPage() {
                           bgcolor: 'primary.main',
                           color: 'white'
                         },
-                        width: 36,
-                        height: 36
+                        width: 40,
+                        height: 40
                       }}
                     >
                       {creatingChat === company.id ? (
-                        <Box sx={{ width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Box sx={{ width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <Box
                             sx={{
-                              width: 14,
-                              height: 14,
+                              width: 16,
+                              height: 16,
                               border: '2px solid',
                               borderColor: 'primary.main',
                               borderTopColor: 'transparent',
@@ -481,7 +481,7 @@ export default function StudentsPage() {
                           />
                         </Box>
                       ) : (
-                        <ChatIcon sx={{ fontSize: 18 }} />
+                        <ChatIcon sx={{ fontSize: 20 }} />
                       )}
                     </IconButton>
                   </Box>
