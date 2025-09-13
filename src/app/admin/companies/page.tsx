@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   Container,
   Typography,
@@ -36,6 +36,7 @@ import {
   Verified as VerifiedIcon,
   Pending as PendingIcon,
 } from "@mui/icons-material";
+import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 
@@ -62,11 +63,7 @@ export default function AdminCompaniesPage() {
 
   const supabase = createClient();
 
-  useEffect(() => {
-    fetchCompanies();
-  }, []);
-
-  const fetchCompanies = async () => {
+  const fetchCompanies = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -82,7 +79,11 @@ export default function AdminCompaniesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase]);
+
+  useEffect(() => {
+    fetchCompanies();
+  }, [fetchCompanies]);
 
   const handleAction = (company: Company, action: 'verify' | 'unverify') => {
     setSelectedCompany(company);
@@ -257,7 +258,7 @@ export default function AdminCompaniesPage() {
                     <TableCell>
                       <Chip
                         label={getStatusText(company.is_verified)}
-                        color={getStatusColor(company.is_verified) as any}
+                        color={getStatusColor(company.is_verified) as 'success' | 'warning'}
                         size="small"
                         icon={company.is_verified ? <VerifiedIcon /> : <PendingIcon />}
                       />

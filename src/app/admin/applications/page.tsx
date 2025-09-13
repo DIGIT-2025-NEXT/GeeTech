@@ -37,7 +37,7 @@ import {
   Web as WebIcon,
   LocationOn as LocationIcon,
 } from "@mui/icons-material";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 
@@ -75,11 +75,7 @@ export default function AdminApplicationsPage() {
 
   const supabase = createClient();
 
-  useEffect(() => {
-    fetchApplications();
-  }, []);
-
-  const fetchApplications = async () => {
+  const fetchApplications = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -113,7 +109,11 @@ export default function AdminApplicationsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase]);
+
+  useEffect(() => {
+    fetchApplications();
+  }, [fetchApplications]);
 
   const handleAction = (application: CompanyApplication, action: 'approve' | 'reject') => {
     setSelectedApplication(application);
@@ -333,7 +333,7 @@ export default function AdminApplicationsPage() {
                     <TableCell>
                       <Chip
                         label={getStatusText(application.application_status)}
-                        color={getStatusColor(application.application_status) as any}
+                        color={getStatusColor(application.application_status) as 'success' | 'error' | 'warning'}
                         size="small"
                       />
                     </TableCell>
