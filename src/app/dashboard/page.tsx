@@ -27,11 +27,14 @@ import {
   Search as SearchIcon,
   Business as BusinessIcon,
   Notifications as NotificationsIcon,
+  Chat as ChatIcon,
 } from "@mui/icons-material";
 import { Tables } from "@/lib/types_db";
 import { useProfile } from "@/hooks/useProfile";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useAuth } from "@/contexts/AuthContext";
+import { createOrGetChatRoom } from "@/lib/chat-rooms";
+import { createClient } from "@/lib/supabase/client";
 
 type Notification = Tables<"notifications">;
 
@@ -205,6 +208,47 @@ export default function Dashboard() {
     }
   };
 
+  const handleOpenChat = async (studentId: string, applicationId: string) => {
+    if (!profile || profile.profile_type !== 'company') {
+      alert('チャットを開くことができません');
+      return;
+    }
+
+    setUpdatingStatus(prev => ({ ...prev, [`chat_${applicationId}`]: true }));
+
+    try {
+      // 企業IDを取得
+      const supabase = createClient();
+      const { data: company, error: companyError } = await supabase
+        .from('company')
+        .select('id')
+        .eq('user_id', profile.id)
+        .single();
+
+      if (companyError || !company) {
+        console.error('Company not found:', companyError);
+        alert('企業情報の取得に失敗しました');
+        return;
+      }
+
+      // チャットルームを作成または取得
+      const chatResult = await createOrGetChatRoom(studentId, company.id);
+
+      if (chatResult.success && chatResult.roomId) {
+        console.log('Opening chat room:', chatResult.roomId);
+        router.push(`/chat/${chatResult.roomId}`);
+      } else {
+        console.error('Failed to create/get chat room:', chatResult.error);
+        alert('チャットルームの作成に失敗しました');
+      }
+    } catch (error) {
+      console.error('Error opening chat:', error);
+      alert('チャットを開く際にエラーが発生しました');
+    } finally {
+      setUpdatingStatus(prev => ({ ...prev, [`chat_${applicationId}`]: false }));
+    }
+  };
+
   return (
     <Box sx={{ flexGrow: 1, p: 3, backgroundColor: "#f4f6f8" }}>
       <Typography variant="h4" sx={{ mb: 3 }}>
@@ -375,30 +419,42 @@ export default function Dashboard() {
                                 color={getStatusChipColor(app.status)}
                                 size="small"
                               />
-                              {app.status === 'pending' && (
-                                <Box sx={{ display: 'flex', gap: 0.5 }}>
-                                  <Button
-                                    size="small"
-                                    variant="contained"
-                                    color="success"
-                                    onClick={() => handleUpdateApplicationStatus(app.id, 'approved')}
-                                    disabled={updatingStatus[app.id]}
-                                    sx={{ fontSize: '0.7rem', minWidth: 'auto', px: 1 }}
-                                  >
-                                    採用
-                                  </Button>
-                                  <Button
-                                    size="small"
-                                    variant="contained"
-                                    color="error"
-                                    onClick={() => handleUpdateApplicationStatus(app.id, 'rejected')}
-                                    disabled={updatingStatus[app.id]}
-                                    sx={{ fontSize: '0.7rem', minWidth: 'auto', px: 1 }}
-                                  >
-                                    不採用
-                                  </Button>
-                                </Box>
-                              )}
+                              <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                                <Button
+                                  size="small"
+                                  variant="outlined"
+                                  startIcon={<ChatIcon />}
+                                  onClick={() => handleOpenChat(app.userId, app.id)}
+                                  disabled={updatingStatus[`chat_${app.id}`]}
+                                  sx={{ fontSize: '0.7rem', minWidth: 'auto', px: 1 }}
+                                >
+                                  {updatingStatus[`chat_${app.id}`] ? '...' : 'チャット'}
+                                </Button>
+                                {app.status === 'pending' && (
+                                  <>
+                                    <Button
+                                      size="small"
+                                      variant="contained"
+                                      color="success"
+                                      onClick={() => handleUpdateApplicationStatus(app.id, 'approved')}
+                                      disabled={updatingStatus[app.id]}
+                                      sx={{ fontSize: '0.7rem', minWidth: 'auto', px: 1 }}
+                                    >
+                                      採用
+                                    </Button>
+                                    <Button
+                                      size="small"
+                                      variant="contained"
+                                      color="error"
+                                      onClick={() => handleUpdateApplicationStatus(app.id, 'rejected')}
+                                      disabled={updatingStatus[app.id]}
+                                      sx={{ fontSize: '0.7rem', minWidth: 'auto', px: 1 }}
+                                    >
+                                      不採用
+                                    </Button>
+                                  </>
+                                )}
+                              </Box>
                             </Box>
                           </ListItemButton>
                         </ListItem>

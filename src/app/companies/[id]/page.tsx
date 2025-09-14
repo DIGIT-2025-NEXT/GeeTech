@@ -29,16 +29,18 @@ import Link from 'next/link';
 import { getProjectsByCompanyId, Company, Project } from '@/lib/mock';
 import { createClient } from '@/lib/supabase/client';
 import { notFound } from 'next/navigation';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { applyToProject } from '@/lib/project-applications';
 import { useNotifications } from '@/hooks/useNotifications';
+import { createOrGetChatRoom } from '@/lib/chat-rooms';
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
 export default function CompanyDetailPage({ params }: Props) {
+  const router = useRouter();
   const [company, setCompany] = useState<Company | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [user, setUser] = useState<any>(null);
@@ -150,7 +152,26 @@ export default function CompanyDetailPage({ params }: Props) {
       });
 
       if (result.success) {
-        alert(`「${projectTitle}」への応募が完了しました！`);
+        // チャットルームを作成または取得
+        try {
+          const chatResult = await createOrGetChatRoom(user.id, company.id);
+
+          if (chatResult.success && chatResult.roomId) {
+            console.log('Chat room created/found:', chatResult.roomId);
+
+            // 応募成功メッセージを表示後、チャットへ移動
+            alert(`「${projectTitle}」への応募が完了しました！チャットページに移動します。`);
+
+            // チャットページに移動
+            router.push(`/chat/${chatResult.roomId}`);
+          } else {
+            console.error('Failed to create chat room:', chatResult.error);
+            alert(`「${projectTitle}」への応募が完了しました！`);
+          }
+        } catch (chatError) {
+          console.error('Chat room creation error:', chatError);
+          alert(`「${projectTitle}」への応募が完了しました！`);
+        }
 
         // 企業側に通知を送信
         try {
