@@ -36,22 +36,39 @@ import { useAuth } from "@/contexts/AuthContext";
 type Notification = Tables<"notifications">;
 
 type ApplicationStatus = {
-  id: number;
+  id: string;
+  projectTitle?: string;
   companyName: string;
-  status: "Reviewing" | "Accepted" | "Rejected";
+  status: "pending" | "approved" | "rejected";
+  appliedAt?: string;
+  type: "project";
 };
 // ---------------------
 
 // ステータスに応じてChipの色を返すヘルパー関数
-const getStatusChipColor = (status: "Reviewing" | "Accepted" | "Rejected") => {
+const getStatusChipColor = (status: "pending" | "approved" | "rejected") => {
   switch (status) {
-    case "Accepted":
+    case "approved":
       return "success";
-    case "Rejected":
+    case "rejected":
       return "error";
-    case "Reviewing":
+    case "pending":
     default:
       return "info";
+  }
+};
+
+// ステータスの表示テキストを返すヘルパー関数
+const getStatusText = (status: "pending" | "approved" | "rejected") => {
+  switch (status) {
+    case "pending":
+      return "審査中";
+    case "approved":
+      return "承認";
+    case "rejected":
+      return "不承認";
+    default:
+      return status;
   }
 };
 
@@ -71,12 +88,17 @@ export default function Dashboard() {
       }
 
       try {
+        console.log('Fetching applications for student:', profile?.id);
         const response = await fetch('/api/student-applications');
+        console.log('Response status:', response.status);
+
         if (response.ok) {
           const data = await response.json();
+          console.log('Applications data:', data);
           setApplicationStatus(data);
         } else {
-          console.error('Failed to fetch application status');
+          const errorData = await response.text();
+          console.error('Failed to fetch application status:', response.status, errorData);
           setApplicationStatus([]);
         }
       } catch (error) {
@@ -87,7 +109,9 @@ export default function Dashboard() {
       }
     };
 
-    fetchApplicationStatus();
+    if (profile) {
+      fetchApplicationStatus();
+    }
   }, [profile]);
 
   const handleNotificationClick = async (notification: Notification) => {
@@ -199,18 +223,37 @@ export default function Dashboard() {
                     applicationStatus.map((app, index) => (
                       <Box key={app.id}>
                         <ListItem disablePadding>
-                          <ListItemButton
-                            onClick={() => router.push(`/applications/${app.id}`)}
-                          >
+                          <ListItemButton>
                             <ListItemText
-                              primary={app.companyName}
-                              secondary={app.status}
+                              primary={
+                                <Box>
+                                  <Typography variant="subtitle2" component="span">
+                                    {app.companyName}
+                                  </Typography>
+                                  {app.projectTitle && (
+                                    <Typography variant="body2" color="text.secondary" component="span" sx={{ display: 'block', mt: 0.5 }}>
+                                      プロジェクト: {app.projectTitle}
+                                    </Typography>
+                                  )}
+                                </Box>
+                              }
+                              secondary={
+                                app.appliedAt ? `応募日: ${new Date(app.appliedAt).toLocaleDateString('ja-JP')}` : undefined
+                              }
                             />
-                            <Chip
-                              label={app.status}
-                              color={getStatusChipColor(app.status)}
-                              size="small"
-                            />
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Chip
+                                label={getStatusText(app.status)}
+                                color={getStatusChipColor(app.status)}
+                                size="small"
+                              />
+                              <Chip
+                                label="プロジェクト"
+                                variant="outlined"
+                                size="small"
+                                sx={{ fontSize: '0.7rem' }}
+                              />
+                            </Box>
                           </ListItemButton>
                         </ListItem>
                         {index < applicationStatus.length - 1 && (
