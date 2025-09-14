@@ -190,6 +190,8 @@ export default function Dashboard() {
         );
 
         alert(result.message || 'ステータスを更新しました');
+
+        // 通知もuseNotificationsフックで送信される（API側で実装済み）
       } else {
         const errorData = await response.json();
         console.error('Failed to update status:', errorData);

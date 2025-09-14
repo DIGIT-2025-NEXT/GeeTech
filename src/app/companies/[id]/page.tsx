@@ -32,6 +32,7 @@ import { notFound } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { applyToProject } from '@/lib/project-applications';
+import { useNotifications } from '@/hooks/useNotifications';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -42,6 +43,7 @@ export default function CompanyDetailPage({ params }: Props) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<{ [key: string]: boolean }>({});
+  const { sendNotification } = useNotifications();
   const searchParams = useSearchParams();
   const fromPage = searchParams.get('from');
 
@@ -149,6 +151,43 @@ export default function CompanyDetailPage({ params }: Props) {
 
       if (result.success) {
         alert(`「${projectTitle}」への応募が完了しました！`);
+
+        // 企業側に通知を送信
+        try {
+          const supabase = createClient();
+          const { data: { user: currentUser } } = await supabase.auth.getUser();
+
+          if (currentUser && company) {
+            // プロフィール情報を取得
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('username, first_name')
+              .eq('id', currentUser.id)
+              .single();
+
+            const applicantName = profile?.username || profile?.first_name || 'ユーザー';
+
+            // 企業のuser_idを取得
+            const { data: companyData } = await supabase
+              .from('company')
+              .select('user_id')
+              .eq('id', company.id)
+              .single();
+
+            if (companyData?.user_id) {
+              await sendNotification({
+                recipient_id: companyData.user_id,
+                title: `新しい応募: ${projectTitle}`,
+                body: `${applicantName}さんがプロジェクト「${projectTitle}」に応募しました。ダッシュボードから確認できます。`,
+                link: '/dashboard'
+              });
+              console.log('Notification sent to company');
+            }
+          }
+        } catch (notificationError) {
+          console.error('Failed to send notification:', notificationError);
+          // 通知エラーは応募成功に影響させない
+        }
       } else {
         alert(result.error || '応募に失敗しました');
       }
