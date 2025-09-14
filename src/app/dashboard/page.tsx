@@ -19,6 +19,12 @@ import {
   Divider,
   Chip,
   ListItemButton,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  CircularProgress,
 } from "@mui/material";
 import {
   Edit as EditIcon,
@@ -108,6 +114,15 @@ export default function Dashboard() {
   const [expandedNotifications, setExpandedNotifications] = useState<
     Set<string>
   >(new Set());
+
+  // ダイアログの状態管理
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogLoading, setDialogLoading] = useState(false);
+  const [dialogData, setDialogData] = useState<{
+    applicationId: string;
+    status: "approved" | "rejected";
+    applicantName: string;
+  } | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -203,11 +218,30 @@ export default function Dashboard() {
     router.replace("/login");
   };
 
-  const handleUpdateApplicationStatus = async (
+  // ダイアログを開く関数
+  const openConfirmDialog = (
     applicationId: string,
-    newStatus: "approved" | "rejected"
+    status: "approved" | "rejected",
+    applicantName: string
   ) => {
-    setUpdatingStatus((prev) => ({ ...prev, [applicationId]: true }));
+    setDialogData({ applicationId, status, applicantName });
+    setDialogOpen(true);
+  };
+
+  // ダイアログを閉じる関数
+  const closeDialog = () => {
+    if (!dialogLoading) {
+      setDialogOpen(false);
+      setDialogData(null);
+    }
+  };
+
+  // 実際の更新処理
+  const handleConfirmStatusUpdate = async () => {
+    if (!dialogData) return;
+
+    const { applicationId, status: newStatus } = dialogData;
+    setDialogLoading(true);
 
     try {
       const response = await fetch(
@@ -238,8 +272,6 @@ export default function Dashboard() {
           )
         );
 
-        alert(result.message || "ステータスを更新しました");
-
         // 通知もuseNotificationsフックで送信される（API側で実装済み）
       } else {
         const errorData = await response.json();
@@ -250,7 +282,9 @@ export default function Dashboard() {
       console.error("Error updating status:", error);
       alert("ステータスの更新中にエラーが発生しました");
     } finally {
-      setUpdatingStatus((prev) => ({ ...prev, [applicationId]: false }));
+      setDialogLoading(false);
+      setDialogOpen(false);
+      setDialogData(null);
     }
   };
 
@@ -586,12 +620,12 @@ export default function Dashboard() {
                                       variant="contained"
                                       color="success"
                                       onClick={() =>
-                                        handleUpdateApplicationStatus(
+                                        openConfirmDialog(
                                           app.id,
-                                          "approved"
+                                          "approved",
+                                          app.applicantName
                                         )
                                       }
-                                      disabled={updatingStatus[app.id]}
                                       sx={{
                                         fontSize: "0.7rem",
                                         minWidth: "auto",
@@ -605,12 +639,12 @@ export default function Dashboard() {
                                       variant="contained"
                                       color="error"
                                       onClick={() =>
-                                        handleUpdateApplicationStatus(
+                                        openConfirmDialog(
                                           app.id,
-                                          "rejected"
+                                          "rejected",
+                                          app.applicantName
                                         )
                                       }
-                                      disabled={updatingStatus[app.id]}
                                       sx={{
                                         fontSize: "0.7rem",
                                         minWidth: "auto",
@@ -710,6 +744,46 @@ export default function Dashboard() {
           </Card>
         </Box>
       </Box>
+
+      {/* 確認ダイアログ */}
+      <Dialog
+        open={dialogOpen}
+        onClose={closeDialog}
+        aria-labelledby="confirm-dialog-title"
+        aria-describedby="confirm-dialog-description"
+      >
+        <DialogTitle id="confirm-dialog-title">
+          {dialogData?.status === "approved" ? "採用確認" : "不採用確認"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="confirm-dialog-description">
+            {dialogData?.applicantName}さんを
+            {dialogData?.status === "approved" ? "採用" : "不採用"}
+            にしてもよろしいですか？
+          </DialogContentText>
+          {dialogLoading && (
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+              <CircularProgress size={24} />
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeDialog} disabled={dialogLoading}>
+            キャンセル
+          </Button>
+          <Button
+            onClick={handleConfirmStatusUpdate}
+            disabled={dialogLoading}
+            color={dialogData?.status === "approved" ? "success" : "error"}
+            variant="contained"
+          >
+            {dialogLoading ? (
+              <CircularProgress size={16} color="inherit" sx={{ mr: 1 }} />
+            ) : null}
+            はい
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
