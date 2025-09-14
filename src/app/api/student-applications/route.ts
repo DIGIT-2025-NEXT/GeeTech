@@ -67,7 +67,7 @@ export async function GET() {
       id: string;
       project_id: string;
       user_id: string;
-      status: string;
+      status: "pending" | "approved" | "rejected";
       applied_at: string;
       status_updated_at?: string;
     }

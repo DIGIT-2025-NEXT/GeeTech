@@ -154,7 +154,7 @@ export default function CompanyDetailPage({ params }: Props) {
       if (result.success) {
         // チャットルームを作成または取得
         try {
-          const chatResult = await createOrGetChatRoom(user.id, company.id);
+          const chatResult = await createOrGetChatRoom(user.id, company?.id || '');
 
           if (chatResult.success && chatResult.roomId) {
             console.log('Chat room created/found:', chatResult.roomId);
