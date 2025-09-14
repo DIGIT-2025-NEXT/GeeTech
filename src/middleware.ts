@@ -1,143 +1,120 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-// アクセス制御が必要なパスを定義
-const PROTECTED_PATHS = ["/company", "/students", "/admin"];
+type PathType = "public" | "auth_required" | "protected";
+type ProfileType = "students" | "company" | "admin";
 
-// 認証が必要だが、profile_typeに基づくアクセス制御は不要なパス
-const AUTH_REQUIRED_PATHS = ["/dashboard", "/profile", "/chat"];
+interface RouteConfig {
+  paths: string[];
+  type: PathType;
+}
 
-// 公開パス（認証不要）
-const PUBLIC_PATHS = [
-  "/",
-  "/auth",
-  "/debug",
-  "/profile-quick-setup",
-  "/middleware-test",
-  "/test-access",
+interface AccessRule {
+  profile: ProfileType;
+  allowed: string[];
+  blocked: string[];
+}
+
+// ルート設定 - 管理しやすい単一箇所での定義
+const ROUTE_CONFIG: RouteConfig[] = [
+  {
+    paths: [
+      "/",
+      "/auth",
+      "/debug",
+      "/profile-quick-setup",
+      "/middleware-test",
+      "/test-access",
+      "/students",
+      "/companies/*",
+    ],
+    type: "public",
+  },
+  {
+    paths: ["/dashboard", "/profile", "/chat"],
+    type: "auth_required",
+  },
+  {
+    paths: ["/company", "/admin", "/student/*"],
+    type: "protected",
+  },
+];
+
+// アクセスルール - 各ロールの権限を明確に定義
+const ACCESS_RULES: AccessRule[] = [
+  {
+    profile: "admin",
+    allowed: ["**"], // 管理者は全てアクセス可能
+    blocked: [],
+  },
+  {
+    profile: "company",
+    allowed: ["/company", "/company/**", "/student/*"],
+    blocked: ["/admin/**"],
+  },
+  {
+    profile: "students",
+    allowed: [],
+    blocked: ["/admin/**", "/company", "/company/**", "/student/*"],
+  },
 ];
 
 /**
- * パスがアクセス制御の対象かどうかを判定
+ * パスのタイプを取得
  */
-function isProtectedPath(pathname: string): boolean {
-  return PROTECTED_PATHS.some((path) => pathname.startsWith(path));
+function getPathType(pathname: string): PathType {
+  for (const config of ROUTE_CONFIG) {
+    const isMatch = config.paths.some((path) => {
+      if (path.endsWith("/*")) {
+        // ワイルドカードパターンの場合は正確にマッチング
+        const basePath = path.slice(0, -2);
+        return pathname.startsWith(`${basePath}/`) && pathname.split('/').length === basePath.split('/').length + 1;
+      } else {
+        // 通常のパス
+        return pathname === path || pathname.startsWith(`${path}/`);
+      }
+    });
+    if (isMatch) return config.type;
+  }
+  return "public";
 }
 
 /**
- * パスが認証必須かどうかを判定
+ * ワイルドカードパターンマッチング
  */
-function isAuthRequiredPath(pathname: string): boolean {
-  return (
-    AUTH_REQUIRED_PATHS.some((path) => pathname.startsWith(path)) ||
-    isProtectedPath(pathname)
+function matchesPattern(path: string, pattern: string): boolean {
+  if (pattern === "**") return true;
+
+  const regex = new RegExp(
+    "^" + pattern.replace(/\*\*/g, ".*").replace(/\*/g, "[^/]*") + "$"
   );
+  return regex.test(path);
 }
 
 /**
- * パスが公開パスかどうかを判定
+ * プロファイルタイプに基づくアクセスチェック
  */
-function isPublicPath(pathname: string): boolean {
-  return PUBLIC_PATHS.some(
-    (path) => pathname === path || pathname.startsWith(`${path}/`)
+function hasAccess(pathname: string, profileType: ProfileType): boolean {
+  const rule = ACCESS_RULES.find((r) => r.profile === profileType);
+  console.log(`[hasAccess] Path: ${pathname}, Profile: ${profileType}, Rule:`, rule);
+
+  if (!rule) return false;
+
+  // ブロックされたパターンをチェック
+  const isBlocked = rule.blocked.some((pattern) =>
+    matchesPattern(pathname, pattern)
   );
-}
+  console.log(`[hasAccess] IsBlocked: ${isBlocked}`);
+  if (isBlocked) return false;
 
-/**
- * profileタイプに基づくアクセスチェック
- */
-function checkPathAccess(
-  pathname: string,
-  profileType: string | null
-): boolean {
-  console.log(`[Access Check] Path: ${pathname}, Profile: ${profileType}`);
-
-  if (!profileType) {
-    console.log(`[Access Check] No profile type - access denied`);
-    return false;
-  }
-
-  // /students/[studentId] のような動的パスを識別するための正規表現
-  const studentDetailPathRegex = /^\/students\/[^/]+$/;
-  // /company/[companyId] のような動的パスを識別するための正規表現
-  const companyDetailPathRegex = /^\/company\/[^/]+$/;
-
-  // students ロールの場合のアクセス制御
-  if (profileType === "students") {
-    if (pathname === "/students") {
-      console.log(`[Access Check] Students access to /students granted`);
-      return true;
-    }
-    if (pathname === "/company") {
-      console.log(`[Access Check] Students blocked from /company granted`);
-      return false;
-    }
-    if (pathname === "/company/register") {
-      console.log(`[Access Check] Students blocked from /company granted`);
-      return false;
-    }
-    if (studentDetailPathRegex.test(pathname)) {
-      console.log(`[Access Check] Students blocked from /students/[studentId]`);
-      return false;
-    }
-    if (companyDetailPathRegex.test(pathname)) {
-      console.log(
-        `[Access Check] Students access to /company/[companyId] granted`
-      );
-      return true;
-    }
-    if (pathname === "/company") {
-      console.log(`[Access Check] Students blocked from /company`);
-      return false;
-    }
-    console.log(`[Access Check] Students default access granted for: ${pathname}`);
-    return true;
-  }
-
-  // company ロールの場合のアクセス制御
-  if (profileType === "company") {
-    // 企業ユーザーは /company/* パスにアクセス可能
-    if (pathname.startsWith("/company")) {
-      console.log(`[Access Check] Company access to ${pathname} granted`);
-      return true;
-    }
-    if (pathname === "/students") {
-      console.log(`[Access Check] Company blocked from /students`);
-      return false;
-    }
-    if (companyDetailPathRegex.test(pathname)) {
-      console.log(`[Access Check] Company blocked from /company/[companyId]`);
-      return false;
-    }
-    if (studentDetailPathRegex.test(pathname)) {
-      console.log(
-        `[Access Check] Company access to /students/[studentId] granted`
-      );
-      return true;
-    }
-    console.log(`[Access Check] Company default access granted for: ${pathname}`);
-    return true;
-  }
-
-  if (profileType === "admin") {
-    console.log(`[Access Check] Admin access granted`);
-    return true;
-  }
-
-  // 管理者パスは管理者のみアクセス可能
-  if (pathname.startsWith("/admin")) {
-    console.log(`[Access Check] Non-admin blocked from admin path: ${pathname}`);
-    return false;
-  }
-
-  console.log(`[Access Check] Default access granted`);
-  return true;
+  // 許可されたパターンをチェック
+  const isAllowed = rule.allowed.some((pattern) => matchesPattern(pathname, pattern));
+  console.log(`[hasAccess] IsAllowed: ${isAllowed}`);
+  return isAllowed;
 }
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-
-  console.log(`[Middleware] 🔍 Processing: ${pathname}`);
 
   // 静的ファイル、API routes、Next.js内部パスをスキップ
   if (
@@ -146,13 +123,10 @@ export async function middleware(request: NextRequest) {
     pathname.includes(".") ||
     pathname.startsWith("/favicon")
   ) {
-    console.log(`[Middleware] ⏭️ Skipping static/api: ${pathname}`);
     return NextResponse.next();
   }
 
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
+  let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -166,9 +140,7 @@ export async function middleware(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
-          supabaseResponse = NextResponse.next({
-            request,
-          });
+          supabaseResponse = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           );
@@ -177,180 +149,140 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // IMPORTANT: Avoid writing any logic between createServerClient and
-  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
-  // issues with users being randomly logged out.
-
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
-  console.log(`[Middleware] 🔐 User status:`, {
-    hasUser: !!user,
-    userId: user?.id,
-  });
+  const pathType = getPathType(pathname);
+  console.log(`[Middleware] Path: ${pathname}, PathType: ${pathType}, HasUser: ${!!user}`);
 
   // 公開パスは認証不要
-  if (isPublicPath(pathname)) {
-    console.log(`[Middleware] 🌐 Public path: ${pathname}`);
+  if (pathType === "public") {
+    console.log(`[Middleware] Public path, allowing access`);
     return supabaseResponse;
   }
 
   // 認証が必要なパスで未認証の場合
-  if (isAuthRequiredPath(pathname) && !user) {
-    console.log(`[Middleware] 🚫 Unauthenticated access to: ${pathname}`);
+  if ((pathType === "auth_required" || pathType === "protected") && !user) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
     url.searchParams.set("redirect", pathname);
     return NextResponse.redirect(url);
   }
 
-  // 認証済みユーザーの保護されたパスチェック
-  if (isProtectedPath(pathname) && user) {
-    console.log(`[Middleware] 🔒 Checking protected path: ${pathname}`);
-
+  // 保護されたパスの権限チェック
+  if (pathType === "protected" && user) {
     try {
-      // プロファイル取得
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("profile_type")
         .eq("id", user.id)
         .single();
 
-      console.log(`[Middleware] 👤 Profile data:`, {
-        userId: user.id,
-        profileType: profile?.profile_type,
-        profileError: profileError?.message,
-      });
-
-      if (profileError) {
-        console.log(`[Middleware] ❌ Profile error: ${profileError.message}`);
-        // プロファイルが見つからない場合（PGRST116エラー）はプロファイル設定へ
-        if (profileError.code === 'PGRST116') {
-          const url = request.nextUrl.clone();
-          url.pathname = "/profile";
-          return NextResponse.redirect(url);
-        }
-        // その他のエラーの場合は一時的にアクセスを許可してログを出力
-        console.log(`[Middleware] ⚠️ Profile error but allowing access: ${profileError.message}`);
-      }
-
-      // プロファイルタイプがnullの場合はプロファイル設定へリダイレクト
-      if (!profile?.profile_type) {
-        console.log(`[Middleware] ⚠️ Profile type is null/undefined, redirecting to profile setup`);
+      // プロファイルエラーまたはプロファイルタイプなしの場合
+      if (profileError?.code === "PGRST116" || !profile?.profile_type) {
         const url = request.nextUrl.clone();
         url.pathname = "/profile";
         return NextResponse.redirect(url);
       }
 
-      // アクセス制御チェック
-      const hasAccess = checkPathAccess(
-        pathname,
-        profile.profile_type
-      );
-
-      if (!hasAccess) {
-        console.log(
-          `[Middleware] 🚨 Access DENIED for ${profile?.profile_type} to ${pathname}`
-        );
-
-        // APIリクエストの場合はJSON、通常のページリクエストの場合はHTMLを返す
-        const isApiRequest = pathname.startsWith("/api/");
-
-        if (isApiRequest) {
-          return new NextResponse(
-            JSON.stringify({ error: "Insufficient permissions" }),
-            {
-              status: 403,
-              headers: { "Content-Type": "application/json" },
-            }
-          );
-        } else {
-          // ページリクエストの場合は403エラーページを表示
-          const errorHtml = `
-            <!DOCTYPE html>
-            <html>
-              <head>
-                <title>Access Denied - 403</title>
-                <meta charset="utf-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-                <style>
-                  body { 
-                    font-family: system-ui, -apple-system, sans-serif;
-                    display: flex; 
-                    justify-content: center; 
-                    align-items: center; 
-                    min-height: 100vh; 
-                    margin: 0; 
-                    background-color: #f3f4f6;
-                    color: #374151;
-                  }
-                  .container { 
-                    text-align: center; 
-                    max-width: 500px;
-                    padding: 2rem;
-                    background: white;
-                    border-radius: 8px;
-                    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-                  }
-                  h1 { 
-                    color: #dc2626; 
-                    margin-bottom: 1rem;
-                    font-size: 2rem;
-                  }
-                  p { 
-                    margin-bottom: 1.5rem;
-                    line-height: 1.6;
-                  }
-                  .back-button {
-                    display: inline-block;
-                    padding: 0.75rem 1.5rem;
-                    background-color: #3b82f6;
-                    color: white;
-                    text-decoration: none;
-                    border-radius: 0.375rem;
-                    font-weight: 500;
-                    transition: background-color 0.2s;
-                  }
-                  .back-button:hover {
-                    background-color: #2563eb;
-                  }
-                </style>
-              </head>
-              <body>
-                <div class="container">
-                  <h1>403 - Access Denied</h1>
-                  <p>このページにアクセスする権限がありません。</p>
-                  <p>プロファイルタイプ: <strong>${
-                    profile?.profile_type || "Unknown"
-                  }</strong></p>
-                  <a href="/dashboard" class="back-button">ダッシュボードに戻る</a>
-                </div>
-              </body>
-            </html>
-          `;
-
-          return new NextResponse(errorHtml, {
-            status: 403,
-            headers: { "Content-Type": "text/html; charset=utf-8" },
-          });
-        }
+      // アクセス権限チェック
+      console.log(`[Middleware] Checking access for ${profile.profile_type} to ${pathname}`);
+      if (!hasAccess(pathname, profile.profile_type as ProfileType)) {
+        console.log(`[Middleware] ACCESS DENIED`);
+        return createAccessDeniedResponse(pathname, profile.profile_type);
       }
-
-      console.log(
-        `[Middleware] ✅ Access GRANTED for ${profile?.profile_type} to ${pathname}`
-      );
+      console.log(`[Middleware] ACCESS GRANTED`);
     } catch (error) {
-      console.error(`[Middleware] 💥 Error checking profile:`, error);
-      // エラーの場合はプロファイル設定ページへ
+      console.error("[Middleware] Profile check error:", error);
       const url = request.nextUrl.clone();
       url.pathname = "/profile-quick-setup";
       return NextResponse.redirect(url);
     }
   }
 
-  console.log(`[Middleware] ✅ Request allowed: ${pathname}`);
   return supabaseResponse;
+}
+
+/**
+ * アクセス拒否レスポンスを作成
+ */
+function createAccessDeniedResponse(pathname: string, profileType?: string) {
+  const isApiRequest = pathname.startsWith("/api/");
+
+  if (isApiRequest) {
+    return new NextResponse(
+      JSON.stringify({ error: "Insufficient permissions" }),
+      { status: 403, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
+  const errorHtml = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Access Denied - 403</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+          body {
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f3f4f6;
+            color: #374151;
+          }
+          .container {
+            text-align: center;
+            max-width: 500px;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+          }
+          h1 {
+            color: #dc2626;
+            margin-bottom: 1rem;
+            font-size: 2rem;
+          }
+          p {
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+          }
+          .back-button {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background-color: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            transition: background-color 0.2s;
+          }
+          .back-button:hover {
+            background-color: #2563eb;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>403 - Access Denied</h1>
+          <p>このページにアクセスする権限がありません。</p>
+          <p>プロファイルタイプ: <strong>${
+            profileType || "Unknown"
+          }</strong></p>
+          <a href="/dashboard" class="back-button">ダッシュボードに戻る</a>
+        </div>
+      </body>
+    </html>
+  `;
+
+  return new NextResponse(errorHtml, {
+    status: 403,
+    headers: { "Content-Type": "text/html; charset=utf-8" },
+  });
 }
 
 export const config = {
