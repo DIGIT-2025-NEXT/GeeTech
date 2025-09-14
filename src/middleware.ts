@@ -9,7 +9,6 @@ interface RouteConfig {
   type: PathType;
 }
 
-
 // ルート設定 - 管理しやすい単一箇所での定義
 const ROUTE_CONFIG: RouteConfig[] = [
   {
@@ -40,12 +39,14 @@ const ROUTE_CONFIG: RouteConfig[] = [
  */
 function getPathType(pathname: string): PathType {
   for (const config of ROUTE_CONFIG) {
-    const isMatch = config.paths.some(path => {
+    const isMatch = config.paths.some((path) => {
       if (path.endsWith("/*")) {
         // /companies/* のような1階層の動的パス
         const basePath = path.slice(0, -2);
-        return pathname.startsWith(`${basePath}/`) &&
-               !pathname.slice(basePath.length + 1).includes('/');
+        return (
+          pathname.startsWith(`${basePath}/`) &&
+          !pathname.slice(basePath.length + 1).includes("/")
+        );
       } else {
         // 完全一致または配下のパス
         return pathname === path || pathname.startsWith(`${path}/`);
@@ -146,7 +147,9 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
   const pathType = getPathType(pathname);
-  console.log(`[Middleware] Path: ${pathname}, PathType: ${pathType}, HasUser: ${!!user}`);
+  console.log(
+    `[Middleware] Path: ${pathname}, PathType: ${pathType}, HasUser: ${!!user}`
+  );
 
   // 公開パスは認証不要
   if (pathType === "public") {
@@ -157,7 +160,7 @@ export async function middleware(request: NextRequest) {
   // 認証が必要なパスで未認証の場合
   if ((pathType === "auth_required" || pathType === "protected") && !user) {
     const url = request.nextUrl.clone();
-    url.pathname = "/auth/login";
+    url.pathname = "/login";
     url.searchParams.set("redirect", pathname);
     return NextResponse.redirect(url);
   }
@@ -179,7 +182,9 @@ export async function middleware(request: NextRequest) {
       }
 
       // アクセス権限チェック
-      console.log(`[Middleware] Checking access for ${profile.profile_type} to ${pathname}`);
+      console.log(
+        `[Middleware] Checking access for ${profile.profile_type} to ${pathname}`
+      );
       if (!hasAccess(pathname, profile.profile_type as ProfileType)) {
         console.log(`[Middleware] ACCESS DENIED`);
         return createAccessDeniedResponse(pathname, profile.profile_type);

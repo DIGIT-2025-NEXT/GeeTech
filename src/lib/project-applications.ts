@@ -182,6 +182,12 @@ export async function getProjectApplications(
         user:user_id (
           id,
           email
+        ),
+        profile:user_id (
+          first_name,
+          last_name,
+          username,
+          email
         )
       `
       )

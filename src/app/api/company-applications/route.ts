@@ -67,7 +67,9 @@ export async function GET() {
 
     // 応募者のユーザー情報を取得
     const userIds = applications.map(app => app.user_id);
+    console.log('User IDs to fetch profiles for:', userIds);
 
+    // 応募者のプロファイル情報を取得
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
       .select('id, username, first_name, last_name, email, avatar_url')
@@ -79,6 +81,7 @@ export async function GET() {
     }
 
     console.log('Profiles:', profiles);
+    console.log('Number of profiles found:', profiles?.length || 0);
 
     interface ApplicationWithProject {
       id: string;
@@ -107,12 +110,32 @@ export async function GET() {
       const project = (projects as Project[])?.find(p => p.id === app.project_id);
       const profile = (profiles as Profile[])?.find(p => p.id === app.user_id);
 
+      // first_name last_name (username) 形式で名前を構築
+      let applicantName = '名前不明';
+      if (profile) {
+        const firstName = profile.first_name || '';
+        const lastName = profile.last_name || '';
+        const username = profile.username || '';
+
+        if (firstName && lastName) {
+          applicantName = username ? `${firstName} ${lastName} (${username})` : `${firstName} ${lastName}`;
+        } else if (firstName) {
+          applicantName = username ? `${firstName} (${username})` : firstName;
+        } else if (lastName) {
+          applicantName = username ? `${lastName} (${username})` : lastName;
+        } else if (username) {
+          applicantName = username;
+        } else if (profile.email) {
+          applicantName = profile.email;
+        }
+      }
+
       return {
         id: app.id,
         projectId: app.project_id,
         projectTitle: project?.title || 'プロジェクト名不明',
         userId: app.user_id,
-        applicantName: profile?.username || profile?.first_name || profile?.email || '名前不明',
+        applicantName,
         applicantEmail: profile?.email,
         status: app.status,
         appliedAt: app.applied_at,
