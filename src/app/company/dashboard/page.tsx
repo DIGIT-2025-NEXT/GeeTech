@@ -271,7 +271,7 @@ export default async function CompanyDashboard() {
                               {students.name}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
-                              {students.university.split(' ')[0]}
+                              {students.university?.split(' ')[0] || '大学不明'}
                             </Typography>
                           </Box>
                         </Box>

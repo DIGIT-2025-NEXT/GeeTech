@@ -27,31 +27,63 @@ import {
   Search as SearchIcon,
   Business as BusinessIcon,
   Notifications as NotificationsIcon,
+  Chat as ChatIcon,
 } from "@mui/icons-material";
 import { Tables } from "@/lib/types_db";
 import { useProfile } from "@/hooks/useProfile";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useAuth } from "@/contexts/AuthContext";
+import { createOrGetChatRoom } from "@/lib/chat-rooms";
+import { createClient } from "@/lib/supabase/client";
 
 type Notification = Tables<"notifications">;
 
 type ApplicationStatus = {
-  id: number;
+  id: string;
+  projectTitle?: string;
   companyName: string;
-  status: "Reviewing" | "Accepted" | "Rejected";
+  status: "pending" | "approved" | "rejected";
+  appliedAt?: string;
+  type: "project";
+};
+
+type CompanyApplication = {
+  id: string;
+  projectId: string;
+  projectTitle: string;
+  userId: string;
+  applicantName: string;
+  applicantEmail?: string;
+  status: "pending" | "approved" | "rejected";
+  appliedAt: string;
+  statusUpdatedAt?: string;
 };
 // ---------------------
 
 // ステータスに応じてChipの色を返すヘルパー関数
-const getStatusChipColor = (status: "Reviewing" | "Accepted" | "Rejected") => {
+const getStatusChipColor = (status: "pending" | "approved" | "rejected") => {
   switch (status) {
-    case "Accepted":
+    case "approved":
       return "success";
-    case "Rejected":
+    case "rejected":
       return "error";
-    case "Reviewing":
+    case "pending":
     default:
       return "info";
+  }
+};
+
+// ステータスの表示テキストを返すヘルパー関数
+const getStatusText = (status: "pending" | "approved" | "rejected") => {
+  switch (status) {
+    case "pending":
+      return "審査中";
+    case "approved":
+      return "承認";
+    case "rejected":
+      return "不承認";
+    default:
+      return status;
   }
 };
 
@@ -61,33 +93,64 @@ export default function Dashboard() {
   const { notifications, markAsRead } = useNotifications();
   const { signOut } = useAuth();
   const [applicationStatus, setApplicationStatus] = useState<ApplicationStatus[]>([]);
+  const [companyApplications, setCompanyApplications] = useState<CompanyApplication[]>([]);
   const [loading, setLoading] = useState(true);
+  const [updatingStatus, setUpdatingStatus] = useState<{ [key: string]: boolean }>({});
 
   useEffect(() => {
-    const fetchApplicationStatus = async () => {
-      if (profile?.profile_type !== 'students') {
-        setLoading(false);
-        return;
-      }
+    const fetchData = async () => {
+      if (!profile) return;
 
-      try {
-        const response = await fetch('/api/student-applications');
-        if (response.ok) {
-          const data = await response.json();
-          setApplicationStatus(data);
-        } else {
-          console.error('Failed to fetch application status');
+      setLoading(true);
+
+      if (profile.profile_type === 'students') {
+        // 学生の場合：応募履歴を取得
+        try {
+          console.log('Fetching applications for student:', profile.id);
+          const response = await fetch('/api/student-applications');
+          console.log('Response status:', response.status);
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log('Student applications data:', data);
+            setApplicationStatus(data);
+          } else {
+            const errorData = await response.text();
+            console.error('Failed to fetch student applications:', response.status, errorData);
+            setApplicationStatus([]);
+          }
+        } catch (error) {
+          console.error('Error fetching student applications:', error);
           setApplicationStatus([]);
         }
-      } catch (error) {
-        console.error('Error fetching application status:', error);
-        setApplicationStatus([]);
-      } finally {
-        setLoading(false);
+      } else if (profile.profile_type === 'company') {
+        // 企業の場合：自社プロジェクトへの応募を取得
+        try {
+          console.log('Fetching company applications for:', profile.id);
+          const response = await fetch('/api/company-applications');
+          console.log('Response status:', response.status);
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log('Company applications data:', data);
+            setCompanyApplications(data);
+          } else {
+            const errorData = await response.text();
+            console.error('Failed to fetch company applications:', response.status, errorData);
+            setCompanyApplications([]);
+          }
+        } catch (error) {
+          console.error('Error fetching company applications:', error);
+          setCompanyApplications([]);
+        }
       }
+
+      setLoading(false);
     };
 
-    fetchApplicationStatus();
+    if (profile) {
+      fetchData();
+    }
   }, [profile]);
 
   const handleNotificationClick = async (notification: Notification) => {
@@ -102,6 +165,88 @@ export default function Dashboard() {
   const handleLogout = async () => {
     await signOut();
     router.replace("/login");
+  };
+
+  const handleUpdateApplicationStatus = async (applicationId: string, newStatus: 'approved' | 'rejected') => {
+    setUpdatingStatus(prev => ({ ...prev, [applicationId]: true }));
+
+    try {
+      const response = await fetch(`/api/company-applications/${applicationId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Status update result:', result);
+
+        // ローカル状態を更新
+        setCompanyApplications(prev =>
+          prev.map(app =>
+            app.id === applicationId
+              ? { ...app, status: newStatus, statusUpdatedAt: new Date().toISOString() }
+              : app
+          )
+        );
+
+        alert(result.message || 'ステータスを更新しました');
+
+        // 通知もuseNotificationsフックで送信される（API側で実装済み）
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to update status:', errorData);
+        alert(errorData.error || 'ステータスの更新に失敗しました');
+      }
+    } catch (error) {
+      console.error('Error updating status:', error);
+      alert('ステータスの更新中にエラーが発生しました');
+    } finally {
+      setUpdatingStatus(prev => ({ ...prev, [applicationId]: false }));
+    }
+  };
+
+  const handleOpenChat = async (studentId: string, applicationId: string) => {
+    if (!profile || profile.profile_type !== 'company') {
+      alert('チャットを開くことができません');
+      return;
+    }
+
+    setUpdatingStatus(prev => ({ ...prev, [`chat_${applicationId}`]: true }));
+
+    try {
+      // 企業IDを取得
+      const supabase = createClient();
+      const { data: company, error: companyError } = await supabase
+        .from('company')
+        .select('id')
+        .eq('user_id', profile.id)
+        .single();
+
+      if (companyError || !company) {
+        console.error('Company not found:', companyError);
+        alert('企業情報の取得に失敗しました');
+        return;
+      }
+
+      // チャットルームを作成または取得
+      const chatResult = await createOrGetChatRoom(studentId, company.id);
+
+      if (chatResult.success && chatResult.roomId) {
+        console.log('Opening chat room:', chatResult.roomId);
+        router.push(`/chat/${chatResult.roomId}`);
+      } else {
+        console.error('Failed to create/get chat room:', chatResult.error);
+        alert('チャットルームの作成に失敗しました');
+      }
+    } catch (error) {
+      console.error('Error opening chat:', error);
+      alert('チャットを開く際にエラーが発生しました');
+    } finally {
+      setUpdatingStatus(prev => ({ ...prev, [`chat_${applicationId}`]: false }));
+    }
   };
 
   return (
@@ -187,30 +332,49 @@ export default function Dashboard() {
           <Card sx={{ flexGrow: 1 }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                応募状況
+                {profile?.profile_type === 'students' ? '応募状況' : '応募管理'}
               </Typography>
               <List sx={{ p: 0 }}>
-                {profile?.profile_type === 'students' ? (
-                  loading ? (
-                    <ListItem>
-                      <ListItemText primary="読み込み中..." />
-                    </ListItem>
-                  ) : applicationStatus.length > 0 ? (
+                {loading ? (
+                  <ListItem>
+                    <ListItemText primary="読み込み中..." />
+                  </ListItem>
+                ) : profile?.profile_type === 'students' ? (
+                  applicationStatus.length > 0 ? (
                     applicationStatus.map((app, index) => (
                       <Box key={app.id}>
                         <ListItem disablePadding>
-                          <ListItemButton
-                            onClick={() => router.push(`/applications/${app.id}`)}
-                          >
+                          <ListItemButton>
                             <ListItemText
-                              primary={app.companyName}
-                              secondary={app.status}
+                              primary={
+                                <Box>
+                                  <Typography variant="subtitle2" component="span">
+                                    {app.companyName}
+                                  </Typography>
+                                  {app.projectTitle && (
+                                    <Typography variant="body2" color="text.secondary" component="span" sx={{ display: 'block', mt: 0.5 }}>
+                                      プロジェクト: {app.projectTitle}
+                                    </Typography>
+                                  )}
+                                </Box>
+                              }
+                              secondary={
+                                app.appliedAt ? `応募日: ${new Date(app.appliedAt).toLocaleDateString('ja-JP')}` : undefined
+                              }
                             />
-                            <Chip
-                              label={app.status}
-                              color={getStatusChipColor(app.status)}
-                              size="small"
-                            />
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Chip
+                                label={getStatusText(app.status)}
+                                color={getStatusChipColor(app.status)}
+                                size="small"
+                              />
+                              <Chip
+                                label="プロジェクト"
+                                variant="outlined"
+                                size="small"
+                                sx={{ fontSize: '0.7rem' }}
+                              />
+                            </Box>
                           </ListItemButton>
                         </ListItem>
                         {index < applicationStatus.length - 1 && (
@@ -223,9 +387,90 @@ export default function Dashboard() {
                       <ListItemText primary="応募履歴がありません" />
                     </ListItem>
                   )
+                ) : profile?.profile_type === 'company' ? (
+                  companyApplications.length > 0 ? (
+                    companyApplications.map((app, index) => (
+                      <Box key={app.id}>
+                        <ListItem disablePadding>
+                          <ListItemButton>
+                            <ListItemText
+                              primary={
+                                <Box>
+                                  <Typography variant="subtitle2" component="span">
+                                    {app.applicantName}
+                                  </Typography>
+                                  <Typography variant="body2" color="text.secondary" component="span" sx={{ display: 'block', mt: 0.5 }}>
+                                    プロジェクト: {app.projectTitle}
+                                  </Typography>
+                                  {app.applicantEmail && (
+                                    <Typography variant="caption" color="text.secondary" component="span" sx={{ display: 'block' }}>
+                                      {app.applicantEmail}
+                                    </Typography>
+                                  )}
+                                </Box>
+                              }
+                              secondary={
+                                `応募日: ${new Date(app.appliedAt).toLocaleDateString('ja-JP')}`
+                              }
+                            />
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1 }}>
+                              <Chip
+                                label={getStatusText(app.status)}
+                                color={getStatusChipColor(app.status)}
+                                size="small"
+                              />
+                              <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                                <Button
+                                  size="small"
+                                  variant="outlined"
+                                  startIcon={<ChatIcon />}
+                                  onClick={() => handleOpenChat(app.userId, app.id)}
+                                  disabled={updatingStatus[`chat_${app.id}`]}
+                                  sx={{ fontSize: '0.7rem', minWidth: 'auto', px: 1 }}
+                                >
+                                  {updatingStatus[`chat_${app.id}`] ? '...' : 'チャット'}
+                                </Button>
+                                {app.status === 'pending' && (
+                                  <>
+                                    <Button
+                                      size="small"
+                                      variant="contained"
+                                      color="success"
+                                      onClick={() => handleUpdateApplicationStatus(app.id, 'approved')}
+                                      disabled={updatingStatus[app.id]}
+                                      sx={{ fontSize: '0.7rem', minWidth: 'auto', px: 1 }}
+                                    >
+                                      採用
+                                    </Button>
+                                    <Button
+                                      size="small"
+                                      variant="contained"
+                                      color="error"
+                                      onClick={() => handleUpdateApplicationStatus(app.id, 'rejected')}
+                                      disabled={updatingStatus[app.id]}
+                                      sx={{ fontSize: '0.7rem', minWidth: 'auto', px: 1 }}
+                                    >
+                                      不採用
+                                    </Button>
+                                  </>
+                                )}
+                              </Box>
+                            </Box>
+                          </ListItemButton>
+                        </ListItem>
+                        {index < companyApplications.length - 1 && (
+                          <Divider component="li" />
+                        )}
+                      </Box>
+                    ))
+                  ) : (
+                    <ListItem>
+                      <ListItemText primary="応募がありません" />
+                    </ListItem>
+                  )
                 ) : (
                   <ListItem>
-                    <ListItemText primary="学生のみ表示される機能です" />
+                    <ListItemText primary="ユーザータイプが不明です" />
                   </ListItem>
                 )}
               </List>
