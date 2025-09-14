@@ -234,7 +234,7 @@ export default function CompanyProfileEditPage() {
         .eq('user_id', currentUserId)
         .single();
 
-      let logoUrl = formData.logo;
+      let logoUrl: string | null = formData.logo;
 
       // ロゴ画像をアップロード
       if (logoFile) {
