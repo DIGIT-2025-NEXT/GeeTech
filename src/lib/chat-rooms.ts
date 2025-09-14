@@ -1,7 +1,4 @@
 import { createClient } from './supabase/client';
-import type { Tables } from './types_db';
-
-type ChatRoom = Tables<'chat_rooms'>;
 
 export async function createOrGetChatRoom(studentId: string, companyId: string): Promise<{ success: boolean; roomId?: string; error?: string }> {
   const supabase = createClient();
@@ -102,7 +99,32 @@ export async function getChatRoomForUsers(studentId: string, companyId: string):
   }
 }
 
-export async function getUserChatRooms(userId: string, userType: 'student' | 'company'): Promise<{ success: boolean; rooms?: any[]; error?: string }> {
+interface ChatRoomWithCompany {
+  id: string;
+  student_id: string;
+  company_id: string;
+  created_at: string;
+  updated_at: string;
+  company?: {
+    id: string;
+    name: string;
+    logo: string;
+  };
+}
+
+interface ChatRoomWithStudent {
+  id: string;
+  student_id: string;
+  company_id: string;
+  created_at: string;
+  updated_at: string;
+  student?: {
+    id: string;
+    email: string;
+  };
+}
+
+export async function getUserChatRooms(userId: string, userType: 'student' | 'company'): Promise<{ success: boolean; rooms?: (ChatRoomWithCompany | ChatRoomWithStudent)[]; error?: string }> {
   const supabase = createClient();
 
   try {

@@ -43,7 +43,7 @@ export default function CompanyDetailPage({ params }: Props) {
   const router = useRouter();
   const [company, setCompany] = useState<Company | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
   const [isLoading, setIsLoading] = useState<{ [key: string]: boolean }>({});
   const { sendNotification } = useNotifications();
   const searchParams = useSearchParams();

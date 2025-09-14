@@ -80,9 +80,32 @@ export async function GET() {
 
     console.log('Profiles:', profiles);
 
-    const result = applications.map((app: any) => {
-      const project = projects.find(p => p.id === app.project_id);
-      const profile = profiles?.find(p => p.id === app.user_id);
+    interface ApplicationWithProject {
+      id: string;
+      project_id: string;
+      user_id: string;
+      status: string;
+      applied_at: string;
+      status_updated_at?: string;
+    }
+
+    interface Profile {
+      id: string;
+      username?: string;
+      first_name?: string;
+      last_name?: string;
+      email?: string;
+      avatar_url?: string;
+    }
+
+    interface Project {
+      id: string;
+      title: string;
+    }
+
+    const result = (applications as ApplicationWithProject[]).map((app) => {
+      const project = (projects as Project[])?.find(p => p.id === app.project_id);
+      const profile = (profiles as Profile[])?.find(p => p.id === app.user_id);
 
       return {
         id: app.id,

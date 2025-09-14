@@ -63,6 +63,27 @@ export async function GET() {
 
     console.log('Companies data:', companies);
 
+    interface ProjectApplication {
+      id: string;
+      project_id: string;
+      user_id: string;
+      status: string;
+      applied_at: string;
+      status_updated_at?: string;
+    }
+
+    interface Project {
+      id: string;
+      title: string;
+      company_id: string;
+    }
+
+    interface Company {
+      id: string;
+      name: string;
+      logo?: string;
+    }
+
     const applications: {
       id: string;
       projectTitle?: string;
@@ -73,9 +94,9 @@ export async function GET() {
     }[] = [];
 
     // データを結合
-    projectApplications.forEach((app: any) => {
-      const project = projects?.find(p => p.id === app.project_id);
-      const company = companies?.find(c => c.id === project?.company_id);
+    (projectApplications as ProjectApplication[]).forEach((app) => {
+      const project = (projects as Project[])?.find(p => p.id === app.project_id);
+      const company = (companies as Company[])?.find(c => c.id === project?.company_id);
 
       console.log('Processing application:', app, 'project:', project, 'company:', company);
 
