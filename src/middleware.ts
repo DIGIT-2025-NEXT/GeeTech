@@ -9,11 +9,6 @@ interface RouteConfig {
   type: PathType;
 }
 
-interface AccessRule {
-  profile: ProfileType;
-  allowed: string[];
-  blocked: string[];
-}
 
 // ルート設定 - 管理しやすい単一箇所での定義
 const ROUTE_CONFIG: RouteConfig[] = [
@@ -40,37 +35,19 @@ const ROUTE_CONFIG: RouteConfig[] = [
   },
 ];
 
-// アクセスルール - 各ロールの権限を明確に定義
-const ACCESS_RULES: AccessRule[] = [
-  {
-    profile: "admin",
-    allowed: ["**"], // 管理者は全てアクセス可能
-    blocked: [],
-  },
-  {
-    profile: "company",
-    allowed: ["/company", "/company/**", "/student/*"],
-    blocked: ["/admin/**"],
-  },
-  {
-    profile: "students",
-    allowed: [],
-    blocked: ["/admin/**", "/company", "/company/**", "/student/*"],
-  },
-];
-
 /**
  * パスのタイプを取得
  */
 function getPathType(pathname: string): PathType {
   for (const config of ROUTE_CONFIG) {
-    const isMatch = config.paths.some((path) => {
+    const isMatch = config.paths.some(path => {
       if (path.endsWith("/*")) {
-        // ワイルドカードパターンの場合は正確にマッチング
+        // /companies/* のような1階層の動的パス
         const basePath = path.slice(0, -2);
-        return pathname.startsWith(`${basePath}/`) && pathname.split('/').length === basePath.split('/').length + 1;
+        return pathname.startsWith(`${basePath}/`) &&
+               !pathname.slice(basePath.length + 1).includes('/');
       } else {
-        // 通常のパス
+        // 完全一致または配下のパス
         return pathname === path || pathname.startsWith(`${path}/`);
       }
     });
@@ -80,37 +57,53 @@ function getPathType(pathname: string): PathType {
 }
 
 /**
- * ワイルドカードパターンマッチング
- */
-function matchesPattern(path: string, pattern: string): boolean {
-  if (pattern === "**") return true;
-
-  const regex = new RegExp(
-    "^" + pattern.replace(/\*\*/g, ".*").replace(/\*/g, "[^/]*") + "$"
-  );
-  return regex.test(path);
-}
-
-/**
- * プロファイルタイプに基づくアクセスチェック
+ * プロファイルタイプに基づくアクセスチェック（シンプルなif文ベース）
  */
 function hasAccess(pathname: string, profileType: ProfileType): boolean {
-  const rule = ACCESS_RULES.find((r) => r.profile === profileType);
-  console.log(`[hasAccess] Path: ${pathname}, Profile: ${profileType}, Rule:`, rule);
+  console.log(`[hasAccess] Checking ${profileType} access to ${pathname}`);
 
-  if (!rule) return false;
+  // 管理者は全てアクセス可能
+  if (profileType === "admin") {
+    console.log(`[hasAccess] Admin - access granted`);
+    return true;
+  }
 
-  // ブロックされたパターンをチェック
-  const isBlocked = rule.blocked.some((pattern) =>
-    matchesPattern(pathname, pattern)
-  );
-  console.log(`[hasAccess] IsBlocked: ${isBlocked}`);
-  if (isBlocked) return false;
+  // 企業は/admin以外なら全てアクセス可能
+  if (profileType === "company") {
+    if (pathname.startsWith("/admin")) {
+      console.log(`[hasAccess] Company blocked from admin area`);
+      return false;
+    }
+    console.log(`[hasAccess] Company - access granted`);
+    return true;
+  }
 
-  // 許可されたパターンをチェック
-  const isAllowed = rule.allowed.some((pattern) => matchesPattern(pathname, pattern));
-  console.log(`[hasAccess] IsAllowed: ${isAllowed}`);
-  return isAllowed;
+  // 学生の場合
+  if (profileType === "students") {
+    // 管理者エリアはNG
+    if (pathname.startsWith("/admin")) {
+      console.log(`[hasAccess] Students blocked from admin area`);
+      return false;
+    }
+
+    // /company配下は全てNG（企業管理系）
+    if (pathname.startsWith("/company")) {
+      console.log(`[hasAccess] Students blocked from company area`);
+      return false;
+    }
+
+    // /student/[id]（他人の個人情報）はNG
+    if (pathname.match(/^\/student\/[^\/]+$/)) {
+      console.log(`[hasAccess] Students blocked from student details`);
+      return false;
+    }
+
+    console.log(`[hasAccess] Students - access granted`);
+    return true;
+  }
+
+  console.log(`[hasAccess] Unknown profile type - access denied`);
+  return false;
 }
 
 export async function middleware(request: NextRequest) {

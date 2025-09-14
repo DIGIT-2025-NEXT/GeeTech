@@ -88,6 +88,7 @@ export async function GET() {
       id: string;
       projectTitle?: string;
       companyName: string;
+      companyId?: string;
       status: "pending" | "approved" | "rejected";
       appliedAt?: string;
       type: "project";
@@ -104,6 +105,7 @@ export async function GET() {
         id: app.id,
         projectTitle: project?.title || 'プロジェクト名不明',
         companyName: company?.name || '企業名不明',
+        companyId: company?.id,
         status: app.status || 'pending',
         appliedAt: app.applied_at,
         type: 'project'
