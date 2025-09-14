@@ -33,7 +33,7 @@ const audiowide = Audiowide({
 });
 
 export const metadata: Metadata = {
-  title: "Kitaq StartUP",
+  title: "Kitaq Startup",
   description: "DIGITKITAQ, GeeTech発表プロダクト。Kitaq_Startupのアプリページです。",
 };
 
