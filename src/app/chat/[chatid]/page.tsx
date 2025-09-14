@@ -6,6 +6,7 @@ import Link from 'next/link';
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWebSocket } from '@/hooks/useWebSocket';
+import { MessageWithLinks } from '@/components/MessageWithLinks';
 
 interface ChatMessage {
   id: string;
@@ -317,15 +318,15 @@ export default function Chat({ params }: { params: Promise<{ chatid: string }> }
                                     {isMyMessage ? 'あなた' : senderName || '読み込み中...'}
                                 </Typography>
                                 <Card sx={{
-                                    p: 2, 
-                                    maxWidth: 600, 
+                                    p: 2,
+                                    maxWidth: 600,
                                     width: "fit-content",
                                     bgcolor: isMyMessage ? "primary.main" : "grey.100",
                                     color: isMyMessage ? "white" : "text.primary",
                                     borderRadius: 2,
                                     boxShadow: 1
                                 }}>
-                                    <Typography>{message.message}</Typography>
+                                    <MessageWithLinks message={message.message} />
                                 </Card>
                                 <Typography variant="caption" color="text.secondary" sx={{textAlign: isMyMessage ? 'right' : 'left', mt: 0.5}}>
                                     {new Date(message.created_at).toLocaleString("ja-JP")}
