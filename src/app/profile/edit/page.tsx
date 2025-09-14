@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSkills } from "@/hooks/useSkills";
 import { useProfile } from "@/hooks/useProfile";
+import { useStudentProfile } from "@/hooks/useStudentProfile";
+import { useProfileCreation } from "@/hooks/useProfileCreation";
 import {
   Box,
   Typography,
@@ -20,6 +22,7 @@ import { SkillIcon } from "@/app/_components/SkillIcon";
 
 export default function EditProfilePage() {
   const router = useRouter();
+  const { profileChecked } = useProfileCreation();
   const {
     loading: profileLoading,
     error: profileError,
@@ -27,17 +30,29 @@ export default function EditProfilePage() {
     lastName,
     username,
     website,
-    bio,
+    bio: profileBio,
     email,
     setFirstName,
     setLastName,
     setUsername,
     setWebsite,
-    setBio,
     setEmail,
     updateProfile,
     hasChanges: profileHasChanges,
   } = useProfile();
+
+  const {
+    loading: studentLoading,
+    error: studentError,
+    name,
+    university,
+    bio: studentBio,
+    setName,
+    setUniversity,
+    setBio,
+    updateStudentProfile,
+    hasChanges: studentHasChanges,
+  } = useStudentProfile();
 
   const {
     allSkills,
@@ -52,7 +67,7 @@ export default function EditProfilePage() {
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const hasChanges = profileHasChanges || skillsHasChanges;
+  const hasChanges = profileHasChanges || skillsHasChanges || studentHasChanges;
 
   const handleSave = async () => {
     setSaving(true);
@@ -65,12 +80,20 @@ export default function EditProfilePage() {
           lastName,
           username,
           website,
-          bio,
+          bio: profileBio,
           email,
         });
       }
       if (skillsHasChanges) {
         await handleSkillsSave();
+      }
+      if (studentHasChanges) {
+        await updateStudentProfile({
+          name,
+          university,
+          bio: studentBio,
+          skills: currentUserSkills.map(skill => skill.skill_name),
+        });
       }
       setSuccessMessage("プロフィールを更新しました！");
       setTimeout(() => {
@@ -83,15 +106,20 @@ export default function EditProfilePage() {
     }
   };
 
-  if (profileLoading || skillsLoading) {
+  if (profileLoading || skillsLoading || studentLoading || !profileChecked) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
         <CircularProgress />
+        <Box sx={{ ml: 2 }}>
+          <Typography variant="body2">
+            {!profileChecked ? 'プロフィール準備中...' : '読み込み中...'}
+          </Typography>
+        </Box>
       </Box>
     );
   }
 
-  const error = profileError || skillsError;
+  const error = profileError || skillsError || studentError;
 
   return (
     <Box sx={{ p: 3 }}>
@@ -133,6 +161,20 @@ export default function EditProfilePage() {
               基本情報
             </Typography>
             <Stack spacing={2}>
+              <TextField
+                label="フルネーム"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                fullWidth
+                placeholder="山田 太郎"
+              />
+              <TextField
+                label="大学名"
+                value={university}
+                onChange={(e) => setUniversity(e.target.value)}
+                fullWidth
+                placeholder="例: 東京大学"
+              />
               <Stack direction="row" spacing={2}>
                 <TextField
                   label="姓"
@@ -169,11 +211,12 @@ export default function EditProfilePage() {
               />
               <TextField
                 label="自己紹介"
-                value={bio}
+                value={studentBio}
                 onChange={(e) => setBio(e.target.value)}
                 fullWidth
                 multiline
                 rows={4}
+                placeholder="あなたの経験、興味、目標について教えてください"
               />
             </Stack>
           </Paper>

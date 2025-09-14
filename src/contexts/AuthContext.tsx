@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session, SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 import { logAuthConfig, getGoogleRedirectUri } from '@/utils/auth-helpers'
+import { clearSupabaseCookies } from '@/utils/clearSupabaseCookies'
 import { useRouter, usePathname } from 'next/navigation'
 
 interface AuthContextType {
@@ -32,8 +33,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     supabase = createClient()
   } catch (err) {
     console.error('Failed to initialize Supabase client:', err)
-    setError(err instanceof Error ? err.message : 'Failed to initialize Supabase client')
-    setLoading(false)
+    // クッキーパースエラーの場合、クッキーをクリアして再試行
+    if (err instanceof Error && err.message.includes('cookie')) {
+      console.log('Cookie parse error detected, clearing cookies...')
+      clearSupabaseCookies()
+      try {
+        supabase = createClient()
+      } catch (retryErr) {
+        console.error('Failed to initialize Supabase client after cookie clear:', retryErr)
+        setError(retryErr instanceof Error ? retryErr.message : 'Failed to initialize Supabase client')
+        setLoading(false)
+      }
+    } else {
+      setError(err instanceof Error ? err.message : 'Failed to initialize Supabase client')
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -51,6 +65,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { data: { session }, error } = await supabase.auth.getSession()
         if (error) {
           console.error('Error getting session:', error)
+          // クッキーパースエラーの場合、クッキーをクリアして再試行
+          if (error.message.includes('cookie') || error.message.includes('parse')) {
+            console.log('Session cookie error detected, clearing cookies...')
+            clearSupabaseCookies()
+            window.location.reload()
+            return
+          }
           setError(error.message)
         } else {
           setSession(session)
@@ -58,6 +79,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (err) {
         console.error('Failed to get initial session:', err)
+        // クッキー関連のエラーの場合
+        if (err instanceof Error && (err.message.includes('cookie') || err.message.includes('parse'))) {
+          console.log('Session parsing error detected, clearing cookies...')
+          clearSupabaseCookies()
+          window.location.reload()
+          return
+        }
         setError(err instanceof Error ? err.message : 'Failed to get initial session')
       } finally {
         setLoading(false)
@@ -77,21 +105,58 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // ログイン時の自動リダイレクト
         if (event === 'SIGNED_IN' && session?.user && pathname === '/login') {
           try {
-            const profileType = session.user.user_metadata?.profile_type
+            // Check if user has a profile
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('profile_type, first_name, last_name')
+              .eq('id', session.user.id)
+              .single()
 
-            if (profileType === 'company') {
-              router.push('/company')
-            } else if (profileType === 'students') {
-              router.push('/students')
+            // If profile doesn't exist, create one with default settings
+            if (!profile) {
+              try {
+                // Create profile with default profile_type = 'students'
+                const { error: createError } = await supabase
+                  .from('profiles')
+                  .insert({
+                    id: session.user.id,
+                    email: session.user.email,
+                    profile_type: 'students',
+                    first_name: null,
+                    last_name: null,
+                    username: null,
+                    company_name: null,
+                    bio: null,
+                    avatar_url: null,
+                    website: null,
+                    updated_at: new Date().toISOString()
+                  })
+
+                if (createError) {
+                  console.error('Error creating profile:', createError)
+                }
+
+                // Update user metadata as well
+                const { error: updateError } = await supabase.auth.updateUser({
+                  data: { profile_type: 'students' }
+                })
+
+                if (updateError) {
+                  console.error('Error updating user metadata:', updateError)
+                }
+
+                // New user with fresh profile - redirect to edit
+                router.push('/profile/edit')
+              } catch (createProfileError) {
+                console.error('Error in profile creation:', createProfileError)
+                router.push('/profile/edit')
+              }
+            } else if (!profile.first_name || !profile.last_name) {
+              // Profile exists but is incomplete - redirect to edit
+              router.push('/profile/edit')
             } else {
-              // プロフィールテーブルから取得を試す
-              const { data: profile } = await supabase
-                .from('profiles')
-                .select('profile_type')
-                .eq('id', session.user.id)
-                .single()
-
-              if (profile?.profile_type === 'company') {
+              // User has completed profile, redirect based on type
+              if (profile.profile_type === 'company') {
                 router.push('/company')
               } else {
                 router.push('/students')
@@ -99,7 +164,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
           } catch (profileError) {
             console.error('Error fetching user profile for redirect:', profileError)
-            router.push('/students') // Default fallback
+            // If error occurs, assume new user and send to profile edit
+            router.push('/profile/edit')
           }
         }
       }
@@ -112,17 +178,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!supabase) {
       return { error: 'Supabase client not initialized' }
     }
-    
+
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
           data: {
             profile_type: 'students',
           },
         },
       })
+
+      // デバッグ用ログ
+      console.log('Sign up result:', { data, error })
+
       return { error: error?.message || null }
     } catch (err) {
       console.error('Sign up error:', err)

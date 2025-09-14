@@ -18,7 +18,7 @@ import {
   Divider,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import ChatIcon from "@mui/icons-material/Chat";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -28,6 +28,8 @@ import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
 import ExploreIcon from "@mui/icons-material/Explore";
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { useNotifications } from "@/hooks/useNotifications";
@@ -47,6 +49,7 @@ export default function Header() {
   const [notificationMenuAnchorEl, setNotificationMenuAnchorEl] = React.useState<null | HTMLElement>(
     null
   );
+  const [expandedNotifications, setExpandedNotifications] = useState<Set<string>>(new Set());
 
   const isUserMenuOpen = Boolean(userMenuAnchorEl);
   const isNotificationMenuOpen = Boolean(notificationMenuAnchorEl);
@@ -91,6 +94,19 @@ export default function Header() {
     if (link) {
       router.push(link);
     }
+  };
+
+  const toggleNotificationExpanded = (notificationId: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    setExpandedNotifications(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(notificationId)) {
+        newSet.delete(notificationId);
+      } else {
+        newSet.add(notificationId);
+      }
+      return newSet;
+    });
   };
 
   // 通知メニューが開かれたら既読にする
@@ -254,27 +270,72 @@ export default function Header() {
         </MenuItem>
         <Divider />
         {notifications && notifications.length > 0 ? (
-          notifications.map((notification) => (
-            <MenuItem
-              key={notification.id}
-              onClick={() => handleNotificationItemClick(notification.link)}
-              sx={{ backgroundColor: notification.is_read ? 'transparent' : '#f0f8ff' }}
-            >
-              <ListItemText
-                primary={notification.title}
-                secondary={notification.body}
-                primaryTypographyProps={{
-                  noWrap: true,
-                  sx: { 
-                    fontWeight: notification.is_read ? 'normal' : 'bold',
-                  },
+          notifications.map((notification) => {
+            const isExpanded = expandedNotifications.has(notification.id);
+            const createdAt = new Date(notification.created_at || '').toLocaleString('ja-JP');
+            const bodyText = notification.body || '';
+            const shouldShowExpand = bodyText.length > 50;
+
+            return (
+              <MenuItem
+                key={notification.id}
+                onClick={() => handleNotificationItemClick(notification.link)}
+                sx={{
+                  backgroundColor: notification.is_read ? 'transparent' : '#f0f8ff',
+                  alignItems: 'flex-start',
+                  py: 2
                 }}
-                secondaryTypographyProps={{
-                  noWrap: true,
-                }}
-              />
-            </MenuItem>
-          ))
+              >
+                <Box sx={{ width: '100%' }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontWeight: notification.is_read ? 'normal' : 'bold',
+                      mb: 0.5
+                    }}
+                  >
+                    {notification.title}
+                  </Typography>
+
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ display: 'block', mb: 1 }}
+                  >
+                    {createdAt}
+                  </Typography>
+
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{
+                      whiteSpace: isExpanded ? 'pre-wrap' : 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: isExpanded ? 'initial' : 'ellipsis',
+                      mb: shouldShowExpand ? 1 : 0
+                    }}
+                  >
+                    {isExpanded ? bodyText : (bodyText.length > 50 ? bodyText.slice(0, 50) + '...' : bodyText)}
+                  </Typography>
+
+                  {shouldShowExpand && (
+                    <Button
+                      size="small"
+                      startIcon={isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                      onClick={(event) => toggleNotificationExpanded(notification.id, event)}
+                      sx={{
+                        minWidth: 'auto',
+                        fontSize: '0.75rem',
+                        textTransform: 'none'
+                      }}
+                    >
+                      {isExpanded ? '折りたたむ' : '全文を見る'}
+                    </Button>
+                  )}
+                </Box>
+              </MenuItem>
+            );
+          })
         ) : (
           <MenuItem disabled>
             <ListItemText primary="新しい通知はありません" />

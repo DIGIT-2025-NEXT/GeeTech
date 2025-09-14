@@ -33,6 +33,7 @@ export default function RejectButton({ studentid }: Props){
     try {
       await sendNotification(params);
     } catch (error) {
+      console.error('Error sending notification:', error)
     }
   };
     const handleConfirm = async() => {
