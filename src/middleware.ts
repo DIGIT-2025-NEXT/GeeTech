@@ -29,7 +29,7 @@ const ROUTE_CONFIG: RouteConfig[] = [
     type: "auth_required",
   },
   {
-    paths: ["/company", "/admin", "/student/*"],
+    paths: ["/company", "/admin", "/student/*", "/register"],
     type: "protected",
   },
 ];
@@ -96,6 +96,12 @@ function hasAccess(pathname: string, profileType: ProfileType): boolean {
     // /student/[id]（他人の個人情報）はNG
     if (pathname.match(/^\/student\/[^\/]+$/)) {
       console.log(`[hasAccess] Students blocked from student details`);
+      return false;
+    }
+
+    // 企業プロフィールの登録はNG
+    if (pathname.startsWith("/register")) {
+      console.log(`[hasAccess] Students blocked from company profile`);
       return false;
     }
 
