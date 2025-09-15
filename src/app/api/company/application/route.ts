@@ -47,7 +47,6 @@ export async function POST(request: Request) {
       address: parsedData.address,
       description: parsedData.description,
       business_detail: parsedData.businessContent,
-      is_without_recompense: parsedData.is_without_recompense || false,
     };
 
     // Supabaseにデータを挿入
