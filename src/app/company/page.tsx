@@ -197,8 +197,9 @@ export default function StudentPage() {
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Box sx={{ mb: 4 }}>
-        <Breadcrumbs sx={{ mb: 2 }}>
+      {/* ヘッダーセクション */}
+      <Box sx={{ mb: 6 }}>
+        <Breadcrumbs sx={{ mb: 3 }}>
           <Typography
             sx={{
               cursor: "pointer",
@@ -210,96 +211,82 @@ export default function StudentPage() {
           </Typography>
           <Typography color="text.primary">学生一覧</Typography>
         </Breadcrumbs>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: 2,
-          }}
-        >
-          <Box sx={{ flex: 1 }}>
-            <Typography
-              variant="h3"
-              component="h1"
-              gutterBottom
-              sx={{ fontWeight: "bold", color: "primary.main" }}
-            >
-              未来を担う才能たち
-            </Typography>
-            <Typography variant="h6" color="text.secondary">
-              あなたの会社を次のレベルへ導く、優秀な学生を見つけよう。
-            </Typography>
-          </Box>
-          <Button
-            variant="contained"
-            size="large"
-            onClick={() => (window.location.href = "/register")}
-            startIcon={<BusinessIcon />}
-            sx={{
-              textTransform: "none",
-              borderRadius: 3,
-              px: 3,
-              py: 1.5,
-              fontWeight: "bold",
-              fontSize: "1rem",
-              ml: 3,
-            }}
-          >
-            企業登録
-          </Button>
-        </Box>
+
+
+        {/* 統計情報 */}
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          <Grid item xs={12} sm={4}>
+            <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 2 }}>
+              <Typography variant="h4" color="#000000" sx={{ fontWeight: 'bold' }}>
+                {students.length}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
+                登録学生数
+              </Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 2 }}>
+              <Typography variant="h4" color="#333333" sx={{ fontWeight: 'bold' }}>
+                {Array.from(new Set(students.map(s => s.university))).length}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
+                提携大学数
+              </Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 2 }}>
+              <Typography variant="h4" color="#666666" sx={{ fontWeight: 'bold' }}>
+                {Array.from(new Set(students.flatMap(s => s.skills || []))).length}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
+                スキル分野数
+              </Typography>
+            </Paper>
+          </Grid>
+        </Grid>
       </Box>
 
-      <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            cursor: "pointer",
-            mb: filterExpanded ? 2 : 0,
-          }}
-          onClick={() => setFilterExpanded(!filterExpanded)}
-        >
-          <Typography
-            variant="h6"
-            sx={{ display: "flex", alignItems: "center" }}
-          >
-            <FilterIcon sx={{ mr: 1 }} />
-            検索・フィルター
-          </Typography>
-          {filterExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-        </Box>
-        <Collapse in={filterExpanded}>
-          <Grid container spacing={2} sx={{ mb: 2 }}>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                placeholder="名前、自己紹介で検索..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} md={3}>
-              <FormControl fullWidth>
-                <InputLabel>大学で絞り込み</InputLabel>
-                <Select
-                  value={universityFilter}
-                  label="大学で絞り込み"
-                  onChange={(e) => setUniversityFilter(e.target.value)}
-                >
-                  <MenuItem value="">すべて</MenuItem>
-                  {universities.map((uni) => (
-                    <MenuItem key={uni} value={uni}>
-                      {uni}
+      {/* 検索・フィルターセクション */}
+      <Paper elevation={2} sx={{ p: 4, mb: 4, borderRadius: 3 }}>
+        <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold', color: '#000000' }}>
+          学生を探す
+        </Typography>
+        <Grid container spacing={3} sx={{ mb: 3 }}>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              placeholder="名前、大学、スキルで検索..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                }
+              }}
+            />
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <FormControl fullWidth>
+              <InputLabel>大学で絞り込み</InputLabel>
+              <Select
+                value={universityFilter}
+                label="大学で絞り込み"
+                onChange={(e) => setUniversityFilter(e.target.value)}
+                sx={{ borderRadius: 2 }}
+              >
+                <MenuItem value="">すべての大学</MenuItem>
+                {universities.map((uni) => (
+                  <MenuItem key={uni} value={uni}>
+                    {uni}
                     </MenuItem>
                   ))}
                 </Select>
@@ -330,9 +317,14 @@ export default function StudentPage() {
               alignItems: "center",
             }}
           >
-            <Typography variant="body2" color="text.secondary">
-              {filteredStudents.length}人の学生が見つかりました
-            </Typography>
+          <Typography variant="body1" color="text.secondary">
+            {filteredStudents.length}人の学生が見つかりました
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <Chip
+              label={`表示中: ${Math.min(displayCount, filteredStudents.length)}/${filteredStudents.length}`}
+              sx={{ bgcolor: '#f5f5f5', color: '#000000' }}
+            />
             <Button
               variant="outlined"
               size="small"
@@ -341,11 +333,19 @@ export default function StudentPage() {
                 setUniversityFilter("");
                 setSkillFilter("");
               }}
+              sx={{
+                borderColor: '#666666',
+                color: '#666666',
+                '&:hover': {
+                  borderColor: '#000000',
+                  color: '#000000'
+                }
+              }}
             >
-              フィルターをリセット
+              リセット
             </Button>
           </Box>
-        </Collapse>
+        </Box>
       </Paper>
 
       <Grid container spacing={3}>
@@ -391,7 +391,7 @@ export default function StudentPage() {
                         height: 50,
                         mr: 2,
                         border: "3px solid",
-                        borderColor: "primary.light",
+                        borderColor: "#333333",
                       }}
                     >
                       {!student.avatar && student.name.charAt(0)}
@@ -497,13 +497,13 @@ export default function StudentPage() {
                       プロフィール
                     </Button>
                     <IconButton
-                      color="primary"
+                      color="default"
                       onClick={() => createChatRoom(student.id)}
                       disabled={creatingChat === student.id}
                       sx={{
                         border: "2px solid",
-                        borderColor: "primary.main",
-                        "&:hover": { bgcolor: "primary.main", color: "white" },
+                        borderColor: "#000000",
+                        "&:hover": { bgcolor: "#000000", color: "white" },
                       }}
                       size="small"
                     >
@@ -514,7 +514,7 @@ export default function StudentPage() {
                               width: 16,
                               height: 16,
                               border: '2px solid',
-                              borderColor: 'primary.main',
+                              borderColor: '#000000',
                               borderTopColor: 'transparent',
                               borderRadius: '50%',
                               animation: 'spin 1s linear infinite',
@@ -593,20 +593,51 @@ export default function StudentPage() {
 
       {/* 企業向けCTAセクション */}
       <Paper
-        elevation={4}
+        elevation={6}
         sx={{
-          mt: 6,
+          mt: 8,
           textAlign: "center",
-          p: 4,
-          background: "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
+          p: 6,
+          background: "linear-gradient(135deg, #000000 0%, #333333 100%)",
           color: "white",
+          borderRadius: 4,
+          position: "relative",
+          overflow: "hidden",
+          '&::before': {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "url('data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')",
+          }
         }}
       >
-        <TrendingUpIcon sx={{ fontSize: 60, mb: 2 }} />
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold" }}>
+        <TrendingUpIcon sx={{ fontSize: 80, mb: 3, position: "relative", zIndex: 1 }} />
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{
+            fontWeight: "bold",
+            position: "relative",
+            zIndex: 1,
+            mb: 2
+          }}
+        >
           あなたの企業も参加しませんか？
         </Typography>
-        <Typography variant="h6" sx={{ mb: 3, opacity: 0.9 }}>
+        <Typography
+          variant="h6"
+          sx={{
+            mb: 4,
+            opacity: 0.9,
+            position: "relative",
+            zIndex: 1,
+            maxWidth: "600px",
+            mx: "auto"
+          }}
+        >
           優秀な学生との出会いが、あなたの事業を加速させます。
         </Typography>
         <Button
@@ -617,14 +648,19 @@ export default function StudentPage() {
           sx={{
             textTransform: "none",
             borderRadius: 3,
-            px: 4,
-            py: 1.5,
+            px: 5,
+            py: 2,
             bgcolor: "white",
-            color: "primary.main",
+            color: "#000000",
             fontWeight: "bold",
-            fontSize: "1.1rem",
+            fontSize: "1.2rem",
+            position: "relative",
+            zIndex: 1,
+            boxShadow: "0 4px 20px rgba(255,255,255,0.3)",
             "&:hover": {
               bgcolor: "grey.100",
+              transform: "translateY(-2px)",
+              boxShadow: "0 8px 30px rgba(255,255,255,0.4)",
             },
           }}
         >

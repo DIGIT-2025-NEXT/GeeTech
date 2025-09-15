@@ -224,7 +224,7 @@ export default function StudentProfileCreatePage() {
   if (submitSuccess) {
     return (
       <Container maxWidth="md" sx={{ py: 4 }}>
-        <Alert severity="success">
+        <Alert severity="info" sx={{ bgcolor: '#f5f5f5', color: '#000000' }}>
           <AlertTitle>プロフィール作成完了</AlertTitle>
           学生プロフィールが正常に作成されました。企業一覧ページにリダイレクトします...
         </Alert>

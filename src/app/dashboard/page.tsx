@@ -393,7 +393,7 @@ export default function Dashboard() {
             <CardContent>
               <Stack alignItems="center" spacing={2} sx={{ p: 2 }}>
                 <Avatar
-                  sx={{ width: 80, height: 80, mb: 1, bgcolor: "primary.main" }}
+                  sx={{ width: 80, height: 80, mb: 1, bgcolor: "#000000" }}
                   src={profile?.avatar_url || undefined}
                 >
                   {profile?.username?.charAt(0).toUpperCase()}
@@ -637,7 +637,6 @@ export default function Dashboard() {
                                     <Button
                                       size="small"
                                       variant="contained"
-                                      color="success"
                                       onClick={() =>
                                         openConfirmDialog(
                                           app.id,
@@ -646,6 +645,8 @@ export default function Dashboard() {
                                         )
                                       }
                                       sx={{
+                                        bgcolor: '#666666',
+                                        color: 'white',
                                         fontSize: "0.7rem",
                                         minWidth: "auto",
                                         px: 1,
@@ -656,7 +657,6 @@ export default function Dashboard() {
                                     <Button
                                       size="small"
                                       variant="contained"
-                                      color="error"
                                       onClick={() =>
                                         openConfirmDialog(
                                           app.id,
@@ -665,6 +665,8 @@ export default function Dashboard() {
                                         )
                                       }
                                       sx={{
+                                        bgcolor: '#000000',
+                                        color: 'white',
                                         fontSize: "0.7rem",
                                         minWidth: "auto",
                                         px: 1,
@@ -709,7 +711,7 @@ export default function Dashboard() {
             <Card>
               <CardContent>
                 <Typography variant="h6" gutterBottom sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <FavoriteIcon color="error" />
+                  <FavoriteIcon sx={{ color: '#000000' }} />
                   いいねした企業
                 </Typography>
                 <List sx={{ p: 0 }}>
@@ -726,7 +728,7 @@ export default function Dashboard() {
                           >
                             <ListItemAvatar>
                               <Avatar
-                                sx={{ bgcolor: "primary.main" }}
+                                sx={{ bgcolor: "#000000" }}
                                 src={company.logo || undefined}
                               >
                                 {company.name.charAt(0)}
@@ -767,9 +769,8 @@ export default function Dashboard() {
                               <Chip
                                 label="認証済み"
                                 size="small"
-                                color="success"
                                 variant="outlined"
-                                sx={{ fontSize: "0.7rem" }}
+                                sx={{ fontSize: "0.7rem", borderColor: '#666666', color: '#666666' }}
                               />
                             )}
                           </ListItemButton>
@@ -841,7 +842,7 @@ export default function Dashboard() {
                         >
                           <ListItemAvatar>
                             <Avatar
-                              sx={{ bgcolor: "secondary.main" }}
+                              sx={{ bgcolor: "#333333" }}
                               src={notification.icon_url || undefined}
                             >
                               <NotificationsIcon />
@@ -905,8 +906,8 @@ export default function Dashboard() {
           <Button
             onClick={handleConfirmStatusUpdate}
             disabled={dialogLoading}
-            color={dialogData?.status === "approved" ? "success" : "error"}
             variant="contained"
+            sx={{ bgcolor: dialogData?.status === "approved" ? '#666666' : '#000000', color: 'white' }}
           >
             {dialogLoading ? (
               <CircularProgress size={16} color="inherit" sx={{ mr: 1 }} />

@@ -237,7 +237,7 @@ export default function StudentsPage() {
           <Typography color="text.primary">企業一覧</Typography>
         </Breadcrumbs>
 
-        <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+        <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 'bold', color: '#000000' }}>
           革新的な企業たち
         </Typography>
         <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
@@ -252,7 +252,7 @@ export default function StudentsPage() {
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={4}>
           <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 2 }}>
-            <Typography variant="h4" color="primary.main" sx={{ fontWeight: 'bold' }}>
+            <Typography variant="h4" color="#000000" sx={{ fontWeight: 'bold' }}>
               {companies.length}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
@@ -262,7 +262,7 @@ export default function StudentsPage() {
         </Grid>
         <Grid item xs={12} sm={4}>
           <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 2 }}>
-            <Typography variant="h4" color="success.main" sx={{ fontWeight: 'bold' }}>
+            <Typography variant="h4" color="#333333" sx={{ fontWeight: 'bold' }}>
               {industries.length}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
@@ -272,7 +272,7 @@ export default function StudentsPage() {
         </Grid>
         <Grid item xs={12} sm={4}>
           <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 2 }}>
-            <Typography variant="h4" color="warning.main" sx={{ fontWeight: 'bold' }}>
+            <Typography variant="h4" color="#666666" sx={{ fontWeight: 'bold' }}>
               {projects.length}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
@@ -411,14 +411,14 @@ export default function StudentsPage() {
                   {/* プロフィール部分 */}
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <Avatar 
-                      sx={{ 
-                        width: 50, 
-                        height: 50, 
+                      sx={{
+                        width: 50,
+                        height: 50,
                         mr: 1.5,
-                        bgcolor: 'primary.main',
+                        bgcolor: '#000000',
                         fontSize: '1.4rem',
                         border: '2px solid',
-                        borderColor: 'primary.light'
+                        borderColor: '#333333'
                       }}
                     >
                       {company.name.charAt(0)}
@@ -466,7 +466,7 @@ export default function StudentsPage() {
                           label={feature}
                           size="small"
                           variant="outlined"
-                          color="secondary"
+                          color="default"
                           sx={{ 
                             fontSize: '0.65rem',
                             height: 20,
@@ -510,14 +510,14 @@ export default function StudentsPage() {
                       詳細を見る
                     </Button>
                     <IconButton 
-                      color="primary"
+                      color="default"
                       onClick={() => createChatRoom(company.id)}
                       disabled={creatingChat === company.id}
-                      sx={{ 
+                      sx={{
                         border: '1.5px solid',
-                        borderColor: 'primary.main',
+                        borderColor: '#000000',
                         '&:hover': {
-                          bgcolor: 'primary.main',
+                          bgcolor: '#000000',
                           color: 'white'
                         },
                         width: 40,
@@ -531,7 +531,7 @@ export default function StudentsPage() {
                               width: 16,
                               height: 16,
                               border: '2px solid',
-                              borderColor: 'primary.main',
+                              borderColor: '#000000',
                               borderTopColor: 'transparent',
                               borderRadius: '50%',
                               animation: 'spin 1s linear infinite',
@@ -646,7 +646,7 @@ export default function StudentsPage() {
             px: 4,
             py: 1.5,
             bgcolor: "white",
-            color: "success.main",
+            color: "#000000",
             fontWeight: "bold",
             fontSize: "1.1rem",
             "&:hover": {

@@ -466,8 +466,8 @@ export default function CompanyProfileEditPage() {
       >
         <Alert
           onClose={() => setSuccessMessage(null)}
-          severity="success"
-          sx={{ width: "100%" }}
+          severity="info"
+          sx={{ bgcolor: '#f5f5f5', color: '#000000', width: "100%" }}
         >
           {successMessage}
         </Alert>

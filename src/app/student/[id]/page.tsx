@@ -305,11 +305,16 @@ export default function StudentDetailPage() {
               variant="outlined"
               startIcon={<WorkIcon />}
               size="large"
-              color="success"
               onClick={() => {
                 alert(`${student.name}さんの採用検討機能は準備中です。`);
               }}
-              sx={{ 
+              sx={{
+                borderColor: '#666666',
+                color: '#666666',
+                '&:hover': {
+                  bgcolor: '#666666',
+                  color: 'white'
+                },
                 textTransform: 'none',
                 borderRadius: 2,
                 fontWeight: 600,
