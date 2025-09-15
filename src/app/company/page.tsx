@@ -41,6 +41,7 @@ import {
 } from "@mui/icons-material";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useAuth } from '@/contexts/AuthContext';
 
 // 学生の型定義
 type Student = {
@@ -62,6 +63,9 @@ export default function StudentPage() {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [filterExpanded, setFilterExpanded] = useState(false);
   const [displayCount, setDisplayCount] = useState(6);
+  const [creatingChat, setCreatingChat] = useState<string | null>(null);
+
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -122,6 +126,64 @@ export default function StudentPage() {
       }
       return newFavorites;
     });
+  };
+
+  const createChatRoom = async (studentId: string) => {
+    if (!user) {
+      alert('チャット機能を利用するにはログインが必要です。');
+      return;
+    }
+
+    setCreatingChat(studentId);
+
+    try {
+      // 企業IDを取得
+      const supabase = createClient();
+      const { data: company, error: companyError } = await supabase
+        .from('company')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (companyError || !company) {
+        console.error('Company not found:', companyError);
+        alert('企業情報の取得に失敗しました。');
+        return;
+      }
+
+      const response = await fetch('/api/chat/room/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          studentId: studentId,
+          companyId: company.id,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const roomId = data.room.id;
+
+        if (data.existed) {
+          // 既存のチャットルームに移動
+          window.location.href = `/chat/${roomId}`;
+        } else {
+          // 新しく作成されたチャットルームに移動
+          window.location.href = `/chat/${roomId}`;
+        }
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to create chat room:', errorData);
+        alert('チャットルームの作成に失敗しました。もう一度お試しください。');
+      }
+    } catch (error) {
+      console.error('Error creating chat room:', error);
+      alert('チャットルームの作成中にエラーが発生しました。');
+    } finally {
+      setCreatingChat(null);
+    }
   };
 
   const universities = Array.from(new Set(students.map((s) => s.university)));
@@ -436,9 +498,8 @@ export default function StudentPage() {
                     </Button>
                     <IconButton
                       color="primary"
-                      onClick={() => {
-                        alert(`チャット機能は準備中です。`);
-                      }}
+                      onClick={() => createChatRoom(student.id)}
+                      disabled={creatingChat === student.id}
                       sx={{
                         border: "2px solid",
                         borderColor: "primary.main",
@@ -446,7 +507,27 @@ export default function StudentPage() {
                       }}
                       size="small"
                     >
-                      <ChatIcon />
+                      {creatingChat === student.id ? (
+                        <Box sx={{ width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Box
+                            sx={{
+                              width: 16,
+                              height: 16,
+                              border: '2px solid',
+                              borderColor: 'primary.main',
+                              borderTopColor: 'transparent',
+                              borderRadius: '50%',
+                              animation: 'spin 1s linear infinite',
+                              '@keyframes spin': {
+                                '0%': { transform: 'rotate(0deg)' },
+                                '100%': { transform: 'rotate(360deg)' }
+                              }
+                            }}
+                          />
+                        </Box>
+                      ) : (
+                        <ChatIcon />
+                      )}
                     </IconButton>
                   </Box>
                 </CardContent>
