@@ -25,8 +25,7 @@ const parseEmployeeCount = (range: string): number | null => {
 };
 
 export async function POST(request: Request) {
-  const cookieStore = await cookies();
-  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+  const supabase = createRouteHandlerClient({ cookies });
   let requestData;
 
   try {
