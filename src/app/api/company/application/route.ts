@@ -25,7 +25,8 @@ const parseEmployeeCount = (range: string): number | null => {
 };
 
 export async function POST(request: Request) {
-  const supabase = createRouteHandlerClient({ cookies });
+  const cookieStore = await cookies();
+  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
   let requestData;
 
   try {
@@ -47,7 +48,6 @@ export async function POST(request: Request) {
       address: parsedData.address,
       description: parsedData.description,
       business_detail: parsedData.businessContent,
-      is_without_recompense: parsedData.is_without_recompense || false,
     };
 
     // Supabaseにデータを挿入

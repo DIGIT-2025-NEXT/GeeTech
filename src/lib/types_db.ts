@@ -168,7 +168,6 @@ export type Database = {
           description: string | null
           id: string
           industry_id: string | null
-          is_without_recompense: boolean | null
           logo_url: string | null
           number_of_employees: number | null
           president_name: string | null
@@ -189,7 +188,6 @@ export type Database = {
           description?: string | null
           id?: string
           industry_id?: string | null
-          is_without_recompense?: boolean | null
           logo_url?: string | null
           number_of_employees?: number | null
           president_name?: string | null
@@ -210,7 +208,6 @@ export type Database = {
           description?: string | null
           id?: string
           industry_id?: string | null
-          is_without_recompense?: boolean | null
           logo_url?: string | null
           number_of_employees?: number | null
           president_name?: string | null
@@ -407,6 +404,38 @@ export type Database = {
           skill_name?: string
         }
         Relationships: []
+      }
+      student_likes: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          id: string
+          student_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          id?: string
+          student_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          student_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_likes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       students: {
         Row: {
