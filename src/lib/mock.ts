@@ -25,6 +25,9 @@ export interface Company {
   adoptedid?: string[];
   Rejectedid?: string[];
   is_verified?: boolean;
+  address?: string;
+  number_of_employees?: number;
+  year_of_establishment?: string;
 }
 
 export interface Project {
@@ -101,6 +104,18 @@ export async function getCompanyById(id: string): Promise<Company | undefined> {
 
   if (!data) return undefined;
 
+  // company_applicationsテーブルから追加の企業情報を取得（企業名でマッチング）
+  const { data: applicationData, error: applicationError } = await supabase
+    .from('company_applications')
+    .select('address, number_of_employees, year_of_establishment')
+    .eq('company_name', data.name)
+    .eq('application_status', 'approved')
+    .single();
+
+  if (applicationError) {
+    console.log('No additional company data found in applications table for company:', data.name);
+  }
+
   return {
     id: data.id,
     name: data.name,
@@ -113,6 +128,9 @@ export async function getCompanyById(id: string): Promise<Company | undefined> {
     adoptedid: data.adoptedid || [],
     Rejectedid: data.Rejectedid || [],
     is_verified: data.is_verified || false,
+    address: applicationData?.address || undefined,
+    number_of_employees: applicationData?.number_of_employees || undefined,
+    year_of_establishment: applicationData?.year_of_establishment || undefined,
   };
 }
 

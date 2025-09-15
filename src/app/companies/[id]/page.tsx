@@ -68,6 +68,13 @@ export default function CompanyDetailPage({ params }: Props) {
       const supabase = createClient();
       
       try {
+        // IDの妥当性チェック
+        if (!id || typeof id !== 'string') {
+          console.error('Invalid company ID:', id);
+          notFound();
+          return;
+        }
+
         // Supabaseから企業データを取得
         console.log('Fetching company data for ID:', id);
         const { data: companyData, error: companyError } = await supabase
@@ -82,21 +89,23 @@ export default function CompanyDetailPage({ params }: Props) {
         console.log('Has data:', !!companyData);
           
         if (companyError) {
-          console.error('Error fetching company:', {
-            message: companyError.message,
-            details: companyError.details,
-            hint: companyError.hint,
-            code: companyError.code
+          console.error('Error fetching company:', companyError);
+          console.error('Error details:', {
+            message: companyError?.message || 'No message',
+            details: companyError?.details || 'No details',
+            hint: companyError?.hint || 'No hint',
+            code: companyError?.code || 'No code',
+            fullError: JSON.stringify(companyError)
           });
-          
+
           // エラーが PGRST116 (行が見つからない) の場合は、データが存在しないことを意味する
           if (companyError.code === 'PGRST116') {
-            console.log('Company not found, showing 404');
+            console.log('Company not found (404), showing 404 page');
           } else {
             // その他のエラーの場合
-            console.error('Other database error occurred');
+            console.error('Database error occurred, details above');
           }
-          
+
           notFound();
           return;
         }
@@ -107,6 +116,20 @@ export default function CompanyDetailPage({ params }: Props) {
           return;
         }
         
+        // company_applicationsテーブルから追加の企業情報を取得（企業名でマッチング）
+        const { data: applicationData, error: applicationError } = await supabase
+          .from('company_applications')
+          .select('address, number_of_employees, year_of_establishment')
+          .eq('company_name', companyData.name)
+          .eq('application_status', 'approved')
+          .single();
+
+        if (applicationError) {
+          console.log('No additional company data found in applications table for company:', companyData.name);
+        } else {
+          console.log('Application data found:', applicationData);
+        }
+
         // Company型に変換
         const company: Company = {
           id: companyData.id,
@@ -119,12 +142,19 @@ export default function CompanyDetailPage({ params }: Props) {
           partcipantsid: companyData.partcipantsid || [],
           adoptedid: companyData.adoptedid || [],
           Rejectedid: companyData.Rejectedid || [],
+          is_verified: companyData.is_verified || false,
+          address: applicationData?.address || undefined,
+          number_of_employees: applicationData?.number_of_employees || undefined,
+          year_of_establishment: applicationData?.year_of_establishment || undefined,
         };
         
         // プロジェクトデータも取得（現時点ではモックデータをフォールバック）
         const projectsData = await getProjectsByCompanyId(id);
         
         console.log('Company page: Company data:', company);
+        console.log('Company page: Address:', company.address);
+        console.log('Company page: Employees:', company.number_of_employees);
+        console.log('Company page: Establishment:', company.year_of_establishment);
         console.log('Company page: Projects data:', projectsData);
         
         setCompany(company);
@@ -294,27 +324,27 @@ export default function CompanyDetailPage({ params }: Props) {
                     <ListItemIcon>
                       <LocationIcon color="primary" />
                     </ListItemIcon>
-                    <ListItemText 
-                      primary="所在地" 
-                      secondary="北九州市小倉北区" 
+                    <ListItemText
+                      primary="所在地"
+                      secondary={company.address || '情報なし'}
                     />
                   </ListItem>
                   <ListItem>
                     <ListItemIcon>
                       <PeopleIcon color="primary" />
                     </ListItemIcon>
-                    <ListItemText 
-                      primary="従業員数" 
-                      secondary="15-30名" 
+                    <ListItemText
+                      primary="従業員数"
+                      secondary={company.number_of_employees ? `${company.number_of_employees}名` : '情報なし'}
                     />
                   </ListItem>
                   <ListItem>
                     <ListItemIcon>
                       <LanguageIcon color="primary" />
                     </ListItemIcon>
-                    <ListItemText 
-                      primary="設立" 
-                      secondary="2022年" 
+                    <ListItemText
+                      primary="設立"
+                      secondary={company.year_of_establishment || '情報なし'}
                     />
                   </ListItem>
                 </List>
