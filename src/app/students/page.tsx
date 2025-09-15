@@ -68,11 +68,25 @@ export default function StudentsPage() {
       setCompanies(allCompanies);
       setFilteredCompanies(allCompanies);
       setProjects(allProjects);
+
+      if (user) {
+        try {
+          const response = await fetch(`/api/likes?studentId=${user.id}`);
+          if (response.ok) {
+            const data = await response.json();
+            const likedCompanyIds = data.companies.map((company: { id: string }) => company.id);
+            setFavorites(new Set(likedCompanyIds));
+          }
+        } catch (error) {
+          console.error('Error fetching user likes:', error);
+        }
+      }
+
       setLoading(false);
     };
-    
+
     fetchData();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     let filtered = companies;
@@ -102,16 +116,63 @@ export default function StudentsPage() {
     setDisplayCount(5);
   }, [searchQuery, industryFilter, featureFilter, companies]);
 
-  const toggleFavorite = (companyId: string) => {
-    setFavorites(prev => {
-      const newFavorites = new Set(prev);
-      if (newFavorites.has(companyId)) {
-        newFavorites.delete(companyId);
+  const toggleFavorite = async (companyId: string) => {
+    if (!user) {
+      alert('いいね機能を利用するにはログインが必要です。');
+      return;
+    }
+
+    const isCurrentlyLiked = favorites.has(companyId);
+
+    try {
+      if (isCurrentlyLiked) {
+        const response = await fetch(`/api/likes?studentId=${user.id}&companyId=${companyId}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          setFavorites(prev => {
+            const newFavorites = new Set(prev);
+            newFavorites.delete(companyId);
+            return newFavorites;
+          });
+        } else {
+          const errorData = await response.json();
+          console.error('Failed to remove like:', errorData);
+          alert('いいね解除に失敗しました。もう一度お試しください。');
+        }
       } else {
-        newFavorites.add(companyId);
+        const response = await fetch('/api/likes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            studentId: user.id,
+            companyId: companyId,
+          }),
+        });
+
+        if (response.ok) {
+          setFavorites(prev => {
+            const newFavorites = new Set(prev);
+            newFavorites.add(companyId);
+            return newFavorites;
+          });
+        } else {
+          const errorData = await response.json();
+          console.error('Failed to add like:', errorData);
+          if (response.status === 409) {
+            alert('既にいいねしています。');
+          } else {
+            alert('いいね追加に失敗しました。もう一度お試しください。');
+          }
+        }
       }
-      return newFavorites;
-    });
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      alert('エラーが発生しました。もう一度お試しください。');
+    }
   };
 
   const createChatRoom = async (companyId: string) => {
