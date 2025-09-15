@@ -23,8 +23,6 @@ import {
   Alert,
   AlertTitle,
   CircularProgress,
-  FormControlLabel,
-  Checkbox,
   FormHelperText,
 } from "@mui/material";
 import {
@@ -86,7 +84,6 @@ export default function CompanyRegisterPage() {
     address: "",
     description: "",
     businessContent: "",
-    is_without_recompense: false,
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -390,24 +387,6 @@ export default function CompanyRegisterPage() {
                 placeholder="主な事業内容を詳しく教えてください"
               />
             </Grid>
-            <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={companyData.is_without_recompense}
-                    onChange={(e) =>
-                      handleInputChange(
-                        "is_without_recompense",
-                        e.target.checked
-                      )
-                    }
-                    name="is_without_recompense"
-                    color="primary"
-                  />
-                }
-                label="無償での募集（インターンシップ等）"
-              />
-            </Grid>
           </Grid>
         );
 
@@ -569,14 +548,6 @@ export default function CompanyRegisterPage() {
                         </Typography>
                       </Grid>
                     )}
-                    <Grid item xs={12}>
-                      <Typography variant="body2" color="text.secondary">
-                        無償での募集
-                      </Typography>
-                      <Typography variant="body1">
-                        {companyData.is_without_recompense ? "はい" : "いいえ"}
-                      </Typography>
-                    </Grid>
                   </Grid>
                 </Paper>
               </Grid>
