@@ -39,48 +39,202 @@ export type Database = {
   }
   public: {
     Tables: {
-      company_participants_data: {
+      chat_messages: {
         Row: {
-          adopted_id: string[] | null
-          applyed_id: string[] | null
+          created_at: string | null
           id: string
-          rejected_id: string[] | null
+          message: string
+          room_id: string | null
+          sender_id: string | null
+          sender_type: string | null
+          updated_at: string | null
         }
         Insert: {
-          adopted_id?: string[] | null
-          applyed_id?: string[] | null
-          id: string
-          rejected_id?: string[] | null
+          created_at?: string | null
+          id?: string
+          message: string
+          room_id?: string | null
+          sender_id?: string | null
+          sender_type?: string | null
+          updated_at?: string | null
         }
         Update: {
-          adopted_id?: string[] | null
-          applyed_id?: string[] | null
+          created_at?: string | null
           id?: string
-          rejected_id?: string[] | null
+          message?: string
+          room_id?: string | null
+          sender_id?: string | null
+          sender_type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "chat_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_rooms: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          id: string
+          student_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          student_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          student_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_rooms_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company: {
+        Row: {
+          adoptedid: string[] | null
+          description: string | null
+          features: string[] | null
+          id: string
+          industry: string | null
+          is_verified: boolean | null
+          logo: string | null
+          name: string
+          participants_id: string[] | null
+          projects: string[] | null
+          rejectedid: string[] | null
+          user_id: string | null
+        }
+        Insert: {
+          adoptedid?: string[] | null
+          description?: string | null
+          features?: string[] | null
+          id?: string
+          industry?: string | null
+          is_verified?: boolean | null
+          logo?: string | null
+          name: string
+          participants_id?: string[] | null
+          projects?: string[] | null
+          rejectedid?: string[] | null
+          user_id?: string | null
+        }
+        Update: {
+          adoptedid?: string[] | null
+          description?: string | null
+          features?: string[] | null
+          id?: string
+          industry?: string | null
+          is_verified?: boolean | null
+          logo?: string | null
+          name?: string
+          participants_id?: string[] | null
+          projects?: string[] | null
+          rejectedid?: string[] | null
+          user_id?: string | null
         }
         Relationships: []
       }
-      events: {
+      company_applications: {
+        Row: {
+          address: string | null
+          application_status:
+            | Database["public"]["Enums"]["application_status"]
+            | null
+          business_detail: string | null
+          company_name: string
+          contact_email: string
+          contact_phone: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          industry_id: string | null
+          is_without_recompense: boolean | null
+          logo_url: string | null
+          number_of_employees: number | null
+          president_name: string | null
+          updated_at: string | null
+          website: string | null
+          year_of_establishment: string | null
+        }
+        Insert: {
+          address?: string | null
+          application_status?:
+            | Database["public"]["Enums"]["application_status"]
+            | null
+          business_detail?: string | null
+          company_name: string
+          contact_email: string
+          contact_phone?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          industry_id?: string | null
+          is_without_recompense?: boolean | null
+          logo_url?: string | null
+          number_of_employees?: number | null
+          president_name?: string | null
+          updated_at?: string | null
+          website?: string | null
+          year_of_establishment?: string | null
+        }
+        Update: {
+          address?: string | null
+          application_status?:
+            | Database["public"]["Enums"]["application_status"]
+            | null
+          business_detail?: string | null
+          company_name?: string
+          contact_email?: string
+          contact_phone?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          industry_id?: string | null
+          is_without_recompense?: boolean | null
+          logo_url?: string | null
+          number_of_employees?: number | null
+          president_name?: string | null
+          updated_at?: string | null
+          website?: string | null
+          year_of_establishment?: string | null
+        }
+        Relationships: []
+      }
+      industries: {
         Row: {
           created_at: string
           id: string
-          starts_on: string
-          title: string
-          venue: string | null
+          name: string
         }
         Insert: {
           created_at?: string
           id?: string
-          starts_on: string
-          title: string
-          venue?: string | null
+          name: string
         }
         Update: {
           created_at?: string
           id?: string
-          starts_on?: string
-          title?: string
-          venue?: string | null
+          name?: string
         }
         Relationships: []
       }
@@ -162,6 +316,71 @@ export type Database = {
         }
         Relationships: []
       }
+      project: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          description: string | null
+          id: string
+          skills: string[] | null
+          status: Database["public"]["Enums"]["project_status"] | null
+          title: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          skills?: string[] | null
+          status?: Database["public"]["Enums"]["project_status"] | null
+          title: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          skills?: string[] | null
+          status?: Database["public"]["Enums"]["project_status"] | null
+          title?: string
+        }
+        Relationships: []
+      }
+      project_applications: {
+        Row: {
+          applied_at: string | null
+          id: string
+          project_id: string
+          status: string
+          status_updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          applied_at?: string | null
+          id?: string
+          project_id: string
+          status?: string
+          status_updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          applied_at?: string | null
+          id?: string
+          project_id?: string
+          status?: string
+          status_updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_applications_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "project"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       skills: {
         Row: {
           created_at: string
@@ -180,6 +399,39 @@ export type Database = {
           icon_name?: string | null
           id?: string
           skill_name?: string
+        }
+        Relationships: []
+      }
+      students: {
+        Row: {
+          avatar: string | null
+          bio: string | null
+          created_at: string
+          id: string
+          name: string
+          skills: string[] | null
+          university: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar?: string | null
+          bio?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          skills?: string[] | null
+          university?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar?: string | null
+          bio?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          skills?: string[] | null
+          university?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -209,75 +461,6 @@ export type Database = {
           },
         ]
       }
-      students: {
-        Row: {
-          id: string;
-          name: string;
-          university: string;
-          bio: string;
-          skills: string[] | string;
-          avatar: string;
-        };
-        Insert: {
-          id?: string;
-          name: string;
-          university: string;
-          bio: string;
-          skills?: string[];
-          avatar?: string;
-        };
-        Update: {
-          id?: string;
-          name?: string;
-          university?: string;
-          bio?: string;
-          skills?: string[];
-          avatar?: string;
-        };
-        Relationships: [];
-      };
-      company: {
-        Row: {
-          id: string;
-          name: string;
-          industry: string;
-          description: string;
-          features: string[];
-          adoptedid: string[];
-          rejectedid: string[];
-          logo: string;
-          projects: string[];
-          participants_id: string[];
-          user_id: string;
-        };
-        Insert: {
-          id?: string;
-          name: string;
-          industry: string;
-          description: string;
-          features?: string[];
-          adoptedid?: string[];
-          rejectedid?: string[];
-          logo?: string;
-          projects?: string[];
-          participants_id?: string[];
-          user_id: string;
-        };
-        Update: {
-          id?: string;
-          name?: string;
-          industry?: string;
-          description?: string;
-          features?: string[];
-          adoptedid?: string[];
-          rejectedid?: string[];
-          logo?: string;
-          projects?: string[];
-          participants_id?: string[];
-          user_id?: string;
-        };
-        Relationships: [];
-      };
     }
     Views: {
       [_ in never]: never
@@ -286,6 +469,30 @@ export type Database = {
       append_applyed_id: {
         Args: { p_company_id: string; p_student_id: string }
         Returns: undefined
+      }
+      citext: {
+        Args: { "": boolean } | { "": string } | { "": unknown }
+        Returns: string
+      }
+      citext_hash: {
+        Args: { "": string }
+        Returns: number
+      }
+      citextin: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      citextout: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      citextrecv: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      citextsend: {
+        Args: { "": string }
+        Returns: string
       }
       get_users_with_all_skills: {
         Args: { skill_ids_array: string[] }
@@ -315,7 +522,8 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      application_status: "pending" | "approved" | "rejected"
+      project_status: "active" | "closed" | "draft"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -445,6 +653,9 @@ export const Constants = {
     Enums: {},
   },
   public: {
-    Enums: {},
+    Enums: {
+      application_status: ["pending", "approved", "rejected"],
+      project_status: ["active", "closed", "draft"],
+    },
   },
 } as const

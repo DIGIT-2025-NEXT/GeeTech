@@ -20,7 +20,6 @@ import {
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { type Student } from '@/lib/mock';
-import { notFound } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
@@ -34,14 +33,14 @@ export default function StudentDetailPage({ params }: Props) {
   const fromPage = searchParams.get('from');
 
   useEffect(() => {
-    params.then(({ studentId }) => {
+    params.then(() => {
       // getStudentById function was removed, need to fetch from database
       // This component needs to be updated to use Supabase
       const studentData = null;
-      
+
       // Temporary: redirect to student list
       window.location.href = '/students';
-      
+
       setStudent(studentData);
     });
   }, [params]);

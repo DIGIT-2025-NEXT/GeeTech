@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest } from 'next/server'
+import { sseManager } from '@/lib/sse-manager'
 
 export async function GET(
   request: NextRequest,
@@ -69,16 +70,26 @@ export async function GET(
   const stream = new ReadableStream({
     start(ctrl) {
       controller = ctrl
-      
+
+      // SSEマネージャーにコネクションを登録（認証されたユーザーIDを使用）
+      let userId = ''
+      createClient().then(async (supabase) => {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          userId = user.id
+          sseManager.addConnection(roomId, userId, controller)
+        }
+      })
+
       // 接続確認メッセージ
       const connectMessage = `data: ${JSON.stringify({
         type: 'connected',
         roomId,
         timestamp: Date.now()
       })}\n\n`
-      
+
       controller.enqueue(encoder.encode(connectMessage))
-      
+
       // 定期的にkeep-aliveメッセージを送信
       const keepAlive = setInterval(() => {
         try {
@@ -93,25 +104,32 @@ export async function GET(
         }
       }, 30000) // 30秒ごと
 
-      // シンプルなキープアライブ機能のみ実装
-      const setupSimpleSSE = () => {
+      // 接続終了時のクリーンアップ
+      const cleanup = () => {
+        clearInterval(keepAlive)
+        if (userId) {
+          sseManager.removeConnection(roomId, userId, controller)
+        }
         try {
-          // 接続終了時のクリーンアップ
-          request.signal.addEventListener('abort', () => {
-            clearInterval(keepAlive)
-            try {
-              controller.close()
-            } catch {
-              // Already closed
-            }
-          })
-          
-        } catch (error) {
-          console.error('Error setting up SSE:', error)
+          controller.close()
+        } catch {
+          // Already closed
         }
       }
 
-      setupSimpleSSE()
+      // 接続終了時のクリーンアップ設定
+      request.signal.addEventListener('abort', cleanup)
+
+      // ブラウザがページを離れた時もクリーンアップ
+      setTimeout(() => {
+        try {
+          if (request.signal.aborted) {
+            cleanup()
+          }
+        } catch (error) {
+          console.error('Error in cleanup:', error)
+        }
+      }, 1000)
     }
   })
 
