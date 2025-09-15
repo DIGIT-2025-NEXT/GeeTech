@@ -41,7 +41,8 @@ export default function Header() {
   const { profile } = useProfile();
   const { unreadCount, notifications, markAllAsRead } = useNotifications();
 
-  const userStatus = profile?.profile_type === "company" ? "company" : "student";
+  const userStatus = profile?.profile_type === "company" ? "company" :
+                    profile?.profile_type === "admin" ? "admin" : "student";
   const userName = profile?.username;
 
   const [userMenuAnchorEl, setUserMenuAnchorEl] = React.useState<null | HTMLElement>(
@@ -79,6 +80,8 @@ export default function Header() {
     handleUserMenuClose();
     if (userStatus === "company") {
       router.push("/company/profile");
+    } else if (userStatus === "admin") {
+      router.push("/admin");
     } else {
       router.push("/profile");
     }
@@ -136,6 +139,17 @@ export default function Header() {
         >
           <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
             企業を探す
+          </Box>
+        </Button>
+      ) : userStatus === "admin" ? (
+        <Button
+          color="inherit"
+          startIcon={<ExploreIcon />}
+          sx={commonButtonSx}
+          onClick={() => router.push("/admin")}
+        >
+          <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
+            管理画面
           </Box>
         </Button>
       ) : (
@@ -196,7 +210,7 @@ export default function Header() {
         sx={commonButtonSx}
       >
         <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
-          {userName} ({userStatus === "student" ? "学生" : "企業"})
+          {userName} ({userStatus === "student" ? "学生" : userStatus === "admin" ? "管理者" : "企業"})
         </Box>
       </Button>
     </>

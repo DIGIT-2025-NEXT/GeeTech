@@ -425,6 +425,14 @@ export default function Dashboard() {
                   >
                     学生を探す
                   </Button>
+                ) : profile?.profile_type === "admin" ? (
+                  <Button
+                    variant="outlined"
+                    href="/admin"
+                    startIcon={<BusinessIcon />}
+                  >
+                    管理画面
+                  </Button>
                 ) : (
                   <Button
                     variant="outlined"
@@ -458,7 +466,8 @@ export default function Dashboard() {
           <Card sx={{ flexGrow: 1 }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                {profile?.profile_type === "students" ? "応募状況" : "応募管理"}
+                {profile?.profile_type === "students" ? "応募状況" :
+                 profile?.profile_type === "admin" ? "管理者機能" : "応募管理"}
               </Typography>
               <List sx={{ p: 0 }}>
                 {loading ? (
@@ -679,6 +688,13 @@ export default function Dashboard() {
                       <ListItemText primary="応募がありません" />
                     </ListItem>
                   )
+                ) : profile?.profile_type === "admin" ? (
+                  <ListItem>
+                    <ListItemText
+                      primary="管理者メニュー"
+                      secondary="企業認証やシステム管理については管理画面をご利用ください"
+                    />
+                  </ListItem>
                 ) : (
                   <ListItem>
                     <ListItemText primary="ユーザータイプが不明です" />
