@@ -33,11 +33,12 @@ import {
   CardContent,
   Stack,
   Autocomplete,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 import {
   Add as AddIcon,
   Edit as EditIcon,
-  Delete as DeleteIcon,
 } from "@mui/icons-material";
 import { Tables, TablesInsert, TablesUpdate, Enums } from "@/lib/types_db";
 
@@ -63,7 +64,6 @@ export default function ProjectManagePage() {
   // Dialog states
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   // Form states
@@ -72,6 +72,7 @@ export default function ProjectManagePage() {
     description: "",
     skills: [] as string[],
     status: "draft" as ProjectStatus,
+    is_without_recompense: false,
   });
 
   const supabase = createClient();
@@ -154,6 +155,7 @@ export default function ProjectManagePage() {
         description: formData.description || null,
         skills: formData.skills.length > 0 ? formData.skills : null,
         status: formData.status,
+        is_without_recompense: formData.is_without_recompense,
       };
 
       const { error } = await supabase.from("project").insert(projectData);
@@ -197,25 +199,6 @@ export default function ProjectManagePage() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!selectedProject) return;
-
-    try {
-      const { error } = await supabase
-        .from("project")
-        .delete()
-        .eq("id", selectedProject.id);
-
-      if (error) throw error;
-
-      setDeleteDialogOpen(false);
-      setSelectedProject(null);
-      fetchProjects();
-    } catch (err) {
-      console.error("Error deleting project:", err);
-      setError("プロジェクトの削除に失敗しました");
-    }
-  };
 
   const resetForm = () => {
     setFormData({
@@ -223,6 +206,7 @@ export default function ProjectManagePage() {
       description: "",
       skills: [],
       status: "draft",
+      is_without_recompense: false,
     });
   };
 
@@ -238,14 +222,11 @@ export default function ProjectManagePage() {
       description: project.description || "",
       skills: project.skills || [],
       status: project.status || "draft",
+      is_without_recompense: project.is_without_recompense || false,
     });
     setEditDialogOpen(true);
   };
 
-  const openDeleteDialog = (project: Project) => {
-    setSelectedProject(project);
-    setDeleteDialogOpen(true);
-  };
 
   const getStatusLabel = (status: ProjectStatus | null) => {
     switch (status) {
@@ -397,22 +378,13 @@ export default function ProjectManagePage() {
                       : "-"}
                   </TableCell>
                   <TableCell align="center">
-                    <Stack direction="row" spacing={1} justifyContent="center">
-                      <IconButton
-                        size="small"
-                        color="default"
-                        onClick={() => openEditDialog(project)}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() => openDeleteDialog(project)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Stack>
+                    <IconButton
+                      size="small"
+                      color="default"
+                      onClick={() => openEditDialog(project)}
+                    >
+                      <EditIcon />
+                    </IconButton>
                   </TableCell>
                 </TableRow>
               ))}
@@ -467,6 +439,15 @@ export default function ProjectManagePage() {
                 <MenuItem value="closed">クローズ</MenuItem>
               </Select>
             </FormControl>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={formData.is_without_recompense}
+                  onChange={(e) => setFormData({ ...formData, is_without_recompense: e.target.checked })}
+                />
+              }
+              label="無償での募集"
+            />
           </Stack>
         </DialogContent>
         <DialogActions>
@@ -527,6 +508,14 @@ export default function ProjectManagePage() {
                 <MenuItem value="closed">クローズ</MenuItem>
               </Select>
             </FormControl>
+            <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+              <Typography variant="body2" color="text.secondary">
+                報酬設定: {formData.is_without_recompense ? '無償' : '有償'}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                ※報酬設定は作成後は変更できません
+              </Typography>
+            </Box>
           </Stack>
         </DialogContent>
         <DialogActions>
@@ -541,29 +530,6 @@ export default function ProjectManagePage() {
         </DialogActions>
       </Dialog>
 
-      {/* 削除ダイアログ */}
-      <Dialog
-        open={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen(false)}
-      >
-        <DialogTitle>プロジェクトの削除</DialogTitle>
-        <DialogContent>
-          <Typography>
-            「{selectedProject?.title}」を削除してもよろしいですか？
-            この操作は取り消せません。
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>キャンセル</Button>
-          <Button
-            variant="contained"
-            color="error"
-            onClick={handleDelete}
-          >
-            削除
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 }

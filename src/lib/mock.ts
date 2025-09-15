@@ -34,6 +34,7 @@ export interface Project {
   description: string;
   skills: string[];
   status: 'active' | 'closed' | 'draft';
+  is_without_recompense: boolean;
 }
 export interface ChatLog{
   speaker: `company`|`student`;
@@ -179,7 +180,8 @@ export async function getProjectsByCompanyId(companyId: string): Promise<Project
       title: project.title,
       description: project.description,
       skills: Array.isArray(project.skills) ? project.skills : [],
-      status: project.status as 'active' | 'closed' | 'draft'
+      status: project.status as 'active' | 'closed' | 'draft',
+      is_without_recompense: project.is_without_recompense || false
     }));
 
     console.log('Transformed projects:', transformedProjects);
@@ -210,7 +212,8 @@ export async function getAllProjects(): Promise<Project[]> {
       title: project.title,
       description: project.description,
       skills: project.skills || [],
-      status: project.status as 'active' | 'closed' | 'draft'
+      status: project.status as 'active' | 'closed' | 'draft',
+      is_without_recompense: project.is_without_recompense || false
     }));
   } catch (error) {
     console.error('Error fetching all projects:', error);

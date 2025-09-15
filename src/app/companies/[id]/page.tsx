@@ -387,12 +387,22 @@ export default function CompanyDetailPage({ params }: Props) {
                           <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                             {project.title}
                           </Typography>
-                          <Chip 
-                            label={project.status === 'active' ? '募集中' : 'クローズ'} 
-                            color={project.status === 'active' ? 'success' : 'default'}
-                            size="small"
-                            variant="outlined"
-                          />
+                          <Box sx={{ display: 'flex', gap: 1 }}>
+                            {project.is_without_recompense && (
+                              <Chip
+                                label="無償"
+                                color="warning"
+                                size="small"
+                                variant="outlined"
+                              />
+                            )}
+                            <Chip
+                              label={project.status === 'active' ? '募集中' : 'クローズ'}
+                              color={project.status === 'active' ? 'success' : 'default'}
+                              size="small"
+                              variant="outlined"
+                            />
+                          </Box>
                         </Box>
 
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 2, lineHeight: 1.6 }}>
