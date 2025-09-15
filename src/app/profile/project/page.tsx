@@ -241,7 +241,7 @@ export default function ProjectManagePage() {
     }
   };
 
-  const getStatusColor = (status: ProjectStatus | null) => {
+  const getStatusColor = (status: ProjectStatus | null): "success" | "default" | "warning" => {
     switch (status) {
       case "active":
         return "success";
@@ -349,7 +349,7 @@ export default function ProjectManagePage() {
                   <TableCell>
                     <Chip
                       label={getStatusLabel(project.status)}
-                      color={getStatusColor(project.status) as any}
+                      color={getStatusColor(project.status)}
                       size="small"
                     />
                   </TableCell>
