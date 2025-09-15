@@ -34,8 +34,7 @@ import {
   Business as BusinessIcon,
   Notifications as NotificationsIcon,
   Chat as ChatIcon,
-  ExpandMore as ExpandMoreIcon,
-  ExpandLess as ExpandLessIcon,
+  Favorite as FavoriteIcon,
 } from "@mui/icons-material";
 import { Tables } from "@/lib/types_db";
 import { useProfile } from "@/hooks/useProfile";
@@ -66,6 +65,16 @@ type CompanyApplication = {
   status: "pending" | "approved" | "rejected";
   appliedAt: string;
   statusUpdatedAt?: string;
+};
+
+type LikedCompany = {
+  id: string;
+  name: string;
+  industry: string;
+  description: string;
+  features?: string[];
+  logo?: string;
+  is_verified?: boolean;
 };
 // ---------------------
 
@@ -107,13 +116,11 @@ export default function Dashboard() {
   const [companyApplications, setCompanyApplications] = useState<
     CompanyApplication[]
   >([]);
+  const [likedCompanies, setLikedCompanies] = useState<LikedCompany[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingStatus, setUpdatingStatus] = useState<{
     [key: string]: boolean;
   }>({});
-  const [expandedNotifications, setExpandedNotifications] = useState<
-    Set<string>
-  >(new Set());
 
   // ダイアログの状態管理
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -153,6 +160,24 @@ export default function Dashboard() {
         } catch (error) {
           console.error("Error fetching student applications:", error);
           setApplicationStatus([]);
+        }
+
+        // 学生の場合：いいねした企業を取得
+        try {
+          console.log("Fetching liked companies for student:", profile.id);
+          const likesResponse = await fetch(`/api/likes?studentId=${profile.id}`);
+
+          if (likesResponse.ok) {
+            const likesData = await likesResponse.json();
+            console.log("Liked companies data:", likesData);
+            setLikedCompanies(likesData.companies || []);
+          } else {
+            console.error("Failed to fetch liked companies:", likesResponse.status);
+            setLikedCompanies([]);
+          }
+        } catch (error) {
+          console.error("Error fetching liked companies:", error);
+          setLikedCompanies([]);
         }
       } else if (profile.profile_type === "company") {
         // 企業の場合：自社プロジェクトへの応募を取得
@@ -197,21 +222,6 @@ export default function Dashboard() {
     }
   };
 
-  const toggleNotificationExpanded = (
-    notificationId: string,
-    event: React.MouseEvent
-  ) => {
-    event.stopPropagation();
-    setExpandedNotifications((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(notificationId)) {
-        newSet.delete(notificationId);
-      } else {
-        newSet.add(notificationId);
-      }
-      return newSet;
-    });
-  };
 
   const handleLogout = async () => {
     await signOut();
@@ -443,8 +453,8 @@ export default function Dashboard() {
           </Card>
         </Box>
 
-        {/* 中央カラム: 応募状況 */}
-        <Box sx={{ width: { xs: "100%", lg: "45%" }, display: "flex" }}>
+        {/* 中央カラム: 応募状況 & いいねした企業 */}
+        <Box sx={{ width: { xs: "100%", lg: "45%" }, display: "flex", flexDirection: "column", gap: 3 }}>
           <Card sx={{ flexGrow: 1 }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -677,6 +687,111 @@ export default function Dashboard() {
               </List>
             </CardContent>
           </Card>
+
+          {/* 学生の場合：いいねした企業を表示 */}
+          {profile?.profile_type === "students" && (
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <FavoriteIcon color="error" />
+                  いいねした企業
+                </Typography>
+                <List sx={{ p: 0 }}>
+                  {loading ? (
+                    <ListItem>
+                      <ListItemText primary="読み込み中..." />
+                    </ListItem>
+                  ) : likedCompanies.length > 0 ? (
+                    likedCompanies.map((company, index) => (
+                      <Box key={company.id}>
+                        <ListItem disablePadding>
+                          <ListItemButton
+                            onClick={() => router.push(`/companies/${company.id}`)}
+                          >
+                            <ListItemAvatar>
+                              <Avatar
+                                sx={{ bgcolor: "primary.main" }}
+                                src={company.logo || undefined}
+                              >
+                                {company.name.charAt(0)}
+                              </Avatar>
+                            </ListItemAvatar>
+                            <ListItemText
+                              primary={
+                                <Box>
+                                  <Typography variant="subtitle2">
+                                    {company.name}
+                                  </Typography>
+                                  <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                    sx={{ fontSize: "0.85rem" }}
+                                  >
+                                    {company.industry}
+                                  </Typography>
+                                </Box>
+                              }
+                              secondary={
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                  sx={{
+                                    display: "-webkit-box",
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: "vertical",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                >
+                                  {company.description}
+                                </Typography>
+                              }
+                            />
+                            {company.is_verified && (
+                              <Chip
+                                label="認証済み"
+                                size="small"
+                                color="success"
+                                variant="outlined"
+                                sx={{ fontSize: "0.7rem" }}
+                              />
+                            )}
+                          </ListItemButton>
+                        </ListItem>
+                        {index < likedCompanies.length - 1 && (
+                          <Divider component="li" />
+                        )}
+                      </Box>
+                    ))
+                  ) : (
+                    <ListItem>
+                      <ListItemText
+                        primary="いいねした企業がありません"
+                        secondary={
+                          <Box>
+                            <Typography variant="body2" color="text.secondary">
+                              企業一覧ページでいいねしてみましょう
+                            </Typography>
+                          </Box>
+                        }
+                      />
+                    </ListItem>
+                  )}
+                </List>
+                {likedCompanies.length > 0 && (
+                  <Box sx={{ mt: 2, textAlign: "center" }}>
+                    <Button
+                      variant="outlined"
+                      onClick={() => router.push("/students")}
+                      size="small"
+                    >
+                      企業一覧を見る
+                    </Button>
+                  </Box>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </Box>
 
         {/* 右カラム: 通知 */}
