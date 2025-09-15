@@ -151,26 +151,27 @@ export async function getAllCompanies(): Promise<Company[]> {
 
 export async function getProjectsByCompanyId(companyId: string): Promise<Project[]> {
   const supabase = createClient();
-  
+
   try {
     console.log('Fetching projects for company ID:', companyId);
     const { data, error } = await supabase
       .from('project')
       .select('*')
-      .eq('company_id', companyId);
-    
+      .eq('company_id', companyId)
+      .eq('status', 'active');
+
     if (error) {
       console.error('Error fetching projects:', error);
       return [];
     }
-    
+
     console.log('Fetched project data:', data);
-    
+
     if (!data || data.length === 0) {
-      console.log('No projects found in database');
+      console.log('No active projects found in database');
       return [];
     }
-    
+
     // Transform database data to Project interface format
     const transformedProjects = data.map(project => ({
       id: project.id,
@@ -180,7 +181,7 @@ export async function getProjectsByCompanyId(companyId: string): Promise<Project
       skills: Array.isArray(project.skills) ? project.skills : [],
       status: project.status as 'active' | 'closed' | 'draft'
     }));
-    
+
     console.log('Transformed projects:', transformedProjects);
     return transformedProjects;
   } catch (error) {
