@@ -278,7 +278,7 @@ export default function StudentsPage() {
             <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
               募集案件数
             </Typography>
-          </Paper>
+         </Paper>
         </Grid>
       </Grid>
 
@@ -624,7 +624,7 @@ export default function StudentsPage() {
           mt: 6,
           textAlign: "center",
           p: 4,
-          background: "linear-gradient(45deg, #4CAF50 30%, #81C784 90%)",
+          background: "linear-gradient(45deg, #000000ff 30%, #000000ff 90%)",
           color: "white"
         }}
       >
