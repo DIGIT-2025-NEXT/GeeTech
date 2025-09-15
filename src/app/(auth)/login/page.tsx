@@ -19,7 +19,6 @@ export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const {
@@ -40,13 +39,6 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setMessage("");
-
-    // 新規登録時のパスワード確認チェック
-    if (!isLogin && password !== confirmPassword) {
-      setMessage("パスワードが一致しません。");
-      setLoading(false);
-      return;
-    }
 
     try {
       const { error } = isLogin
@@ -140,27 +132,6 @@ export default function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
             disabled={loading}
           />
-          {!isLogin && (
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="confirmPassword"
-              label="パスワード（確認用）"
-              type="password"
-              id="confirmPassword"
-              autoComplete="new-password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              disabled={loading}
-              error={!isLogin && confirmPassword !== "" && password !== confirmPassword}
-              helperText={
-                !isLogin && confirmPassword !== "" && password !== confirmPassword
-                  ? "パスワードが一致しません"
-                  : ""
-              }
-            />
-          )}
           <Button
             type="submit"
             fullWidth
@@ -203,11 +174,7 @@ export default function LoginPage() {
         {/* ログイン/登録切り替え */}
         <Box textAlign="center" sx={{ mt: 2 }}>
           <Button
-            onClick={() => {
-              setIsLogin(!isLogin);
-              setConfirmPassword(""); // 切り替え時に確認パスワードをクリア
-              setMessage(""); // メッセージもクリア
-            }}
+            onClick={() => setIsLogin(!isLogin)}
             disabled={loading}
             sx={{ textTransform: "none" }}
           >
