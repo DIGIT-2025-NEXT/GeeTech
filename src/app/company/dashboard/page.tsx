@@ -118,7 +118,7 @@ export default async function CompanyDashboard() {
                 </ListItem>
                 <ListItem>
                   <ListItemIcon>
-                    <PeopleIcon color="success" />
+                    <PeopleIcon sx={{ color: '#000000' }} />
                   </ListItemIcon>
                   <ListItemText 
                     primary="応募者数" 
@@ -336,7 +336,7 @@ export default async function CompanyDashboard() {
                   <Divider />
                   <ListItem>
                     <ListItemIcon>
-                      <CheckCircleIcon color="success" />
+                      <CheckCircleIcon sx={{ color: '#666666' }} />
                     </ListItemIcon>
                     <ListItemText 
                       primary="「地域密着型マーケティングアシスタント」プロジェクトを公開しました"

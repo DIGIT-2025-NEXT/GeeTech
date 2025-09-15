@@ -268,7 +268,7 @@ export default function AdminCompaniesPage() {
                         {!company.is_verified ? (
                           <Button
                             variant="contained"
-                            color="success"
+                            sx={{ bgcolor: '#666666', color: 'white' }}
                             size="small"
                             startIcon={<CheckIcon />}
                             onClick={() => handleAction(company, 'verify')}

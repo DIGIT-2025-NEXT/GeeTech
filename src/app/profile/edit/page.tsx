@@ -243,7 +243,7 @@ export default function EditProfilePage() {
                         </Box>
                       }
                       onDelete={() => handleSkillToggle(skill)}
-                      color="primary"
+                      color="default"
                     />
                   ))
                 ) : (
@@ -270,11 +270,7 @@ export default function EditProfilePage() {
                       </Box>
                     }
                     onClick={() => handleSkillToggle(skill)}
-                    color={
-                      currentUserSkills.some((s) => s.id === skill.id)
-                        ? "primary"
-                        : "default"
-                    }
+                    color="default"
                     variant={
                       currentUserSkills.some((s) => s.id === skill.id)
                         ? "filled"
@@ -295,8 +291,8 @@ export default function EditProfilePage() {
       >
         <Alert
           onClose={() => setSuccessMessage(null)}
-          severity="success"
-          sx={{ width: "100%" }}
+          severity="info"
+          sx={{ bgcolor: '#f5f5f5', color: '#000000', width: "100%" }}
         >
           {successMessage}
         </Alert>

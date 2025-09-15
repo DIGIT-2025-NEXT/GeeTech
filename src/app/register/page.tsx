@@ -484,7 +484,7 @@ export default function CompanyRegisterPage() {
                       </Typography>
                       <Chip
                         label={selectedIndustry?.name || "未選択"}
-                        color="primary"
+                        color="default"
                         variant="outlined"
                       />
                     </Grid>
@@ -590,7 +590,7 @@ export default function CompanyRegisterPage() {
           variant="h3"
           component="h1"
           gutterBottom
-          sx={{ fontWeight: "bold", color: "primary.main" }}
+          sx={{ fontWeight: "bold", color: "#000000" }}
         >
           企業登録
         </Typography>

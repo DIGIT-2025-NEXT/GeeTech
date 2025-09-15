@@ -342,7 +342,7 @@ export default function AdminApplicationsPage() {
                         <Box sx={{ display: 'flex', gap: 1 }}>
                           <Button
                             variant="contained"
-                            color="success"
+                            sx={{ bgcolor: '#666666', color: 'white' }}
                             size="small"
                             startIcon={<CheckIcon />}
                             onClick={() => handleAction(application, 'approve')}

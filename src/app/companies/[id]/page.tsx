@@ -283,7 +283,7 @@ export default function CompanyDetailPage({ params }: Props) {
                   height: 120, 
                   mx: 'auto',
                   mb: 2,
-                  bgcolor: 'secondary.main',
+                  bgcolor: '#333333',
                   fontSize: '3rem'
                 }}
               >
@@ -304,13 +304,12 @@ export default function CompanyDetailPage({ params }: Props) {
               <Box sx={{ mb: 3 }}>
                 <Chip
                   label="募集中"
-                  color="success"
                   variant="filled"
-                  sx={{ mr: 1 }}
+                  sx={{ bgcolor: '#666666', color: 'white', mr: 1 }}
                 />
                 <Chip
                   label="急成長"
-                  color="warning"
+                  sx={{ borderColor: '#666666', color: '#666666' }}
                   variant="outlined"
                 />
               </Box>
@@ -322,7 +321,7 @@ export default function CompanyDetailPage({ params }: Props) {
                 <List dense>
                   <ListItem>
                     <ListItemIcon>
-                      <LocationIcon color="primary" />
+                      <LocationIcon sx={{ color: '#000000' }} />
                     </ListItemIcon>
                     <ListItemText
                       primary="所在地"
@@ -331,7 +330,7 @@ export default function CompanyDetailPage({ params }: Props) {
                   </ListItem>
                   <ListItem>
                     <ListItemIcon>
-                      <PeopleIcon color="primary" />
+                      <PeopleIcon sx={{ color: '#000000' }} />
                     </ListItemIcon>
                     <ListItemText
                       primary="従業員数"
@@ -340,7 +339,7 @@ export default function CompanyDetailPage({ params }: Props) {
                   </ListItem>
                   <ListItem>
                     <ListItemIcon>
-                      <LanguageIcon color="primary" />
+                      <LanguageIcon sx={{ color: '#000000' }} />
                     </ListItemIcon>
                     <ListItemText
                       primary="設立"
@@ -390,15 +389,14 @@ export default function CompanyDetailPage({ params }: Props) {
             <Card>
               <CardContent sx={{ p: 4 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                  <AssignmentIcon sx={{ mr: 1, color: 'primary.main' }} />
+                  <AssignmentIcon sx={{ mr: 1, color: '#000000' }} />
                   <Typography variant="h5" component="h2" sx={{ fontWeight: 'bold' }}>
                     募集中のプロジェクト
                   </Typography>
-                  <Chip 
-                    label={`${projects.length}件`} 
-                    size="small" 
-                    color="primary" 
-                    sx={{ ml: 2 }}
+                  <Chip
+                    label={`${projects.length}件`}
+                    size="small"
+                    sx={{ color: '#000000', ml: 2 }}
                   />
                 </Box>
 
@@ -446,8 +444,7 @@ export default function CompanyDetailPage({ params }: Props) {
                               label={skill}
                               size="small"
                               variant="outlined"
-                              color="primary"
-                              sx={{ fontSize: '0.75rem' }}
+                              sx={{ color: '#000000', fontSize: '0.75rem' }}
                             />
                           ))}
                         </Box>
