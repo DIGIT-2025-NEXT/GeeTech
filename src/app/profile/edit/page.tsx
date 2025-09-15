@@ -161,20 +161,6 @@ export default function EditProfilePage() {
               基本情報
             </Typography>
             <Stack spacing={2}>
-              <TextField
-                label="フルネーム"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                fullWidth
-                placeholder="山田 太郎"
-              />
-              <TextField
-                label="大学名"
-                value={university}
-                onChange={(e) => setUniversity(e.target.value)}
-                fullWidth
-                placeholder="例: 東京大学"
-              />
               <Stack direction="row" spacing={2}>
                 <TextField
                   label="姓"
@@ -194,6 +180,13 @@ export default function EditProfilePage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 fullWidth
+              />
+              <TextField
+                label="大学名"
+                value={university}
+                onChange={(e) => setUniversity(e.target.value)}
+                fullWidth
+                placeholder="例: 東京大学"
               />
               <TextField
                 label="メールアドレス"
