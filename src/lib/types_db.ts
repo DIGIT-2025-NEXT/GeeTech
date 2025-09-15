@@ -276,6 +276,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_id: string | null
           avatar_url: string | null
           bio: string | null
           company_name: string | null
@@ -289,6 +290,7 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          avatar_id?: string | null
           avatar_url?: string | null
           bio?: string | null
           company_name?: string | null
@@ -302,6 +304,7 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          avatar_id?: string | null
           avatar_url?: string | null
           bio?: string | null
           company_name?: string | null
@@ -322,6 +325,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           id: string
+          is_without_recompense: boolean
           skills: string[] | null
           status: Database["public"]["Enums"]["project_status"] | null
           title: string
@@ -331,6 +335,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          is_without_recompense?: boolean
           skills?: string[] | null
           status?: Database["public"]["Enums"]["project_status"] | null
           title: string
@@ -340,6 +345,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          is_without_recompense?: boolean
           skills?: string[] | null
           status?: Database["public"]["Enums"]["project_status"] | null
           title?: string

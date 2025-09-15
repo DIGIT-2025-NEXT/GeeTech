@@ -27,6 +27,7 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
 import ExploreIcon from "@mui/icons-material/Explore";
+import WorkIcon from "@mui/icons-material/Work";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
@@ -358,6 +359,14 @@ export default function Header() {
           </ListItemIcon>
           プロフィール
         </MenuItem>
+        {userStatus === "company" && (
+          <MenuItem onClick={() => { handleUserMenuClose(); router.push("/profile/project"); }}>
+            <ListItemIcon>
+              <WorkIcon fontSize="small" />
+            </ListItemIcon>
+            プロジェクト管理
+          </MenuItem>
+        )}
         <MenuItem onClick={handleLogout}>
           <ListItemIcon>
             <LogoutIcon fontSize="small" />

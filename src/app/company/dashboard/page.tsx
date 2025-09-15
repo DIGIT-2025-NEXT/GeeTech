@@ -150,12 +150,14 @@ export default async function CompanyDashboard() {
                   <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
                     プロジェクト管理
                   </Typography>
-                  <Button 
+                  <Button
+                    component={Link}
+                    href="/profile/project"
                     variant="contained"
                     startIcon={<AddIcon />}
                     sx={{ textTransform: 'none' }}
                   >
-                    新規プロジェクトを掲載
+                    プロジェクト管理
                   </Button>
                 </Box>
 
@@ -202,14 +204,14 @@ export default async function CompanyDashboard() {
                           </TableCell>
                           <TableCell>
                             <Box sx={{ display: 'flex', gap: 1 }}>
-                              <IconButton size="small" color="primary">
+                              <IconButton
+                                size="small"
+                                color="primary"
+                                component={Link}
+                                href="/profile/project"
+                                title="プロジェクト管理で詳細操作"
+                              >
                                 <VisibilityIcon />
-                              </IconButton>
-                              <IconButton size="small" color="default">
-                                <EditIcon />
-                              </IconButton>
-                              <IconButton size="small" color="error">
-                                <DeleteIcon />
                               </IconButton>
                             </Box>
                           </TableCell>
