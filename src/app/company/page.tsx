@@ -148,7 +148,14 @@ export default function StudentPage() {
           </Typography>
           <Typography color="text.primary">学生一覧</Typography>
         </Breadcrumbs>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 2,
+          }}
+        >
           <Box sx={{ flex: 1 }}>
             <Typography
               variant="h3"
@@ -165,7 +172,7 @@ export default function StudentPage() {
           <Button
             variant="contained"
             size="large"
-            onClick={() => window.location.href = '/company/register'}
+            onClick={() => (window.location.href = "/register")}
             startIcon={<BusinessIcon />}
             sx={{
               textTransform: "none",
@@ -174,7 +181,7 @@ export default function StudentPage() {
               py: 1.5,
               fontWeight: "bold",
               fontSize: "1rem",
-              ml: 3
+              ml: 3,
             }}
           >
             企業登録
@@ -504,14 +511,14 @@ export default function StudentPage() {
       )}
 
       {/* 企業向けCTAセクション */}
-      <Paper 
-        elevation={4} 
-        sx={{ 
-          mt: 6, 
-          textAlign: "center", 
-          p: 4, 
+      <Paper
+        elevation={4}
+        sx={{
+          mt: 6,
+          textAlign: "center",
+          p: 4,
           background: "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
-          color: "white"
+          color: "white",
         }}
       >
         <TrendingUpIcon sx={{ fontSize: 60, mb: 2 }} />
@@ -521,12 +528,12 @@ export default function StudentPage() {
         <Typography variant="h6" sx={{ mb: 3, opacity: 0.9 }}>
           優秀な学生との出会いが、あなたの事業を加速させます。
         </Typography>
-        <Button 
-          variant="contained" 
+        <Button
+          variant="contained"
           size="large"
-          onClick={() => window.location.href = '/company/register'}
+          onClick={() => (window.location.href = "/register")}
           startIcon={<BusinessIcon />}
-          sx={{ 
+          sx={{
             textTransform: "none",
             borderRadius: 3,
             px: 4,
@@ -536,8 +543,8 @@ export default function StudentPage() {
             fontWeight: "bold",
             fontSize: "1.1rem",
             "&:hover": {
-              bgcolor: "grey.100"
-            }
+              bgcolor: "grey.100",
+            },
           }}
         >
           企業登録はこちら
